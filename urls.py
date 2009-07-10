@@ -20,7 +20,9 @@ urlpatterns = patterns('',
      (r'^site/(?P<site_id>\d+)/games/$','mafiastats.mafiaStats.views.games'),
      (r'^game/add/$','mafiastats.mafiaStats.views.add'),
      (r'^game/(?P<game_id>\d+)/$','mafiastats.mafiaStats.views.game'),
-     (r'^player/(?P<site_id>\d+)/(?P<player_id>\d+)/$','mafiastats.mafiaStats.views.player'),
+     (r'^player/(?P<player_id>\d+)/$','mafiastats.mafiaStats.views.player'),
+     (r'^player/(?P<player_id>\d+)/played/$','mafiastats.mafiaStats.views.playerPlayed'),
+     (r'^player/(?P<player_id>\d+)/moderated/$','mafiastats.mafiaStats.views.playerModerated'),
 )
 if settings.DEBUG:
     urlpatterns += patterns('',

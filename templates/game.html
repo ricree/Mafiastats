@@ -7,6 +7,7 @@
 <div class="span-15 infoBox">
 	<div class = "span-7">
 		<b>{{game.title}}</b><br/>
+		Moderated By: {{game.moderator}}<br/>
 		Length: {{length.days}} days<br/>
 		Players: {{num_players}}<br/>
 	</div>
@@ -40,7 +41,7 @@
 	</div>
 	{%for player in team.players.all%}
 		<div class="span-2">
-		<a href="/player/{{team.site.id}}/{{player.id}}/">{{player.name}}</a>
+		<a href="/player/{{player.id}}/">{{player.name}}</a>
 		</div>
 	{%endfor%}
 </div>

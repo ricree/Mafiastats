@@ -42,7 +42,15 @@ div#menu{
 	min-height: 25px;
 }
 a{
-text-weight:bold;
+	font-weight:bold;
+	text-decoration:none;
+}
+div.even{
+	text-align:center;
+	background-color:#C0C0DD;
+}
+div.odd{
+	text-align:center;
 }
 a.menuItem{
 	-moz-border-radius:4px;

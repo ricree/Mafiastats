@@ -1,4 +1,6 @@
+from django.db.models.query import QuerySet
 from django.db import models
+
 
 # Create your models here.
 
@@ -16,22 +18,22 @@ class Category(models.Model):
 		verbose_name = 'Category'
 		verbose_name_plural = 'Categories'
 	def games_won(self, site):
-		return len(Team.filter(site=site, category = self, won=True))
+		return Team.objects.filter(site=site, category = self, won=True).count()
 	def games_lost(self, site):
-                return len(Team.filter(site=site, category = self, won=False))
+		return Team.objects.filter(site=site, category = self, won=False).count()
 	def win_score(self, site):
-		totalWins = len(Team.objects.filter(site=site,won=True))
-		totalLosses = len(Team.objects.filter(site=site, won=False))
-		selfWins = games_won(self, site_id)
-		selfLost = games_lost(self, site_id)
-		score = (1-selfWins/totalWins) * ((selfWins +selfLost)/(totalWins+totalLosses))
+		totalWins = float(len(Team.objects.filter(site=site,won=True)))
+		totalLosses = float(len(Team.objects.filter(site=site, won=False)))
+		selfWins = float(self.games_won(site))
+		selfLost = float(self.games_lost(site))
+		score = (1.0-selfWins/totalWins) * ((selfWins +selfLost)/(totalWins+totalLosses))
 		return score
 	def loss_score(self, site):
-		totalWins = len(Team.objects.filter(site=site,won=True))
-                totalLosses = len(Team.objects.filter(site=site, won=False))
-                selfWins = games_won(self, site_id)
-                selfLost = games_lost(self, site_id)
-		score = (-1 + selfLost/totalLosses) * .5 *((selfWins + selfLost) / (totalWins + totalLosses))
+		totalWins = float(len(Team.objects.filter(site=site,won=True)))
+		totalLosses = float(len(Team.objects.filter(site=site, won=False)))
+		selfWins = float(self.games_won(site))
+		selfLost = float(self.games_lost(site))
+		score = (-1.0 + selfLost/totalLosses) * .5 *((selfWins + selfLost) / (totalWins + totalLosses))
 		return score
 
 
@@ -40,6 +42,10 @@ class Player(models.Model):
 		return self.name
 	name = models.CharField(max_length=50)
 	site = models.ForeignKey(Site)
+	def wins(self):
+		return Team.objects.filter(players=self,won=True).count()
+	def losses(self):
+		return Team.objects.filter(players=self,won=False).count()
 	def score(self):
 		site = self.site
 		categories = Category.objects.all()
@@ -52,20 +58,15 @@ class Player(models.Model):
 	def scores(self, site, category, won=None):
 		"""get the number of times this player has scored in one or more categories"""
 		numScores = 0
-		def findScore(cat):
-			if won==None:
-				#print cat
-				#print Team.objects.filter(site=site,category=cat)
-				results = [x for x in Team.objects.filter(site=site,category=cat) if (len(x.players.filter(pk=self.pk)))]
-				#print results
-				return len(results)
-			else:
-				results = len([x for x in Team.objects.filter(site=site,category=cat, won=won) if (len(x.players.filter(pk=self.pk)))])
-				return results
-		if type(category) is list:
-			numScores = [findScore(cat) for cat in category]
+		#args is the argument dictionary passed to the filter function
+		args = {'site':site,'players':self}
+#if won was actually assigned a value, it will be a factor in the query
+		if won!=None:
+			args['won']=won
+		if type(category) is QuerySet:
+			numScores = [Team.objects.filter(category=cat,**args).count() for cat in category]
 		else:
-			numScores = findScore(category)
+			numScores = Team.objects.filter(category=category,**args).count()
 		return numScores
 class Game(models.Model):
 	def __unicode__(self):

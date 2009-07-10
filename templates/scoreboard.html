@@ -1,0 +1,35 @@
+{%extends "sitePage.html"%}
+{%block content%}
+	<div class="span-4">
+    <b>Name</b>
+	</div>
+	<div class="span-4" style="text-align:center">
+        <b>Wins</b>
+	</div>
+	<div class="span-4" style="text-align:center">
+        <b>Losses</b>
+	</div>
+	<div class=span-4" style="tex-align:center">
+		<b>Games Moderated</b>
+	</div>
+	{%for player in players%}
+	<div class="span-20 {%cycle 'odd' 'even'%}">
+		{#names#}
+		<div class="span-4" style="text-align:left">	
+			<a href="/player/{{player.id}}/">{{player.name}}</a><br/>
+		</div>
+		{#wins#}
+		<div class="span-4">
+			{{player.wins}}
+		</div>
+		{#losses#}
+		<div class="span-4">
+			{{player.losses}}
+		</div>
+		{#moderated#}
+		<div class="span-4">
+			{{player.moderated_set.all|length}}
+		</div>
+	</div>
+	{%endfor%}
+{%endblock%}
