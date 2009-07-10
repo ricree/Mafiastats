@@ -1,0 +1,27 @@
+{%extends "playerPage.html"%}
+{%block content%}
+<div class="span-16 infoBox">
+	<div class="span-8">
+		<b>Games Played:</b>{{played|length}}<br/>
+		Games Won:{{won|length}}<br/>
+		Games Lost:{{lost|length}}<br/>
+	</div>
+	<div class="span-7">
+		<b>Games Moderated:</b>{{moderated|length}}
+	</div>
+</div>
+<div class="span-20">
+	{%if moderated%}
+	<h2>Games {{player.name}} has Moderated</h2>
+	{%for team in moderated%}
+	<a href="/game/{{team.game.id}}/">{{game.title}}</a><br/>
+	{%endfor%}
+	{%endif%}
+	{%if played%}
+	<h2>Games {{player.name}} Has Played</h2>
+	{%for team in played%}
+	<a href="/game/{{team.game.id}}/">{{team.game.title}}</a><br/>
+	{%endfor%}
+	{%endif%}
+</div>
+{%endblock%}

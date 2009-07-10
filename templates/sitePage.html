@@ -1,0 +1,10 @@
+{%extends "base.html"%}
+{% block title%}
+Mafia Stats - {{site.title}} Site Statistics
+{%endblock%}
+{%block header%}
+<h1>{{site.title}}</h1>
+{%endblock%}
+{%block menu%}
+<a class="menuItem" href="/">Site List</a> <a class="menuItem" href = "/site/{{site.id}}/scoreboard/">Scoreboard</a><a class="menuItem" href="/site/{{site.id}}/games/">Games</a>
+{%endblock%}

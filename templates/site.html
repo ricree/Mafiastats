@@ -1,0 +1,12 @@
+{% extends "sitePage.html"%}
+{%block content %}
+<h3>{{site.description}}</h3>
+{%if games_list %}
+<ul>
+	{%for game in games_list %}
+	<li><b><a href="/game/{{game.pk}}">{{game.title}}</a></b></li>		{%endfor%}
+</ul>
+{%else%}
+This site does not have any games yet
+{%endif%}
+{%endblock%}

@@ -1,0 +1,25 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<link rel="stylesheet" href="/static/css/blueprint/screen.css" type="text/css" media="screen, projection">
+	<link rel="stylesheet" href="/static/css/blueprint/print.css" type="text/css" media="print">
+  <!--[if lt IE 8]><link rel="stylesheet" href="../../blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
+<link rel="stylesheet" href="/static/css/blueprint/plugins/fancy-type/screen.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="/static/css/stylesheet.css"/>
+<title>{% block title %}Mafia Stats{%endblock%}</title>
+</head>
+<body>
+	<div class="container">
+	<div class="span-24" id="header">
+	{%block header %}{%endblock%}	
+	</div>
+	<div class="span-24" id="menu">
+	{% block menu%}&nbsp {% endblock %}
+	</div>
+	<div class="span-24" id="content">
+		{% block content %}{%endblock%}
+	</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{%extends "base.html" %}
+{%block header%}
+<h1>Mafia Statistics</h1>
+{%endblock %}
+{%block content %}{% if site_list %}
+	<ul>
+	{% for site in site_list %}
+		<li><a href="/site/{{site.pk}}/"> {{site.title}}</a></li>
+	{%endfor%}
+	</ul>
+{%else %}
+	<p>There do not seem to be any sites available</p>
+{%endif%}
+{%endblock%}

@@ -1,0 +1,6 @@
+{%extends "base.html"%}
+{%block title%}Mafia Stats - {{player.name}}{%endblock%}
+{%block header %}<h3>{{player.name}}</h3>{%endblock%}
+{%block menu%}
+<a class="menuItem" href="/site/{{player.site.id}}/">{{player.site.title}}</a><a class="menuItem" href="/player/{{player.site.id}}/{{player.id}}/played/">Games Played</a><a class="menuItem" href="/player/{{player.site.id}}/{{player.id}}/moderated/">Games Moderated</a>
+{%endblock%}
