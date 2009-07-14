@@ -7,9 +7,19 @@
   <!--[if lt IE 8]><link rel="stylesheet" href="../../blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
 <link rel="stylesheet" href="/static/css/blueprint/plugins/fancy-type/screen.css" type="text/css" media="screen, projection">
 <link rel="stylesheet" href="/static/css/stylesheet.css"/>
+{{form.media|safe}}
+{%comment%}{%block sheets%}{%if sheets%}{%for sheet in sheets%}
+	{{sheet|safe}}
+	{%endfor%}
+	{%endif%}{%endblock%}{%endcomment%}
 <title>{% block title %}Mafia Stats{%endblock%}</title>
 </head>
 <body>
+	{%comment%}{%block bodyscripts%}{%if bodyscripts %}{%for script in bodyscripts%}
+	{{script|safe}}
+	{%endfor%}
+	{%endif%}
+	{%endblock%}{%endcomment%}
 	<div class="container">
 	<div class="span-24" id="header">
 	{%block header %}{%endblock%}	

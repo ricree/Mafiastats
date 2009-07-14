@@ -2,6 +2,7 @@
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from mafiastats.mafiaStats.models import Site, Game, Team, Category,Player
+from mafiastats.mafiaStats.forms import AddGameForm
 
 def index(request):
 	site_list = Site.objects.all()[:5]
@@ -46,5 +47,13 @@ def scoreboard(request, site_id,page):
 	players,scores = zip(*players)
 	return render_to_response('scoreboard.html', {'site':site,'players':players})
 def add(request):
-	return HttpResponse("Not yet implemented")
+	if request.method=='POST':
+		return HttpResponse("Not yet implemented")
+	else:
+		form =  AddGameForm()
+		bodyscripts = form.media.render_js()
+		sheets = form.media.render_css() #it either returns an iterable or 
+		if type(sheets) is str:#a string.  a string screws with the template
+			sheets = [sheets] #so we must box strings up in a list
+	return render_to_response('addGame.html',{'form':form,'bodyscripts':bodyscripts,'sheets':sheets})
 
