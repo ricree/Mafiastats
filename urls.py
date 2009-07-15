@@ -18,11 +18,12 @@ urlpatterns = patterns('',
      (r'^site/(?P<site_id>\d+)/$', 'mafiastats.mafiaStats.views.site'),
      (r'^site/(?P<site_id>\d+)/scoreboard/$','mafiastats.mafiaStats.views.scoreboard'),
      (r'^site/(?P<site_id>\d+)/games/$','mafiastats.mafiaStats.views.games'),
-     (r'^game/add/$','mafiastats.mafiaStats.views.add'),
+     (r'^game/add/(?P<site_id>\d*)/*$','mafiastats.mafiaStats.views.add'),
      (r'^game/(?P<game_id>\d+)/$','mafiastats.mafiaStats.views.game'),
      (r'^player/(?P<player_id>\d+)/$','mafiastats.mafiaStats.views.player'),
      (r'^player/(?P<player_id>\d+)/played/$','mafiastats.mafiaStats.views.playerPlayed'),
      (r'^player/(?P<player_id>\d+)/moderated/$','mafiastats.mafiaStats.views.playerModerated'),
+     (r'^player/name_lookup','mafiastats.mafiaStats.views.nameLookup'),
 )
 if settings.DEBUG:
     urlpatterns += patterns('',

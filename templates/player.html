@@ -20,7 +20,7 @@
 	{%if played%}
 	<h2>Games {{player.name}} Has Played</h2>
 	{%for team in played%}
-	<a href="/game/{{team.game.id}}/">{{team.game.title}}</a><br/>
+	<a href="/game/{{team.game.id}}/">{{team.game.title}}</a> - {%if team.won%}Won{%else%}Lost{%endif%} as {{team.title}}<br/>
 	{%endfor%}
 	{%endif%}
 </div>

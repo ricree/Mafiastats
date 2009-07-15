@@ -1,5 +1,7 @@
+p {text-indent:0px} 
 body{background-color: #506073;
 }
+h1{margin-bottom:5px;}
 div#header{
 	-moz-border-radius-topleft:5px;
 	-webkit-border-radius-topleft:5px;
@@ -64,4 +66,12 @@ a.menuItem{
 	border-width:1px;
 	border-color:#4050B0;
 	border-style:solid;
+}
+div.sidebar{
+	background-color:#DDDDEE;
+	border-style:solid;
+	border-width:2px;
+	border-color:black;
+	padding:12px;
+	padding-top:30px;
 }
