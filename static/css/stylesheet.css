@@ -75,3 +75,11 @@ div.sidebar{
 	padding:12px;
 	padding-top:30px;
 }
+.dynamic-form{
+	padding:15px;
+	margin-bottom:10px;
+	margin-top:10px;
+	border-style:solid;
+	border-width:2px;
+	border-color:black;
+}

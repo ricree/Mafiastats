@@ -2,13 +2,13 @@
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from mafiastats.mafiaStats.models import Site, Game, Team, Category,Player
-from mafiastats.mafiaStats.forms import AddGameForm
+from mafiastats.mafiaStats.forms import AddGameForm,TeamFormSet,AddTeamForm
 import json
 
 def index(request):
 	site_list = Site.objects.all()[:5]
 	return render_to_response('index.html',{'site_list' : site_list})
-def site(request,site_id):
+def site(request,site_id,page=1):
 	try:
 		p = Site.objects.get(pk=site_id)
 	except Site.DoesNotExist:
@@ -39,9 +39,9 @@ def playerPlayed(request,player_id):
 	return HttpResponse("Not yet implemented")
 def playerModerated(request,player_id):
 	return HttpResponse("Not yet implemented")
-def games(request, site_id,page):
+def games(request, site_id,page=1):
 	return HttpResponse("Not yet implemented")
-def scoreboard(request, site_id,page):
+def scoreboard(request, site_id,page=1):
 	site = get_object_or_404(Site, pk=site_id)
 	players = Player.objects.filter(site=site)
 	players = zip(list(players),[player.score() for player in players])
@@ -53,6 +53,7 @@ def add(request, site_id=None):
 		return HttpResponse("Not yet implemented")
 	else:
 		form =  AddGameForm(initial={'title':'Test 2'})
+		formset = TeamFormSet()	
 		bodyscripts = form.media.render_js()
 		sheets = form.media.render_css() #it either returns an iterable or 
 		if type(sheets) is str:#a string.  a string screws with the template
@@ -63,7 +64,10 @@ def add(request, site_id=None):
 			site = Site.objects.get(pk=site_id)
 		else:
 			site = None
-	return render_to_response('addGame.html',{'form':form,'bodyscripts':bodyscripts,'sheets':sheets,'site':site,'id':site_id})
+		left_attrs = [("Team Name:","title"),('Team Type:','type'),('Won:','won')]
+		for tform in formset.forms:
+			tform.left_attrs = [(label,tform[property],property) for label,property in left_attrs]
+	return render_to_response('addGame.html',{'game_form':form,'formset': formset,'bodyscripts':bodyscripts,'sheets':sheets,'site':site,'id':site_id,})
 def nameLookup(request):
 	if 'text' not in request.GET:
 		return HttpResponse("[]")

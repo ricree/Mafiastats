@@ -11,7 +11,7 @@ class ClassedTextInput(forms.TextInput):
 			attrs['class'] = ' '.join([attrs['class'],self._init_class])
 		else:
 			attrs['class'] = self._init_class
-		super(ClassedTextInput,self).__init__(attrs=attrs)
+		super(forms.TextInput,self).__init__(attrs=attrs)
 
 class AutoTextBox(ClassedTextInput):
 	_init_class = 'AutoSuggestBox'
@@ -31,6 +31,32 @@ class JQueryDateWidget(ClassedTextInput):
 		js= ('/static/js/jquery-1.3.2.min.js',
 			'/static/js/jquery-ui-1.7.2.custom.min.js',
 			'/static/js/widget/datePicker.js')
-	#def render(self):
-	#	retval = ''.join(['<script type="text/javascript"> $(#',self.attrs['id'],
-	#		'_trigger).click(function(){ $(#',self.attrs['id'],').
+
+class NameBox(forms.SelectMultiple):
+	class Media:
+		js=('/static/js/jquery-1.3.2.min.js',
+			'/static/js/widget/nameBox.js',)
+	def render(self, name, value,attrs={},choices=()):
+		if (attrs is not None) and ('id'in attrs):
+			id = attrs['id']
+		else:
+			id = None
+		if (atts is not None) and ('class' in attrs):
+			classes = attrs['class']
+		else:
+			classes=None
+		return render_to_string("widgets/nameBox.html",{'id':id ,'class':classes})
+			
+
+class NameEntryBox(forms.MultiWidget):
+	_init_class='NameChooser'
+	def __init__(self, attrs={}):
+		widgets = (forms.TextInput(), forms.SelectMultiple(choices=[]))
+		if 'class' in attrs:
+			attrs['class'] = ' '.join([attrs['class'],self._init_class])
+		else:
+			attrs['class'] = self._init_class
+		super(forms.TextInput,self).__init__(attrs=attrs)
+	class Media:
+		js=('/static/js/jquery-1.3.2.min.js',)
+	
