@@ -1,4 +1,5 @@
 from django import forms
+from django.template.loader import render_to_string
 
 class ClassedTextInput(forms.TextInput):
 	"""A widget that will add an additional class to the rendered html
@@ -35,17 +36,19 @@ class JQueryDateWidget(ClassedTextInput):
 class NameBox(forms.SelectMultiple):
 	class Media:
 		js=('/static/js/jquery-1.3.2.min.js',
-			'/static/js/widget/nameBox.js',)
+			'/static/js/widget/nameBox.js',
+			'/static/js/jquery.contextMenu.js')
+		css={'all':('/static/css/jquery.contextMenu.css',)}
 	def render(self, name, value,attrs={},choices=()):
 		if (attrs is not None) and ('id'in attrs):
 			id = attrs['id']
 		else:
-			id = None
-		if (atts is not None) and ('class' in attrs):
+			id = ""
+		if (attrs is not None) and ('class' in attrs):
 			classes = attrs['class']
 		else:
-			classes=None
-		return render_to_string("widgets/nameBox.html",{'id':id ,'class':classes})
+			classes=""
+		return render_to_string("nameBoxWidget.html",{'box_id':id ,'box_class':classes+" NameBox",'box_name':name,'text_name':name+"_text",'text_id':id+'_text','text_class':classes+" NameBoxText"})
 			
 
 class NameEntryBox(forms.MultiWidget):

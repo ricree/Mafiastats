@@ -3,6 +3,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from mafiastats.mafiaStats.models import Site, Game, Team, Category,Player
 from mafiastats.mafiaStats.forms import AddGameForm,TeamFormSet,AddTeamForm
+from itertools import chain
 import json
 
 def index(request):
@@ -48,18 +49,22 @@ def scoreboard(request, site_id,page=1):
 	players.sort(cmp=(lambda (x,xs),(y,ys): (1 if xs< ys else -1)))
 	players,scores = zip(*players)
 	return render_to_response('scoreboard.html', {'site':site,'players':players})
+def moderators(request,site_id,page=1):
+	return HttpResponse("Not yet implemented")
 def add(request, site_id=None):
 	if request.method=='POST':
 		return HttpResponse("Not yet implemented")
 	else:
 		form =  AddGameForm(initial={'title':'Test 2'})
 		formset = TeamFormSet()	
-		bodyscripts = form.media.render_js()
-		sheets = form.media.render_css() #it either returns an iterable or 
-		if type(sheets) is str:#a string.  a string screws with the template
-			sheets = [sheets,] #so we must box strings up in a list
-		if type(bodyscripts) is str:
-			bodyscripts = [bodyscripts,]
+		def boxIfString(val):#render either returns an iterable or
+			if type(val) is str: #a string.  a string screws with the template
+				retval = [val,] #so we must box strings up in a list
+			else:
+				retval = val
+			return retval
+		sheets = boxIfString((form.media + formset.media).render_css())
+		bodyscripts = boxIfString((form.media+formset.media).render_js())
 		if (site_id):
 			site = Site.objects.get(pk=site_id)
 		else:
