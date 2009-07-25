@@ -8,8 +8,9 @@ class ClassedTextInput(forms.TextInput):
 	def __init__(self, attrs={}):
 		if self._init_class == None:
 			raise NotImplementedError, "Child class did not define _init_class"
-		if 'class' in attrs:
-			attrs['class'] = ' '.join([attrs['class'],self._init_class])
+		if ('class' in attrs):
+			if (self._init_class not in attrs['class']):
+				attrs['class'] = ' '.join([attrs['class'],self._init_class])
 		else:
 			attrs['class'] = self._init_class
 		super(forms.TextInput,self).__init__(attrs=attrs)
@@ -48,7 +49,7 @@ class NameBox(forms.SelectMultiple):
 			classes = attrs['class']
 		else:
 			classes=""
-		return render_to_string("nameBoxWidget.html",{'box_id':id ,'box_class':classes+" NameBox",'box_name':name,'text_name':name+"_text",'text_id':id+'_text','text_class':classes+" NameBoxText"})
+		return render_to_string("nameBoxWidget.html",{'box_id':id+"_box" ,'box_class':classes+" NameBox",'box_name':name+"_box",'result_name':name,'text_name':name+"_text",'text_id':id+'_text','text_class':classes+" NameBoxText"})
 			
 
 class NameEntryBox(forms.MultiWidget):
@@ -63,3 +64,9 @@ class NameEntryBox(forms.MultiWidget):
 	class Media:
 		js=('/static/js/jquery-1.3.2.min.js',)
 	
+class NameList(forms.MultipleChoiceField):
+	def clean(self,value):
+		value = unicode(value[0])
+		if((type(value) is str) or(type(value) is unicode)):
+			value = value.split(',')
+		return value

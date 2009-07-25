@@ -1,13 +1,14 @@
 from django import forms
 from django.forms.formsets import formset_factory
 from mafiastats.mafiaStats.widgets import AutoTextBox, JQueryDateWidget,NameBox
+from mafiastats.mafiaStats.widgets import NameList
 from mafiastats.mafiaStats.models import Site,Category
 from django.contrib.admin.widgets import AdminDateWidget
 from django.utils.safestring import mark_safe
 
 class AddGameForm(forms.Form):
-	title = forms.CharField(max_length=50, initial="Stuff")
-	url = forms.URLField(max_length=75)
+	title = forms.CharField(max_length=50)
+	url = forms.URLField(max_length=75,required=False)
 	moderator = forms.CharField(max_length=50, widget=AutoTextBox())
 	start_date = forms.DateField(widget = JQueryDateWidget())
 	end_date = forms.DateField(widget = JQueryDateWidget())
@@ -16,10 +17,10 @@ class AddGameForm(forms.Form):
 	#site = forms.ModelChoiceField(Site)
 class AddTeamForm(forms.Form):
 	title = forms.CharField(max_length=50)
-	won = forms.BooleanField()
+	won = forms.BooleanField(required=False)
 	type = forms.MultipleChoiceField(choices=[(cat.title,cat.title) for cat in Category.objects.all()])
 #	players = forms.MultipleChoiceField(choices=[('1','Febo'),('2','ricree'),('3','Apeiron')])
-	players = forms.MultipleChoiceField(choices=[],widget=NameBox)
+	players = NameList(choices=[],widget=NameBox)
 TeamFormSetParent = formset_factory(AddTeamForm)
 class TeamFormSet(TeamFormSetParent):
 	def as_p(self):
