@@ -78,6 +78,14 @@ class Game(models.Model):
 	#moderator = models.CharField(max_length=50)
 	start_date = models.DateField()
 	end_date = models.DateField()
+	def length(self):
+		return self.end_date - self.start_date
+	def winningTeams(self):
+		return self.team_set.filter(won=True)
+	def players(self):
+		return [player for team in self.team_set.all() for player in team.players.all()]
+	def num_players(self):
+		return sum((team.players.count() for team in self.team_set.all()))
 	timestamp = models.DateField(auto_now_add = True)
 	gameType = models.CharField(max_length=25,choices = [(u'full','Full Game'),
 		(u'mini','Mini Game'), (u'irc','IRC Game')])

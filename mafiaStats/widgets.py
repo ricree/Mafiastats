@@ -66,7 +66,11 @@ class NameEntryBox(forms.MultiWidget):
 	
 class NameList(forms.MultipleChoiceField):
 	def clean(self,value):
+		if len(value) <=0:
+			raise forms.ValidationError("Must have at least one name")
 		value = unicode(value[0])
+		if len(value)<=0:
+			raise forms.ValidationError("Must have at least one name")
 		if((type(value) is str) or(type(value) is unicode)):
 			value = value.split(',')
 		return value

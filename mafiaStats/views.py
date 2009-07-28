@@ -40,8 +40,24 @@ def playerPlayed(request,player_id):
 	return HttpResponse("Not yet implemented")
 def playerModerated(request,player_id):
 	return HttpResponse("Not yet implemented")
+def get_bounds(perPage,page,num):
+	if (page <1):
+		return -1
+	if ((perPage*(page-1)) > num):
+		return -1
+	if ((perPage * page)>num):
+		return num
+	return perPage*page
 def games(request, site_id,page=1):
-	return HttpResponse("Not yet implemented")
+	gamesPerPage = 10
+	page = int(page)
+	numGames = Game.objects.count
+	last = get_bounds(gamesPerPage,page,numGames)
+	if (last<0):
+		raise Http404("Page out of bounds")
+	site = get_object_or_404(Site,id=site_id)
+	pageGames = Game.objects.filter(site=site)[gamesPerPage*(page-1):last]
+	return render_to_response("games.html",{'games':pageGames,'site':site})
 def scoreboard(request, site_id,page=1):
 	site = get_object_or_404(Site, pk=site_id)
 	players = Player.objects.filter(site=site)
@@ -49,7 +65,11 @@ def scoreboard(request, site_id,page=1):
 	players.sort(cmp=(lambda (x,xs),(y,ys): (1 if xs< ys else -1)))
 	players,scores = zip(*players)
 	for player in players:
-		player.win_pct = (100* player.wins())/(player.losses() + player.wins())
+		totalGames = player.losses() + player.wins()
+		if(totalGames >0):
+			player.win_pct = (100* player.wins())/(player.losses() + player.wins())
+		else:
+			player.win_pct = "N/A"
 	return render_to_response('scoreboard.html', {'site':site,'players':players})
 def moderators(request,site_id,page=1):
 	return HttpResponse("Not yet implemented")

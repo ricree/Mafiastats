@@ -1,0 +1,80 @@
+{%extends "sitePage.html"%}
+{%block title%}Add New Game to {{site}}{%endblock%}
+{%block header %}<h1>Add New Game {%if site%}to {{site}}{%endif%}</h1>{%endblock%}
+{%block content%}
+<script type="text/javascript" src="/static/js/js_formset.js"></script>
+<script type="text/javascript">
+$(function () {
+	$('.add-row').click(function(){
+		addForm(this,'form');
+		SetChooser();
+	});
+	$('.delete-row').click(function(){
+		return deleteForm(this, 'form');
+	})
+})
+$(document).ready(function(){
+	$("form").keydown(function(event){
+		if(event.which == 13){
+			return false;}
+	})
+})
+</script>
+<div>
+<form action="/game/add/{{site.id}}" method="post">
+<div>
+{% for field in game_form%}
+<div class="span-18">
+<div class="span-4">
+	{{field.label_tag}}
+</div>
+<div class="span-5">
+	{{field}}
+</div>
+<div class="span-8">
+	{{field.errors}}
+</div>
+</div>
+{%endfor%}
+</div>
+<div class="span-12">
+<br/>
+<a href="javascript:void(0)" class="add-row menuItem">add team</a>
+<input type="submit" value="Add Site"/>
+{%comment%}<a href="javascript:void(0)" class="menuItem" id="populate_fake">Populate Players</a>{%endcomment%}
+</div>
+<div>
+	{%for form in formset.forms %}
+		<div class="dynamic-form span-22 last">
+			<div class="span-10">
+				{%for label,attr,at_name in form.left_attrs%}
+				<div class="span-7">
+					<div class="span-3">
+						<label for="{{form.prefix}}_{{at_name}}">{{label}}</label>
+					</div>
+					<div class="span-3">
+						{{attr}}
+					</div>
+					<div class="span-6">
+						{{attr.errors}}
+					</div>
+				</div>
+				{%endfor%}
+			</div>
+			<div class="span-10">
+				<label for="{{form.prefix}}_players">Players</label>
+				{{form.players}}<br/>
+				{{form.players.errors}}
+			</div>
+			<div class="span-1">
+				<a href="javascript:void(0)" class="delete-row menuItem">delete</a>
+			</div>
+		</div>
+	{%endfor%}
+</div><br/>
+<div>
+{{formset.management_form}}
+</div>
+</form>
+</div>
+{%endblock%}
