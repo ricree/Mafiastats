@@ -8,9 +8,9 @@
 <div class="span-15 infoBox">
 	<div class = "span-7">
 		<b>{{game.title}}</b><br/>
-		Moderated By: {{game.moderator}}<br/>
+		Moderated By: <a href="/player/{{game.moderator.id}}">{{game.moderator}}</a><br/>
 		Length: {{length.days}} days<br/>
-		Players: {{num_players}}<br/>
+		Players: {{game.num_players}}<br/>
 	</div>
 	<div class="span-8 last">
 		<b>Winning Team{{winers|pluralize}}:</b><br/>

@@ -17,10 +17,10 @@ function addForm(btn, prefix){
 //	alert($(row).html());
 //	$(row).insertAfter($('.dynamic-form:last'));
 	//alert($(row).children().not(':last').html());
-	$(row).children().children().not(':last').children().children().each(function() {
-		//alert($(this).html());
+	$(row).children().not(":last").children().children().children().each(function() {
+//		alert($(this).html());
 		updateElementIndex(this, prefix, formCount);
-		$(this).val('').attr('checked',false).filter(".NameChooser").children().filter("select").empty();
+		$(this).val('').attr('checked',false).filter("option").remove()
 		
 	});
 	$(row).find('.delete-row').click(function() {

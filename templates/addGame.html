@@ -40,7 +40,7 @@ $(document).ready(function(){
 <div class="span-12">
 <br/>
 <a href="javascript:void(0)" class="add-row menuItem">add team</a>
-<input type="submit" value="Add Site"/>
+<input type="submit" value="Add Game"/>
 {%comment%}<a href="javascript:void(0)" class="menuItem" id="populate_fake">Populate Players</a>{%endcomment%}
 </div>
 <div>
@@ -62,7 +62,7 @@ $(document).ready(function(){
 				{%endfor%}
 			</div>
 			<div class="span-10">
-				<label for="{{form.prefix}}_players">Players</label>
+				<label for="{{form.prefix}}-players_text">Players</label>
 				{{form.players}}<br/>
 				{{form.players.errors}}
 			</div>

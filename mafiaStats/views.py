@@ -3,19 +3,22 @@ from django.http import HttpResponse, Http404,HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from mafiastats.mafiaStats.models import Site, Game, Team, Category,Player
 from mafiastats.mafiaStats.forms import AddGameForm,TeamFormSet,AddTeamForm
+from django.template import RequestContext
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from itertools import chain
 import json
 
 def index(request):
 	site_list = Site.objects.all()[:5]
-	return render_to_response('index.html',{'site_list' : site_list})
+	return render_to_response('index.html',{'site_list' : site_list},context_instance=RequestContext(request))
 def site(request,site_id,page=1):
 	try:
 		p = Site.objects.get(pk=site_id)
 	except Site.DoesNotExist:
 		raise Http404
 	games = Game.objects.filter(site=p)[:10]
-	return render_to_response('site.html', {'site' : p, 'games_list' : games})
+	return render_to_response('site.html', {'site' : p, 'games_list' : games},context_instance=RequestContext(request))
 #	return HttpResponse("Not yet implemented")
 def game(request, game_id):
 	game = get_object_or_404(Game, pk=game_id)
@@ -27,7 +30,7 @@ def game(request, game_id):
 	length = game.end_date - game.start_date
 	winners = teams.filter(won=True)
 	numWinners =teams.filter(won=True).count()
-	return render_to_response('game.html', {'game':game, 'teams':teams, 'num_players' : numPlayers, 'length':length, 'players':players,'winners':winners})
+	return render_to_response('game.html', {'game':game, 'teams':teams, 'num_players' : numPlayers, 'length':length, 'players':players,'winners':winners},context_instance=RequestContext(request))
 
 def player(request,player_id):
 	player = get_object_or_404(Player, pk=player_id)
@@ -35,7 +38,7 @@ def player(request,player_id):
 	won = player.team_set.filter(won=True)
 	lost = player.team_set.filter(won=False)
 	moderated = player.moderated_set.all()
-	return render_to_response('player.html',{'player':player,'played':played,'moderated':moderated, 'won':won,'lost':lost})
+	return render_to_response('player.html',{'player':player,'played':played,'moderated':moderated, 'won':won,'lost':lost},context_instance=RequestContext(request))
 def playerPlayed(request,player_id):
 	return HttpResponse("Not yet implemented")
 def playerModerated(request,player_id):
@@ -57,7 +60,7 @@ def games(request, site_id,page=1):
 		raise Http404("Page out of bounds")
 	site = get_object_or_404(Site,id=site_id)
 	pageGames = Game.objects.filter(site=site)[gamesPerPage*(page-1):last]
-	return render_to_response("games.html",{'games':pageGames,'site':site})
+	return render_to_response("games.html",{'games':pageGames,'site':site},context_instance=RequestContext(request))
 def scoreboard(request, site_id,page=1):
 	site = get_object_or_404(Site, pk=site_id)
 	players = Player.objects.filter(site=site)
@@ -70,8 +73,16 @@ def scoreboard(request, site_id,page=1):
 			player.win_pct = (100* player.wins())/(player.losses() + player.wins())
 		else:
 			player.win_pct = "N/A"
-	return render_to_response('scoreboard.html', {'site':site,'players':players})
+	return render_to_response('scoreboard.html', {'site':site,'players':players},context_instance=RequestContext(request))
 def moderators(request,site_id,page=1):
+	page=int(page)
+	modsPerPage=20
+	moderators = list(set([game.moderator for game in Game.objects.filter(site=site_id)]))
+	site = get_object_or_404(Site,id=site_id)
+	last = get_bounds(modsPerPage,page,len(moderators))
+	if(last<0):
+		raise Http404("Page out of bounds")
+	return render_to_response("moderators.html",{'moderators':moderators,'site':site},context_instance=RequestContext(request))
 	return HttpResponse("Not yet implemented")
 def add(request, site_id=None):
 	if request.method=='POST':
@@ -104,7 +115,7 @@ def add(request, site_id=None):
 			return HttpResponseRedirect('/game/'+str(game.id)+'/')
 			return HttpResponse("Not yet implemented "+ str(name)+str(request.POST['form-0-players']))
 	else:
-		form =  AddGameForm(initial={'title':'Test 2'})
+		form =  AddGameForm()
 		formset = TeamFormSet()	
 	def boxIfString(val):#render either returns an iterable or
 		if type(val) is str: #a string.  a string screws with the template
@@ -121,7 +132,7 @@ def add(request, site_id=None):
 	left_attrs = [("Team Name:","title"),('Team Type:','type'),('Won:','won')]
 	for tform in formset.forms:
 		tform.left_attrs = [(label,tform[property],property) for label,property in left_attrs]
-	return render_to_response('addGame.html',{'game_form':form,'formset': formset,'bodyscripts':bodyscripts,'sheets':sheets,'site':site,'id':site_id,})
+	return render_to_response('addGame.html',{'game_form':form,'formset': formset,'bodyscripts':bodyscripts,'sheets':sheets,'site':site,'id':site_id,},context_instance=RequestContext(request))
 def nameLookup(request):
 	if 'text' not in request.GET:
 		return HttpResponse("[]")
@@ -134,4 +145,13 @@ def nameLookup(request):
 	response = [{'id':player.id,'text':player.name} for player in players]
 	response = json.dumps(response)
 	return HttpResponse(response)
-
+def register(request):
+	if (request.method=='POST'):
+		form = UserCreationForm(request.POST)
+		if( form.is_valid()):
+			user = User.objects.create_user(form.name,form.email,form.password)	
+			user.save()
+			return HttpResponseRedirect("/")
+	else:
+		form=UserCreationForm()
+	return render_to_response("register.html",{'form':form},context_instance=RequestContext(request))
