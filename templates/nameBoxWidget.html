@@ -6,7 +6,10 @@
 			<a href="#remove">Remove</a>
 		</li>
 </ul>
-<input type="hidden" id="team_result" name="{{result_name}}"/>
+<input type="hidden" id="team_result" name="{{result_name}}" value="{{value}}"/>
 <select multiple="multiple" name="{{box_name}}" id="{{box_id}}" class="{{box_class}}">
+	{%for name in value_list%}
+	<option value="{{name}}">{{name}}</option>
+	{%endfor%}
 </select>
 </div>

@@ -6,6 +6,7 @@ from mafiastats.mafiaStats.forms import AddGameForm,TeamFormSet,AddTeamForm
 from django.template import RequestContext
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from itertools import chain
 import json
 
@@ -84,6 +85,7 @@ def moderators(request,site_id,page=1):
 		raise Http404("Page out of bounds")
 	return render_to_response("moderators.html",{'moderators':moderators,'site':site},context_instance=RequestContext(request))
 	return HttpResponse("Not yet implemented")
+@login_required()
 def add(request, site_id=None):
 	if request.method=='POST':
 		form = AddGameForm(request.POST)
@@ -149,7 +151,10 @@ def register(request):
 	if (request.method=='POST'):
 		form = UserCreationForm(request.POST)
 		if( form.is_valid()):
-			user = User.objects.create_user(form.name,form.email,form.password)	
+			username = form.cleaned_data['username']
+			email = ''
+			password = form.cleaned_data['password1']
+			user = User.objects.create_user(username,email,password)
 			user.save()
 			return HttpResponseRedirect("/")
 	else:

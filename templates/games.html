@@ -12,7 +12,7 @@
 		Players: {{game.num_players}}<br/>
 	</div>
 	<div class="span-8 last">
-        <b>Winning Team{{winers|pluralize}}:</b><br/>
+        <b>Winning Team{{game.winningTeams|pluralize}}:</b><br/>
         {% for team in game.winningTeams %}
         <a href="/game/{{game.id}}/#{{team.id}}">{{team.title}}</a><br/>
         {%endfor%}

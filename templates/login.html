@@ -1,8 +1,10 @@
 {%extends "base.html"%}
+{%block title%}Login - Mafia Stats{%endblock%}
 {%block content%}
 <form action="/login/" method="post">
 {{form.as_p}}
 <input type="submit" value="Log In"/>
+<input type="hidden" name="next" value="{{next}}"/>
 Don't have an account?  <a href="/register/">register</a>
 </form>
 {%endblock%}

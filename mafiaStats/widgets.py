@@ -49,7 +49,13 @@ class NameBox(forms.SelectMultiple):
 			classes = attrs['class']
 		else:
 			classes=""
-		return render_to_string("nameBoxWidget.html",{'box_id':id+"_box" ,'box_class':classes+" NameBox",'box_name':name+"_box",'result_name':name,'text_name':name+"_text",'text_id':id+'_text','text_class':classes+" NameBoxText"})
+		if((type(value) is list) and (len(value) >0)):
+			val = value[0]
+			val_list = value[0].split(',')
+		else:
+			val = ''
+			val_list = []
+		return render_to_string("nameBoxWidget.html",{'value':val,'value_list':val_list,'box_id':id+"_box" ,'box_class':classes+" NameBox",'box_name':name+"_box",'result_name':name,'text_name':name+"_text",'text_id':id+'_text','text_class':classes+" NameBoxText"})
 			
 
 class NameEntryBox(forms.MultiWidget):

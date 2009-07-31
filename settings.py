@@ -76,6 +76,9 @@ TEMPLATE_DIRS = ('/home/rareed/projects/mafiastats/templates/'
     # Don't forget to use absolute paths, not relative paths.
 )
 
+LOGIN_REDIRECT_URL='/'
+LOGIN_URL='/login/'
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
