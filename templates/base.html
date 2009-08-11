@@ -5,16 +5,20 @@
 	<link rel="stylesheet" href="/static/css/blueprint/print.css" type="text/css" media="print">
   <!--[if lt IE 8]><link rel="stylesheet" href="../../blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
 <!--<link rel="stylesheet" href="/static/css/blueprint/plugins/fancy-type/screen.css" type="text/css" media="screen, projection">-->
+<link rel="stylesheet" href="/static/css/stylesheet.css"/>
 {%block sheets%}{%if sheets%}{%for sheet in sheets%}
 {{sheet|safe}}{%endfor%}
 	{%endif%}{%endblock%}
-<link rel="stylesheet" href="/static/css/stylesheet.css"/>
-<title>{% block title %}Mafia Stats{%endblock%}</title>
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+{%block extra_css%}
+{%endblock%}
+{%block bodyscripts%}{%if bodyscripts %}{%for script in bodyscripts%}
+{{script|safe}} {%endfor%}  {%endif%}
+    {%endblock%}
+{%block extra_scripts%}{%endblock%}
+<title>{% block title %}{%endblock%} Mafia Stats</title>
 </head>
 <body>
-	{%block bodyscripts%}{%if bodyscripts %}{%for script in bodyscripts%}
-{{script|safe}}	{%endfor%}	{%endif%}
-	{%endblock%}
 	<div class="container">
 	<div class="span-24" id="header">
 	{%block header %}{%endblock%}
@@ -28,7 +32,7 @@
 	{%else%}[<a href="/login/">login</a>]{%endif%}
 	</div>
 	</div>
-	<div class="span-24" id="content">
+	<div class="span-24" id="pageContent">
 		{% block content %}{%endblock%}
 	</div>
 	</div>

@@ -17,14 +17,20 @@ div#header{
 h2{
 margin-bottom:5px;
 }
-div#content{
+div#pageContent{
 	background-color: #CCCCDD;
-	border-color: #556076;
-	border-width: 4px;
 	padding:5px;
 	padding-bottom:20px;
-	min-height:500px;
-	font-size: large;
+	min-height:500px;/*
+	font-size: large;*/
+}
+fieldset{
+background-color:#DDDDE0;
+border-color:black;
+border-width:1px;
+border-style:solid;
+margin:0px;
+padding:0px;
 }
 div.infoBox
 {
@@ -90,4 +96,3 @@ div.sidebar{
 .errorlist{
 	color:red;
 }
-

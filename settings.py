@@ -60,12 +60,14 @@ TEMPLATE_CONTEXT_PROCESSORS = ("django.core.context_processors.auth",
 "django.core.context_processors.debug",
 "django.core.context_processors.i18n",
 "django.core.context_processors.media",
+'django_authopenid.context_processors.authopenid',
 )
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+	'django_authopenid.middleware.OpenIDMiddleware',
 )
 
 ROOT_URLCONF = 'mafiastats.urls'
@@ -76,8 +78,8 @@ TEMPLATE_DIRS = ('/home/rareed/projects/mafiastats/templates/'
     # Don't forget to use absolute paths, not relative paths.
 )
 
-LOGIN_REDIRECT_URL='/'
-LOGIN_URL='/login/'
+LOGIN_REDIRECT_URL='/account/profile'
+LOGIN_URL='/accounts/signin/'
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -86,5 +88,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
 	'django.contrib.auth',
+	'registration',
+	'django_authopenid',
     'mafiastats.mafiaStats'
 )
