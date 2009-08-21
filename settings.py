@@ -1,4 +1,5 @@
 # Django settings for mafiastats project.
+from deploy_settings import DATABASE_ENGINE,DATABASE_NAME,DATABASE_USER,DATABASE_PASSWORD,DATABASE_HOST,DATABASE_PORT,SECRET_KEY,SITE_ROOT
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -9,12 +10,6 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DATABASE_ENGINE =  'postgresql'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = 'MAFIA_STATS'             # Or path to database file if using sqlite3.
-DATABASE_USER = 'rareed'             # Not used with sqlite3.
-DATABASE_PASSWORD = 'Ra030025'         # Not used with sqlite3.
-DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
-DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -35,7 +30,7 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/home/rareed/projects/mafiastats/static'
+MEDIA_ROOT = SITE_ROOT + '/static'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -47,8 +42,6 @@ MEDIA_URL = 'localhost:8000/static/'
 # Examples: "http://foo.com/media/", "/media/".
 ADMIN_MEDIA_PREFIX = '/media/'
 
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = '$!sjks!&1h=8g(@i#fj$(-sd24v-7_s++$ujuysty_valq=@a9'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -72,7 +65,7 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'mafiastats.urls'
 
-TEMPLATE_DIRS = ('/home/rareed/projects/mafiastats/templates/'
+TEMPLATE_DIRS = (SITE_ROOT+'/templates/'
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
