@@ -1,8 +1,8 @@
 from django import forms
 from django.forms.formsets import formset_factory
-from mafiastats.mafiaStats.widgets import AutoTextBox, JQueryDateWidget,NameBox
-from mafiastats.mafiaStats.widgets import NameList
-from mafiastats.mafiaStats.models import Site,Category
+from Mafiastats.mafiaStats.widgets import AutoTextBox, JQueryDateWidget,NameBox
+from Mafiastats.mafiaStats.widgets import NameList
+from Mafiastats.mafiaStats.models import Site,Category
 from django.contrib.admin.widgets import AdminDateWidget
 from django.utils.safestring import mark_safe
 

@@ -1,8 +1,8 @@
 # Create your views here.
 from django.http import HttpResponse, Http404,HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
-from mafiastats.mafiaStats.models import Site, Game, Team, Category,Player
-from mafiastats.mafiaStats.forms import AddGameForm,TeamFormSet,AddTeamForm
+from Mafiastats.mafiaStats.models import Site, Game, Team, Category,Player
+from Mafiastats.mafiaStats.forms import AddGameForm,TeamFormSet,AddTeamForm
 from django.template import RequestContext
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User

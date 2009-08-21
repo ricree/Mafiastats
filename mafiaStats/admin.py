@@ -1,4 +1,4 @@
-from mafiastats.mafiaStats.models import Site, Game, Category, Player,Team
+from Mafiastats.mafiaStats.models import Site, Game, Category, Player,Team
 from django.contrib import admin
 
 class TeamInline(admin.StackedInline):

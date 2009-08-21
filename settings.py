@@ -1,4 +1,4 @@
-# Django settings for mafiastats project.
+# Django settings for Mafiastats.project.
 from deploy_settings import DATABASE_ENGINE,DATABASE_NAME,DATABASE_USER,DATABASE_PASSWORD,DATABASE_HOST,DATABASE_PORT,SECRET_KEY,SITE_ROOT
 
 DEBUG = True
@@ -63,7 +63,7 @@ MIDDLEWARE_CLASSES = (
 	'django_authopenid.middleware.OpenIDMiddleware',
 )
 
-ROOT_URLCONF = 'mafiastats.urls'
+ROOT_URLCONF = 'Mafiastats.urls'
 
 TEMPLATE_DIRS = (SITE_ROOT+'/templates/'
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -83,5 +83,5 @@ INSTALLED_APPS = (
 	'django.contrib.auth',
 	'registration',
 	'django_authopenid',
-    'mafiastats.mafiaStats'
+    'Mafiastats.mafiaStats'
 )
