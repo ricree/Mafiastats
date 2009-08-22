@@ -14,7 +14,7 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
      (r'^admin/(.*)', admin.site.root),
-     (r'^$', 'Mafiastats.mafiaStats..views.index'),
+     (r'^$', 'Mafiastats.mafiaStats.views.index'),
      (r'^site/(?P<site_id>\d+)/(?P<page>\d*)/{0,1}$', 'Mafiastats.mafiaStats.views.site'),
      (r'^site/(?P<site_id>\d+)/scoreboard/(?P<page>\d*)/{0,1}$','Mafiastats.mafiaStats.views.scoreboard'),
      (r'^site/(?P<site_id>\d+)/games/(?P<page>\d*)/{0,1}$','Mafiastats.mafiaStats.views.games'),
@@ -36,8 +36,8 @@ urlpatterns = patterns('',
 
      #(r'^register/','Mafiastats.mafiaStats.views.register'),
 )
-if settings.DEBUG:
-    urlpatterns += patterns('',
-        (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
-    )
+#if settings.DEBUG:
+    #urlpatterns += patterns('',
+    #    (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
+    #)
 
