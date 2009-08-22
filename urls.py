@@ -6,7 +6,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     # Example:
-    # (r'^mafiastats/', include('mafiastats.foo.urls')),
+    # (r'^Mafiastats/', include('mafiastats.foo.urls')),
 
     # Uncomment the admin/doc line below and add 'django.contrib.admindocs' 
     # to INSTALLED_APPS to enable admin documentation:
@@ -14,27 +14,27 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
      (r'^admin/(.*)', admin.site.root),
-     (r'^$', 'Mafiastats.mafiaStat.views.index'),
-     (r'^site/(?P<site_id>\d+)/(?P<page>\d*)/{0,1}$', 'Mafiastats.mafiaStat.views.site'),
-     (r'^site/(?P<site_id>\d+)/scoreboard/(?P<page>\d*)/{0,1}$','Mafiastats.mafiaStat.views.scoreboard'),
-     (r'^site/(?P<site_id>\d+)/games/(?P<page>\d*)/{0,1}$','Mafiastats.mafiaStat.views.games'),
-     (r'^site/(?P<site_id>\d+)/moderators/(?P<page>\d*)/{0,1}$','Mafiastats.mafiaStat.views.moderators'),
-     (r'^game/add/(?P<site_id>\d*)/*$','Mafiastats.mafiaStat.views.add'),
-     (r'^game/(?P<game_id>\d+)/$','Mafiastats.mafiaStat.views.game'),
-     (r'^player/(?P<player_id>\d+)/$','Mafiastats.mafiaStat.views.player'),
-     (r'^player/(?P<player_id>\d+)/played/$','Mafiastats.mafiaStat.views.playerPlayed'),
-     (r'^player/(?P<player_id>\d+)/moderated/$','Mafiastats.mafiaStat.views.playerModerated'),
-     (r'^player/name_lookup','Mafiastats.mafiaStat.views.nameLookup'),
+     (r'^$', 'Mafiastats.mafiaStats..views.index'),
+     (r'^site/(?P<site_id>\d+)/(?P<page>\d*)/{0,1}$', 'Mafiastats.mafiaStats.views.site'),
+     (r'^site/(?P<site_id>\d+)/scoreboard/(?P<page>\d*)/{0,1}$','Mafiastats.mafiaStats.views.scoreboard'),
+     (r'^site/(?P<site_id>\d+)/games/(?P<page>\d*)/{0,1}$','Mafiastats.mafiaStats.views.games'),
+     (r'^site/(?P<site_id>\d+)/moderators/(?P<page>\d*)/{0,1}$','Mafiastats.mafiaStats.views.moderators'),
+     (r'^game/add/(?P<site_id>\d*)/*$','Mafiastats.mafiaStats.views.add'),
+     (r'^game/(?P<game_id>\d+)/$','Mafiastats.mafiaStats.views.game'),
+     (r'^player/(?P<player_id>\d+)/$','Mafiastats.mafiaStats.views.player'),
+     (r'^player/(?P<player_id>\d+)/played/$','Mafiastats.mafiaStats.views.playerPlayed'),
+     (r'^player/(?P<player_id>\d+)/moderated/$','Mafiastats.mafiaStats.views.playerModerated'),
+     (r'^player/name_lookup','Mafiastats.mafiaStats.views.nameLookup'),
      (r'^login/','django.contrib.auth.views.login',{'template_name':'login.html',}),
      (r'^logout/','django.contrib.auth.views.logout',{'template_name':'logout.htl','next_page':'/'}),
-     (r'^register/','Mafiastats.mafiaStat.views.register'),
-     (r'^account/profile/','mafiastats.auth.views.profile'),
+     (r'^register/','Mafiastats.mafiaStats.views.register'),
+     (r'^account/profile/','Mafiastats.auth.views.profile'),
      (r'^account/',include('django_authopenid.urls')),
     # (r'^openid/$','django_openidconsumer.views.begin'),
     # (r'^openid/complete/$', 'django_openidconsumer.views.complete'),
     # (r'^openid/signout/$', 'django_openidconsumer.views.signout'),
 
-     #(r'^register/','Mafiastats.mafiaStat.views.register'),
+     #(r'^register/','Mafiastats.mafiaStats.views.register'),
 )
 if settings.DEBUG:
     urlpatterns += patterns('',
