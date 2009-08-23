@@ -19,7 +19,12 @@ def site(request,site_id,page=1):
 	except Site.DoesNotExist:
 		raise Http404
 	games = Game.objects.filter(site=p)
-	return render_to_response('site.html', {'site' : p, 'games_list' : games},context_instance=RequestContext(request))
+	stats = {'played': games.count(),'players':Player.objects.filter(site=p).count()}
+	if (games.count()>0):
+		stats['mostRecent'] = games.order_by('timestamp')[0]
+	else:
+		stats['mostRecent']=None
+	return render_to_response('site.html', {'stats':stats,'site' : p, 'games_list' : games},context_instance=RequestContext(request))
 #	return HttpResponse("Not yet implemented")
 def game(request, game_id):
 	game = get_object_or_404(Game, pk=game_id)

@@ -1,6 +1,23 @@
 {% extends "sitePage.html"%}
 {%block content %}
 <h3><a href="{{site.url}}">{{site.description}}</a></h3>
+{%if stats%}
+<div class="infoBox span-20">
+<div class="span-8">
+Games Played: {{stats.played}}
+</div>
+<div class="span-8">
+Total Players:{{stats.players}}
+</div>
+<br/>
+{%if stats.mostRecent%}
+<div class="span-12">
+Most Recent Game: <a href="/game/{{stats.mostRecent.id}}">{{stats.mostRecent.title}}</a>
+</div>
+{%endif%}
+</div>
+{%endif%}
+
 {%if games_list %}
 <ul>
 	{%for game in games_list %}
