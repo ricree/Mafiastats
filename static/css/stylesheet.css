@@ -21,8 +21,8 @@ div#pageContent{
 	background-color: #CCCCDD;
 	padding:5px;
 	padding-bottom:20px;
-	min-height:500px;/*
-	font-size: large;*/
+	min-height:500px;
+	font-size: medium;
 }
 fieldset{
 background-color:#DDDDE0;
@@ -95,4 +95,17 @@ div.sidebar{
 }
 .errorlist{
 	color:red;
+}
+.hlist{
+	word-spacing:10px;
+}
+#techButtons{
+	text-align:center;
+	text-padding-left:5px;
+	text-padding-right:5px;
+	border-top-width:2px;
+	border-top-style:solid;
+	border-top-color:black;
+	background-color: #CCCCDD;
+	padding:5px;
 }

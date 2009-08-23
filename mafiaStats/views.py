@@ -18,7 +18,7 @@ def site(request,site_id,page=1):
 		p = Site.objects.get(pk=site_id)
 	except Site.DoesNotExist:
 		raise Http404
-	games = Game.objects.filter(site=p)[:10]
+	games = Game.objects.filter(site=p)
 	return render_to_response('site.html', {'site' : p, 'games_list' : games},context_instance=RequestContext(request))
 #	return HttpResponse("Not yet implemented")
 def game(request, game_id):
@@ -27,10 +27,12 @@ def game(request, game_id):
 	players = []
 	for team in teams:
 		players += team.players.all()
+	players = sorted(players,(lambda x,y:cmp(x.name,y.name)))
 	numPlayers = len(players)
 	length = game.end_date - game.start_date
 	winners = teams.filter(won=True)
 	numWinners =teams.filter(won=True).count()
+	teams=[(team,team.players.all().order_by('name')) for team in teams]
 	return render_to_response('game.html', {'game':game, 'teams':teams, 'num_players' : numPlayers, 'length':length, 'players':players,'winners':winners},context_instance=RequestContext(request))
 
 def player(request,player_id):

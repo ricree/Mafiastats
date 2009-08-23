@@ -42,6 +42,9 @@ MEDIA_URL = 'localhost:8000/static/'
 ADMIN_MEDIA_PREFIX = '/media/'
 
 
+INTERNAL_IPS=("127.0.0.1",)
+
+
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
@@ -52,6 +55,7 @@ TEMPLATE_CONTEXT_PROCESSORS = ("django.core.context_processors.auth",
 "django.core.context_processors.debug",
 "django.core.context_processors.i18n",
 "django.core.context_processors.media",
+"django.core.context_processors.debug",
 'django_authopenid.context_processors.authopenid',
 )
 
@@ -71,7 +75,7 @@ TEMPLATE_DIRS = (SITE_ROOT+'/templates/'
 )
 
 LOGIN_REDIRECT_URL='/account/profile'
-LOGIN_URL='/accounts/signin/'
+LOGIN_URL='/account/signin/'
 
 INSTALLED_APPS = (
     'django.contrib.auth',
