@@ -2,5 +2,5 @@
 {%block title%}Mafia Stats - {{player.name}}{%endblock%}
 {%block header %}<h3>{{player.name}}</h3>{%endblock%}
 {%block menu%}
-<a class="menuItem" href="/site/{{player.site.id}}/">{{player.site.title}} Stats</a><a class="menuItem" href="/player/{{player.id}}/played/">Games Played</a><a class="menuItem" href="/player/{{player.id}}/moderated/">Games Moderated</a>
+<a class="menuItem" href="/stats/site/{{player.site.id}}/">{{player.site.title}} Stats</a><a class="menuItem" href="/stats/player/{{player.id}}/played/">Games Played</a><a class="menuItem" href="/stats/player/{{player.id}}/moderated/">Games Moderated</a>
 {%endblock%}
