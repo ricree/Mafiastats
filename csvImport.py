@@ -67,15 +67,13 @@ def importCsv(siteDetails,fileName):
 			dln = dict(((n,line[csvColumns[n]]) for n in csvColumns.keys()))
 			start=datetime.datetime.strptime(dln['SDate'],dateFormat).date()
 			end = datetime.datetime.strptime(dln['EDate'],dateFormat).date()
-			print dln['GName']
 			modName = dln['Mod']
 			moderator,created = Player.objects.get_or_create(name=modName,site=site)
 			if(created):
-				print 'mod added'
 				moderator.save()
 			game,created = Game.objects.get_or_create(title=dln['GName'],defaults={'url':'','moderator':moderator,'start_date':start,'end_date':end,'gameType':dln['Type'],'site':site})
-			print created
 			game.save()
 			for category in categoryNames:
 				prefix=categoryNames[category]
 				makeTeam(game,dln,category,prefix,site)
+			print "Added %s, modded by %s" %(dln['GName'],modName)

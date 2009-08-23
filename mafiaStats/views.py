@@ -140,6 +140,7 @@ def nameLookup(request):
 	if 'site' in request.GET:
 		filterAttrs['site'] = request.GET['site']
 	#This probably ought to be replaced with something more efficient
+	#like a trie or something
 	#Then again, game entries aren't that common, so might not be worth it
 	players = Player.objects.filter(**filterAttrs)
 	response = [{'id':player.id,'text':player.name} for player in players]
