@@ -34,7 +34,7 @@ def site(request,site_id):
 	games = Game.objects.filter(site=p).order_by('end_date')
 	stats = {'played': games.count(),'players':Player.objects.filter(site=p).count()}
 	if (games.count()>0):
-		stats['mostRecent'] = games[-1]
+		stats['mostRecent'] = games[games.count()-1]
 	else:
 		stats['mostRecent']=None
 	paginator = Paginator(games,15)
