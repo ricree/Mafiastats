@@ -47,6 +47,8 @@ class Player(models.Model):
 		return Team.objects.filter(players=self,won=True).count()
 	def losses(self):
 		return Team.objects.filter(players=self,won=False).count()
+	def played(self):
+		return Team.objects.filter(players=self).count()
 	def score(self):
 		wins = self.wins()
 		total = wins + self.losses()
