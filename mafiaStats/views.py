@@ -67,15 +67,11 @@ def games(request, site_id,page=1):
 def scoreboard(request, site_id,page=1):
 	site = get_object_or_404(Site, pk=site_id)
 	players = Player.objects.filter(site=site)
-	players = zip(list(players),[player.score() for player in players])
-	players.sort(cmp=(lambda (x,xs),(y,ys): (1 if xs< ys else -1)))
+	players = [(player,player.score()) for player in players if player.played()>0]
+	players.sort(cmp=(lambda (x,xs),(y,ys): cmp(ys,xs)))
 	players,scores = zip(*players)
 	for player in players:
-		totalGames = player.losses() + player.wins()
-		if(totalGames >0):
-			player.win_pct = (100* player.wins())/(player.losses() + player.wins())
-		else:
-			player.win_pct = "N/A"
+		player.win_pct = (100* player.wins())/(player.losses() + player.wins())
 	return render_to_response('scoreboard.html', {'site':site,'players':players},context_instance=RequestContext(request))
 def moderators(request,site_id,page=1):
 	page=int(page)
