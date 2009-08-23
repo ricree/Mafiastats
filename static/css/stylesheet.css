@@ -109,3 +109,8 @@ div.sidebar{
 	background-color: #CCCCDD;
 	padding:5px;
 }
+#pageListing{
+    text-padding-left:5px;
+    text-padding-right:5px;
+    padding:12px;
+}
