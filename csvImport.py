@@ -67,7 +67,7 @@ def importCsv(siteDetails,fileName):
 			dln = dict(((n,line[csvColumns[n]]) for n in csvColumns.keys()))
 			start=datetime.datetime.strptime(dln['SDate'],dateFormat).date()
 			end = datetime.datetime.strptime(dln['EDate'],dateFormat).date()
-			modName = dln['Mod']
+			modName = cleanNameString(dln['Mod'])
 			moderator,created = Player.objects.get_or_create(name=modName,site=site)
 			if(created):
 				moderator.save()

@@ -12,13 +12,14 @@
 </div>
 <div class="span-20">
 	{%if moderated%}
+	<a name="moderated"></a>
 	<h2>Games {{player.name}} has Moderated</h2>
 	{%for game in moderated%}
 	<a href="/game/{{game.id}}/">{{game.title}}</a><br/>
 	{%endfor%}
 	{%endif%}
 	{%if played%}
-	<h2>Games {{player.name}} Has Played</h2>
+	<a name="played"></a><h2>Games {{player.name}} Has Played</h2>
 	{%for team in played%}
 	<a href="/game/{{team.game.id}}/">{{team.game.title}}</a> - {%if team.won%}Won{%else%}Lost{%endif%} as {{team.title}}<br/>
 	{%endfor%}

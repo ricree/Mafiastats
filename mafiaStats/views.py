@@ -11,7 +11,7 @@ from django.core.paginator import Paginator, InvalidPage,EmptyPage
 from itertools import chain
 import json
 
-def getPage(request,default,paginator):
+def getPage(request,paginator,default=1,indexRange=2):
 	try:
 		pNum = int(request.GET.get('page',str(default)))
 	except ValueError:
@@ -20,6 +20,16 @@ def getPage(request,default,paginator):
 		retval = paginator.page(pNum)
 	except (EmptyPage,InvalidPage):
 		retval = paginator.page(paginator.num_pages)
+	retval.pre_list = []
+	retval.post_list=[]
+	if(pNum>1):
+		retval.pre_list += paginator.page_range[pNum-1-indexRange:pNum-1]
+		if 1 not in retval.pre_list:
+			retval.pre_list.insert(0,1)
+	if(pNum<paginator.num_pages):
+		retval.post_list+=paginator.page_range[pNum:pNum+indexRange]
+		if paginator.num_pages not in retval.post_list:
+			retval.post_list+=[paginator.num_pages]
 	return retval
 
 
@@ -38,8 +48,8 @@ def site(request,site_id):
 	else:
 		stats['mostRecent']=None
 	paginator = Paginator(games,15)
-	gamesPage = getPage(request,1,paginator)
-	return render_to_response('site.html', {'stats':stats,'site' : p, 'games_list' : gamesPage},context_instance=RequestContext(request))
+	gamesPage = getPage(request,paginator,1)
+	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage},context_instance=RequestContext(request))
 #	return HttpResponse("Not yet implemented")
 def game(request, game_id):
 	game = get_object_or_404(Game, pk=game_id)
@@ -74,34 +84,32 @@ def get_bounds(perPage,page,num):
 	if ((perPage * page)>num):
 		return num
 	return perPage*page
-def games(request, site_id,page=1):
-	gamesPerPage = 10
-	page = int(page)
-	numGames = Game.objects.count
-	last = get_bounds(gamesPerPage,page,numGames)
-	if (last<0):
-		raise Http404("Page out of bounds")
+def games(request, site_id):
+	gamesPerPage = 5
 	site = get_object_or_404(Site,id=site_id)
-	pageGames = Game.objects.filter(site=site)[gamesPerPage*(page-1):last]
-	return render_to_response("games.html",{'games':pageGames,'site':site},context_instance=RequestContext(request))
-def scoreboard(request, site_id,page=1):
+	paginator = Paginator(Game.objects.filter(site=site).order_by('-end_date'),gamesPerPage)
+	page=getPage(request,paginator)
+	return render_to_response("games.html",{'games':page.object_list,'page':page,'site':site},context_instance=RequestContext(request))
+def scoreboard(request, site_id):
 	site = get_object_or_404(Site, pk=site_id)
-	players = Player.objects.filter(site=site)
-	players = [(player,player.score()) for player in players if player.played()>0]
-	players.sort(cmp=(lambda (x,xs),(y,ys): cmp(ys,xs)))
-	players,scores = zip(*players)
-	for player in players:
+	players = Player.objects.filter(site=site,played__gt=0).order_by('-score')
+#	players = [(player,player.score()) for player in players if player.played()>0]
+#	players.sort(cmp=(lambda (x,xs),(y,ys): cmp(ys,xs)))
+#	players,scores = zip(*players)
+	paginator=Paginator(players,25)
+	page=getPage(request,paginator)
+	for player in page.object_list:
 		player.win_pct = (100* player.wins())/(player.losses() + player.wins())
-	return render_to_response('scoreboard.html', {'site':site,'players':players},context_instance=RequestContext(request))
+	return render_to_response('scoreboard.html', {'site':site,'players':page.object_list,'page':page},context_instance=RequestContext(request))
 def moderators(request,site_id,page=1):
 	page=int(page)
-	modsPerPage=20
+	modsPerPage=15
 	moderators = list(set([game.moderator for game in Game.objects.filter(site=site_id)]))
+	moderators = sorted(moderators, lambda x,y:cmp(x.name,y.name))
+	paginator=Paginator(moderators,modsPerPage,orphans=5)
+	page = getPage(request,paginator)
 	site = get_object_or_404(Site,id=site_id)
-	last = get_bounds(modsPerPage,page,len(moderators))
-	if(last<0):
-		raise Http404("Page out of bounds")
-	return render_to_response("moderators.html",{'moderators':moderators,'site':site},context_instance=RequestContext(request))
+	return render_to_response("moderators.html",{'page':page,'moderators':page.object_list,'site':site},context_instance=RequestContext(request))
 	return HttpResponse("Not yet implemented")
 @login_required()
 def add(request, site_id=None):

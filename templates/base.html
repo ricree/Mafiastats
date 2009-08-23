@@ -14,7 +14,7 @@
 {%endblock%}
 {%block bodyscripts%}{%if bodyscripts %}{%for script in bodyscripts%}
 {{script|safe}} {%endfor%}  {%endif%}
-    {%endblock%}
+	{%endblock%}
 {%block extra_scripts%}{%endblock%}
 <title>{% block title %}{%endblock%} Mafia Stats</title>
 </head>
@@ -33,9 +33,33 @@
 	{%else%}[<a href="/account/signin/">login</a>]{%endif%}
 	</div>
 	</div>
+	<br/>
 	<div class="span-24" id="pageContent">
 		{% block content %}{%endblock%}
-	</div>
+		<br/>
+		{%block pageControls%}
+		{%if page%}
+		<div class="span-20"id="pageListing">
+			{%if page.has_previous%}
+			<a href="?page={{page.previous_page_number}}">previous</a>
+			{%else%}
+				previous
+			{%endif%}
+			{%for p in page.pre_list%}
+				<a href="?page={{p}}">{{p}}</a>
+			{%endfor%}
+			{{page.number}}
+			{%for p in page.post_list%}
+				<a href="?page={{p}}">{{p}}</a>
+			{%endfor%}
+			{%if page.has_next%}
+				<a href="?page={{page.next_page_number}}">next</a>
+			{%else%}
+				next
+			{%endif%}
+		</div>
+		{%endif%}
+	{%endblock%}
 	</div><br/>
 	<div id="techButtons" class="span-24">
 	<a href="http://www.djangoproject.com/"><img src="http://media.djangoproject.com/img/badges/djangosite80x15.gif" border="0" alt="A Django site." title="A Django site." /></a>

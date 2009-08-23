@@ -43,18 +43,25 @@ class Player(models.Model):
 		return self.name
 	name = models.CharField(max_length=50)
 	site = models.ForeignKey(Site)
+	score = models.FloatField()
+	played = models.IntegerField(default=0)
 	def wins(self):
 		return Team.objects.filter(players=self,won=True).count()
 	def losses(self):
 		return Team.objects.filter(players=self,won=False).count()
-	def played(self):
+	def playedCalc(self):
 		return Team.objects.filter(players=self).count()
-	def score(self):
-		wins = self.wins()
-		total = wins + self.losses()
+	def freshScore(self):
+		wins = float(self.wins())
+		total = float(wins + self.losses())
 		if total<1:
 			return -1
 		return wins**2/total
+	def save(self ,force_insert=False, force_update=False):
+		self.score=self.freshScore()
+		self.played=self.playedCalc()
+		super(Player,self).save(force_insert,force_update)
+	
 	def oldScore(self):#currently too slow.  needs caching.  might do later
 		site = self.site
 		categories = Category.objects.all()
@@ -94,6 +101,11 @@ class Game(models.Model):
 		return [player for team in self.team_set.all() for player in team.players.all()]
 	def num_players(self):
 		return sum((team.players.count() for team in self.team_set.all()))
+	def save(self, force_insert=False, force_update=False):
+		super(Game,self).save(force_insert,force_update)
+		for p in self.players():
+			p.save()
+		self.moderator.save()
 	timestamp = models.DateField(auto_now_add = True)
 	gameType = models.CharField(max_length=25,choices = [(u'full','Full Game'),
 		(u'mini','Mini Game'), (u'irc','IRC Game')])
@@ -108,4 +120,8 @@ class Team(models.Model):
 	game = models.ForeignKey(Game)
 	site = models.ForeignKey(Site)
 	won = models.BooleanField()
+	def save(self, force_insert=False, force_update=False):
+		super(Team,self).save(force_insert,force_update)
+		for p in self.players.all():
+			p.save()
 	

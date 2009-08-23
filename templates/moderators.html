@@ -2,7 +2,7 @@
 {%block title%} {{site.short_name}} Moderators - Mafia Stats{%endblock%}
 {% block content%}
 {%for mod in moderators%}
-<div class="infoBox span-15">
+<div class="span-15 {%cycle 'odd' 'even'%}">
 <div class="span-5"><a href="/player/{{mod.id}}/">{{mod.name}}</a></div>
 <div class="span-7">Games Moderated: {{mod.moderated_set.count}}</div>
 </div>

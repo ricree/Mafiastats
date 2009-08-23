@@ -19,24 +19,11 @@ Most Recent Game: <a href="/game/{{stats.mostRecent.id}}">{{stats.mostRecent.tit
 <br/>
 {%endif%}
 <div class="span-16">
-{%if games_list %}
+{%if page %}
 <ul>
-	{%for game in games_list.object_list%}
+	{%for game in page.object_list%}
 	<li><b><a href="/game/{{game.pk}}">{{game.title}}</a></b></li>		{%endfor%}
 </ul>
-<div id="pageListing">
-	{%if games_list.has_previous%}
-		<a href="?page={{games_list.previous_page_number}}">previous</a>
-	{%else%}
-		previous
-	{%endif%}
-	({{games_list.number}}/{{games_list.paginator.num_pages}})
-	{%if games_list.has_next%}
-		<a href="?page={{games_list.next_page_number}}">next</a>
-	{%else%}
-		next
-	{%endif%}
-</div>
 {%else%}
 This site does not have any games yet
 {%endif%}
