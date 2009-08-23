@@ -79,8 +79,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-	'django.contrib.auth',
-	'registration',
-	'django_authopenid',
+    'django.contrib.auth',
+    'registration',
+    'django_authopenid',
     'Mafiastats.mafiaStats'
 )
