@@ -15,7 +15,7 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
      (r'^admin/(.*)', admin.site.root),
      (r'^$', 'Mafiastats.mafiaStats.views.index'),
-     (r'^site/(?P<site_id>\d+)/(?P<page>\d*)/{0,1}$', 'Mafiastats.mafiaStats.views.site'),
+     (r'^site/(?P<site_id>\d+)/$', 'Mafiastats.mafiaStats.views.site'),
      (r'^site/(?P<site_id>\d+)/scoreboard/(?P<page>\d*)/{0,1}$','Mafiastats.mafiaStats.views.scoreboard'),
      (r'^site/(?P<site_id>\d+)/games/(?P<page>\d*)/{0,1}$','Mafiastats.mafiaStats.views.games'),
      (r'^site/(?P<site_id>\d+)/moderators/(?P<page>\d*)/{0,1}$','Mafiastats.mafiaStats.views.moderators'),

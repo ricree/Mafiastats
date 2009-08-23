@@ -7,18 +7,32 @@ from django.template import RequestContext
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, InvalidPage,EmptyPage
 from itertools import chain
 import json
+
+def getPage(request,default,paginator):
+	try:
+		pNum = int(request.GET.get('page',str(default)))
+	except ValueError:
+		pNum = 1
+	try:
+		retval = paginator.page(pNum)
+	except (EmptyPage,InvalidPage):
+		retval = paginator.page(paginator.num_pages)
+	return retval
+
 
 def index(request):
 	site_list = Site.objects.all()[:5]
 	return render_to_response('index.html',{'site_list' : site_list},context_instance=RequestContext(request))
-def site(request,site_id,page=1):
+def site(request,site_id):
 	try:
 		p = Site.objects.get(pk=site_id)
 	except Site.DoesNotExist:
 		raise Http404
-	games = Game.objects.filter(site=p)
+	paginator = Paginator(Game.objects.filter(site=p),15)
+	games = getPage(request,1,paginator)
 	return render_to_response('site.html', {'site' : p, 'games_list' : games},context_instance=RequestContext(request))
 #	return HttpResponse("Not yet implemented")
 def game(request, game_id):
