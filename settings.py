@@ -60,10 +60,12 @@ TEMPLATE_CONTEXT_PROCESSORS = ("django.core.context_processors.auth",
 )
 
 MIDDLEWARE_CLASSES = (
+	'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'django_authopenid.middleware.OpenIDMiddleware',
+	'django.middleware.cache.FetchFromCacheMiddleware',
 )
 
 ROOT_URLCONF = 'Mafiastats.urls'
@@ -76,6 +78,9 @@ TEMPLATE_DIRS = (SITE_ROOT+'/templates/'
 
 LOGIN_REDIRECT_URL='/account/profile'
 LOGIN_URL='/account/signin/'
+
+CACHE_MIDDLEWARE_PREFIX=''
+CACHE_MIDDLEWARE_SECONDS=100000000
 
 INSTALLED_APPS = (
     'django.contrib.auth',
