@@ -21,7 +21,7 @@
 </div>
 <div class="span-19">
 <h2> Teams in this game:</h2>
-{%for team in teams%}
+{%for team,tplayers in teams%}
 <div class="span-17 infoBox">
 	<a name="{{team.id}}"></a>
 		<div class="span-17">
@@ -35,11 +35,11 @@
 		<b>{%if team.won%}Won{%else%}Lost{%endif%}</b>
 		</div>
 	</div>
-	{%for player in team.players.all%}
-		<div class="span-2">
+	<div class="hlist">
+	{%for player in tplayers%}
 		<a href="/player/{{player.id}}/">{{player.name}}</a>
-		</div>
 	{%endfor%}
+	</div>
 </div>
 {%endfor%}
 </div>

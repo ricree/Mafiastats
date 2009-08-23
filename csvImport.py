@@ -3,7 +3,7 @@ import csv
 import datetime
 import re
 
-categoryNames = {'Town':'T','Mafia':'M','Survivor':'SU','Serial Killer':'SK','Cult':'C','Other':'O'}
+categoryNames = {'Town':'T','Mafia':'M','Survivor':'Su','Serial Killer':'SK','Cult':'C','Other':'O'}
 
 
 
@@ -33,6 +33,21 @@ def normLength(lists):
 		counter+=1
 	return lists	
 
+
+def makeTeam(game,dline,category,prefix,site):
+	cat = Category.objects.get(title=category)
+	for suff,title,won in [('Win',' Winners',True),('Loss',' Losers',False)]:
+		players = getNames(dline[prefix+suff])
+		if players:
+			team,created = Team.objects.get_or_create(title=(category+title),game=game,site=site,defaults={'won':won,'category':cat})
+			team.save()
+			for pName in players:
+				p,created = Player.objects.get_or_create(name=pName,site=site)
+				if created:
+					p.save()
+				team.players.add(p)
+				team.save()
+
 def importCsv(siteDetails,fileName):
 	for k in optFields:
 		if not(k in siteDetails):
@@ -61,4 +76,6 @@ def importCsv(siteDetails,fileName):
 			game,created = Game.objects.get_or_create(title=dln['GName'],defaults={'url':'','moderator':moderator,'start_date':start,'end_date':end,'gameType':dln['Type'],'site':site})
 			print created
 			game.save()
-			
+			for category in categoryNames:
+				prefix=categoryNames[category]
+				makeTeam(game,dln,category,prefix,site)

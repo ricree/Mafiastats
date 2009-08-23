@@ -48,6 +48,12 @@ class Player(models.Model):
 	def losses(self):
 		return Team.objects.filter(players=self,won=False).count()
 	def score(self):
+		wins = self.wins()
+		total = wins + self.losses()
+		if total<1:
+			return -1
+		return wins**2/total
+	def oldScore(self):#currently too slow.  needs caching.  might do later
 		site = self.site
 		categories = Category.objects.all()
 		wins = self.scores(site, categories, True)

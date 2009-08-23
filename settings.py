@@ -75,7 +75,7 @@ TEMPLATE_DIRS = (SITE_ROOT+'/templates/'
 )
 
 LOGIN_REDIRECT_URL='/account/profile'
-LOGIN_URL='/accounts/signin/'
+LOGIN_URL='/account/signin/'
 
 INSTALLED_APPS = (
     'django.contrib.auth',
