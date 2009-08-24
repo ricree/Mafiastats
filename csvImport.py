@@ -6,9 +6,6 @@ import re
 categoryNames = {'Town':'T','Mafia':'M','Survivor':'Su','Serial Killer':'SK','Cult':'C','Other':'O'}
 
 
-
-csvColumns = {'GName':1,'TWin':2,'TLoss':3,'MWin':4,'MLoss':5,'SuWin':6,'SuLoss':7,'SKWin':8,'SKLoss':9,'CWin':10,'CLoss':11,'OWin':12,'OLoss':13,'Type':14,'SDate':17,'EDate':18,'Mod':19}
-
 dateFormat = "%m/%d/%Y"
 
 optFields = ['url','description']
@@ -48,7 +45,7 @@ def makeTeam(game,dline,category,prefix,site):
 				team.players.add(p)
 				team.save()
 
-def importCsv(siteDetails,fileName):
+def importCsv(siteDetails,fileName,csvColumns):
 	for k in optFields:
 		if not(k in siteDetails):
 			siteDetails[k] = ''
