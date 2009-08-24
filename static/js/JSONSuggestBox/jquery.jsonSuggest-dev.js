@@ -85,10 +85,9 @@
 			onSelect: undefined,
 			ajaxResults: false,
 			useJQueryAjax: false,
-			JQueryAjaxParam: "text"
-			};  
+			JQueryAjaxParam: "text",
+			requestParams:{},			};  
 		settings = $.extend(defaults, settings);  
-	
 		return this.each(function() {
 			
 			function regexEscape(txt, omit) {
@@ -219,7 +218,7 @@
 				// given on contruction.
 				if (settings.ajaxResults === true) {
 					if (settings.useJQueryAjax == true){
-						param = {};
+						param = settings.requestParams;
 						param[settings.JQueryAjaxParam] = this.value
 //						alert("I got called: " + param["text"] + "\n" + this.value+"\n"+searchData);
 						$.getJSON(searchData,param,function(data,textstatus){
