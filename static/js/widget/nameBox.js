@@ -47,7 +47,7 @@ function SetChooser()
 	//set the autocomplete on the text box with a callback to insert text into list when a name is chosen
 	$(".NameChooser").each(function(){
 			var node = this;
-			$(this).children(":first").jsonSuggest("/stats/player/name_lookup/",{wildCard:'*',maxResults:10,ajaxResults:true,useJQueryAjax:true,JQueryAjaxParam : "text",onSelect:CopyToBox(node)}).keyup(function(e){
+			$(this).children(":first").jsonSuggest("/stat/player/name_lookup/",{wildCard:'*',maxResults:10,ajaxResults:true,useJQueryAjax:true,JQueryAjaxParam : "text",onSelect:CopyToBox(node)}).keyup(function(e){
 	if(e.which == 0xD){
 		CopyToBox(node)(null);
 	}

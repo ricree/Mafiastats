@@ -3,6 +3,7 @@ from django.conf import settings
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
+from Mafiastats.mafiaStats import urls as statUrls
 
 urlpatterns = patterns('',
     # Example:
@@ -15,7 +16,7 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
      (r'^admin/(.*)', admin.site.root),
      (r'^$', 'Mafiastats.mafiaStats.views.index'),
-     (r'^stats/',include('Mafiastats.mafiaStats.urls')),
+     (r'^stat/',include('Mafiastats.mafiaStats.urls')),
      (r'^login/','django.contrib.auth.views.login',{'template_name':'login.html',}),
      (r'^logout/','django.contrib.auth.views.logout',{'template_name':'logout.htl','next_page':'/'}),
      (r'^register/','Mafiastats.mafiaStats.views.register'),

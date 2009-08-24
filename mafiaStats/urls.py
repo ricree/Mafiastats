@@ -1,7 +1,6 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
 
-from mafiaStats import views
 
 urlpatterns = patterns('',
 	(r'^site/(?P<site_id>\d+)/$', 'Mafiastats.mafiaStats.views.site'),

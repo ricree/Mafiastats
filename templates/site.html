@@ -12,7 +12,7 @@ Total Players:{{stats.players}}
 <br/>
 {%if stats.mostRecent%}
 <div class="span-12">
-Most Recent Game: <a href="/stats/game/{{stats.mostRecent.id}}">{{stats.mostRecent.title}}</a>
+Most Recent Game: <a href="/stat/game/{{stats.mostRecent.id}}">{{stats.mostRecent.title}}</a>
 </div>
 {%endif%}
 </div>
@@ -22,7 +22,7 @@ Most Recent Game: <a href="/stats/game/{{stats.mostRecent.id}}">{{stats.mostRece
 {%if page %}
 <ul>
 	{%for game in page.object_list%}
-	<li><b><a href="/stats/game/{{game.pk}}">{{game.title}}</a></b></li>		{%endfor%}
+	<li><b><a href="/stat/game/{{game.pk}}">{{game.title}}</a></b></li>		{%endfor%}
 </ul>
 {%else%}
 This site does not have any games yet

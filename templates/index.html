@@ -5,7 +5,7 @@
 {%block content %}{% if site_list %}
 	<ul>
 	{% for site in site_list %}
-		<li><a href="/stats/site/{{site.pk}}/"> {{site.title}}</a></li>
+		<li><a href="/stat/site/{{site.pk}}/"> {{site.title}}</a></li>
 	{%endfor%}
 	</ul>
 {%else %}

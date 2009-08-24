@@ -40,7 +40,8 @@ def site(request,site_id):
 	try:
 		p = Site.objects.get(pk=site_id)
 	except Site.DoesNotExist:
-		raise Http404
+		return HttpResponse("PROBLEMS")
+		#raise Http404
 	games = Game.objects.filter(site=p).order_by('end_date')
 	stats = {'played': games.count(),'players':Player.objects.filter(site=p).count()}
 	if (games.count()>0):
@@ -140,7 +141,7 @@ def add(request, site_id=None):
 				team.save()
 				game.team_set.add(team)
 			game.save()
-			return HttpResponseRedirect('/game/'+str(game.id)+'/')
+			return HttpResponseRedirect('/stat/game/'+str(game.id)+'/')
 			return HttpResponse("Not yet implemented "+ str(name)+str(request.POST['form-0-players']))
 	else:
 		form =  AddGameForm()
