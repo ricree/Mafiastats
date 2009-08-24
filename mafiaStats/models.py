@@ -9,7 +9,7 @@ class Site(models.Model):
 		return self.title
 	title = models.CharField(max_length=50, blank = False)
 	url = models.CharField(max_length=50, blank=True)
-#	shortName = models.CharField(max_length=10,blank=False)
+	shortName = models.CharField(max_length=10,blank=False)
 	description = models.CharField(max_length=1000, blank = True)
 class Category(models.Model):
 	def __unicode__(self):

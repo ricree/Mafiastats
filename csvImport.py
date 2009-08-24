@@ -53,12 +53,12 @@ def importCsv(siteDetails,fileName,csvColumns):
 		categ,created = Category.objects.get_or_create(title=cat)
 		if created:
 			categ.save()
-	(site,created) = Site.objects.get_or_create(title=siteDetails['title'],defaults={'url':siteDetails['url'],'description':siteDetails['description']})
+	(site,created) = Site.objects.get_or_create(title=siteDetails['title'],defaults={'url':siteDetails['url'],'description':siteDetails['description'],'shortName':siteDetails['shortName']})
 	site.save()
 	with open(fileName) as cFile:
 		reader = csv.reader(cFile)
 		reader.next()#skip col titles
-		reader.next()
+		reader.next()#and counts
 		data = normLength([line for line in reader])
 		for line in data:
 			dln = dict(((n,line[csvColumns[n]]) for n in csvColumns.keys()))
@@ -73,4 +73,4 @@ def importCsv(siteDetails,fileName,csvColumns):
 			for category in categoryNames:
 				prefix=categoryNames[category]
 				makeTeam(game,dln,category,prefix,site)
-			print "Added %s, modded by %s" %(dln['GName'],modName)
+			print "Added %s, modded by %s to %s" %(dln['GName'],modName,siteDetails['title'])
