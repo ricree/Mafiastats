@@ -4,17 +4,13 @@
 {%if stats%}
 <div class="infoBox span-20">
 <div class="span-8">
-Games Played: {{stats.played}}
-</div>
-<div class="span-8">
-Total Players:{{stats.players}}
-</div>
-<br/>
-{%if stats.mostRecent%}
-<div class="span-12">
+Games Played: {{stats.played}}<br/>
 Most Recent Game: <a href="/stat/game/{{stats.mostRecent.id}}">{{stats.mostRecent.title}}</a>
 </div>
-{%endif%}
+<div class="span-8">
+Total Players:{{stats.players}}<br/>
+Newest Player:&nbsp;<a href="/stat/player/{{newest.id}}">{{newest.name}}</a>
+</div>
 </div>
 <br/>
 {%endif%}

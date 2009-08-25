@@ -2,7 +2,9 @@ from django.db.models.query import QuerySet
 from django.db import models
 
 
+
 # Create your models here.
+
 
 class Site(models.Model):
 	def __unicode__(self):
@@ -43,6 +45,8 @@ class Player(models.Model):
 		return self.name
 	name = models.CharField(max_length=50)
 	site = models.ForeignKey(Site)
+	firstGame = models.ForeignKey("Game",related_name="firstGame_set",null=True,blank=True)
+	lastGame = models.ForeignKey("Game",related_name="lastGame_set",null=True,blank=True)
 	score = models.FloatField()
 	played = models.IntegerField(default=0)
 	def wins(self):
@@ -61,6 +65,12 @@ class Player(models.Model):
 		self.score=self.freshScore()
 		self.played=self.playedCalc()
 		super(Player,self).save(force_insert,force_update)
+	def updateDates(self,game):
+		if(game.start_date < p.firstGame.start_date):
+			p.firstGame =game
+		if(p.lastGame.end_date < game.end_date):
+			p.lastGame = game
+		p.save()
 	
 	def oldScore(self):#currently too slow.  needs caching.  might do later
 		site = self.site

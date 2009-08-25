@@ -4,12 +4,14 @@ from django.shortcuts import render_to_response, get_object_or_404
 from Mafiastats.mafiaStats.models import Site, Game, Team, Category,Player
 from Mafiastats.mafiaStats.forms import AddGameForm,TeamFormSet,AddTeamForm
 from django.template import RequestContext
+from django.template.loader import render_to_string
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, InvalidPage,EmptyPage
 from itertools import chain
 import json
+from sortMethods import sortQuery, playersByWins,playersByLosses
 
 def getPage(request,paginator,default=1,indexRange=2):
 	try:
@@ -42,7 +44,7 @@ def site(request,site_id):
 	except Site.DoesNotExist:
 		return HttpResponse("PROBLEMS")
 		#raise Http404
-	games = Game.objects.filter(site=p).order_by('end_date')
+	games = Game.objects.filter(site=p).order_by('-end_date')
 	stats = {'played': games.count(),'players':Player.objects.filter(site=p).count()}
 	if (games.count()>0):
 		stats['mostRecent'] = games[games.count()-1]
@@ -50,7 +52,14 @@ def site(request,site_id):
 		stats['mostRecent']=None
 	paginator = Paginator(games,15)
 	gamesPage = getPage(request,paginator,1)
-	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage},context_instance=RequestContext(request))
+	newest= None
+	count=0
+	while not newest:
+		game = games[count]
+		if (game.firstGame_set.count() >0):
+			newest = game.firstGame_set.all()[0]
+		count+=1
+	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage,'newest':newest},context_instance=RequestContext(request))
 #	return HttpResponse("Not yet implemented")
 def game(request, game_id):
 	game = get_object_or_404(Game, pk=game_id)
@@ -92,6 +101,8 @@ def games(request, site_id):
 	page=getPage(request,paginator)
 	return render_to_response("games.html",{'games':page.object_list,'page':page,'site':site},context_instance=RequestContext(request))
 def scoreboard(request, site_id):
+	sortMethods={'score':'score','name':'name','wins':playersByWins,'losses':playersByLosses}
+	reversals = {'up':True,'down':False}
 	site = get_object_or_404(Site, pk=site_id)
 	players = Player.objects.filter(site=site,played__gt=0).order_by('-score')
 #	players = [(player,player.score()) for player in players if player.played()>0]
@@ -131,13 +142,14 @@ def add(request, site_id=None):
 				category = Category.objects.get(title=tForm.cleaned_data['type'][0])
 #				category = tForm.cleaned_data['type']
 				won = tForm.cleaned_data['won']
-				players = [Player.objects.get_or_create(name=p,site=site)[0] for p in tForm.cleaned_data['players']]
+				players = [Player.objects.get_or_create(name=p,site=site,defaults={'firstGame':game,'lastGame':game})[0] for p in tForm.cleaned_data['players']]
 				for p in players:
 					p.save()
 				team = Team(title=title,category=category,site=site,won=won,game=game)
 				team.save()
 				for p in players:
 					team.players.add(p)
+					p.updateDates(game)
 				team.save()
 				game.team_set.add(team)
 			game.save()

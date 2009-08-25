@@ -39,7 +39,7 @@ def makeTeam(game,dline,category,prefix,site):
 			team,created = Team.objects.get_or_create(title=(category+title),game=game,site=site,defaults={'won':won,'category':cat})
 			team.save()
 			for pName in players:
-				p,created = Player.objects.get_or_create(name=pName,site=site)
+				p,created = Player.objects.get_or_create(name=pName,site=site,defaults={'firstGame':game,'lastGame':game})
 				if created:
 					p.save()
 				team.players.add(p)
@@ -68,8 +68,9 @@ def importCsv(siteDetails,fileName,csvColumns):
 			moderator,created = Player.objects.get_or_create(name=modName,site=site)
 			if(created):
 				moderator.save()
-			game,created = Game.objects.get_or_create(title=dln['GName'],defaults={'url':'','moderator':moderator,'start_date':start,'end_date':end,'gameType':dln['Type'],'site':site})
-			game.save()
+			game,gCreated = Game.objects.get_or_create(title=dln['GName'],defaults={'url':'','start_date':start,'end_date':end,'moderator':moderator,'gameType':dln['Type'],'site':site})
+			if(created):
+				game.save()
 			for category in categoryNames:
 				prefix=categoryNames[category]
 				makeTeam(game,dln,category,prefix,site)

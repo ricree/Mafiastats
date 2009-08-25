@@ -1,12 +1,43 @@
 {%extends "sitePage.html"%}
 {%block content%}
-	<div class="span-4">
+	<script type="text/javascript">
+		var sortMethod='score';
+		var sortDirection='up';
+		var newDirection={'up':'down','down':'up'};
+		function parseUrl(url){
+			var retval = {};
+			var base = url.split('?');
+			if(length(base)>1){
+				var params = base[1].split('&');
+				for( var count in params){
+					var temp = params.split('=');
+					retval[temp[0]] = temp[1];}
+			}
+			return retval;
+		};
+		alert(parseUrl('foo.com?width=20'));
+		function sortBy(method)
+		{
+			if(method==sortMethod)
+			{
+				sortDirection=newDirection[sortDirection];
+			}else{
+				sortDirection='up';
+				sortMethod=method;
+			}
+		};
+		$(document).ready(){
+			$("#nameLabel").click(function(){sortyBy("name");});
+			$("#winLabel").click(function(){sortBy("wins")
+		}
+	</script>
+	<div id="nameLabel" class="span-4">
     <b>Name</b>
 	</div>
-	<div class="span-3" style="text-align:center">
+	<div id="winLabel" class="span-3" style="text-align:center">
         <b>Wins</b>
 	</div>
-	<div class="span-3" style="text-align:center">
+	<div id="lossLabel" class="span-3" style="text-align:center">
         <b>Losses</b>
 	</div>
 	<div class="span-3" style="text-align:center">
@@ -15,27 +46,5 @@
 	<div class="span-3" style="text-align:center">
 		<b>Games Moderated</b>
 	</div>
-	{%for player in players%}
-	<div class="span-20 {%cycle 'odd' 'even'%}">
-		{#names#}
-		<div class="span-4" style="text-align:left">	
-			<a href="/stat/player/{{player.id}}/">{{player.name}}</a><br/>
-		</div>
-		{#wins#}
-		<div class="span-3">
-			{{player.wins}}
-		</div>
-		{#losses#}
-		<div class="span-3">
-			{{player.losses}}
-		</div>
-		<div class="span-3">
-			{{player.win_pct}}%
-		</div>
-		{#moderated#}
-		<div class="span-3">
-			{{player.moderated_set.all|length}}
-		</div>
-	</div>
-	{%endfor%}
+	<div id="content">{%include "scoreBoardPresenter.html"%}</div>
 {%endblock%}

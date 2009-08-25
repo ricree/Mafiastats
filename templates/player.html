@@ -2,12 +2,14 @@
 {%block content%}
 <div class="span-16 infoBox">
 	<div class="span-8">
-		<b>Games Played:</b>{{played|length}}<br/>
+		<b>Games Played:&nbsp</b>{{played|length}}<br/>
 		Games Won:{{won|length}}<br/>
 		Games Lost:{{lost|length}}<br/>
 	</div>
 	<div class="span-7">
-		<b>Games Moderated:</b>{{moderated|length}}
+		<b>Games Moderated:&nbsp</b>{{moderated|length}}<br/>
+		<b>First Game:&nbsp</b><a href="/stat/game/{{player.firstGame.id}}/">{{player.firstGame.title}}</a><br/>
+		<b>Last Game:&nbsp</b><a href="/stat/game/{{player.lastGame.id}}/">{{player.lastGame.title}}</a><br/>
 	</div>
 </div>
 <div class="span-20">
