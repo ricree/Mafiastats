@@ -73,6 +73,20 @@ a.menuItem{
 	border-color:#4050B0;
 	border-style:solid;
 }
+.colHeaderNormal{
+	-moz-border-radius:4px;
+    -webkit-border-radius:4px;
+	padding-bottom:3px;
+	}
+.colHeaderHover{
+	/*-moz-border-radius:4px;
+    -webkit-border-radius:4px;*/
+	background-color:#C0C0D0;
+	cursor:pointer;
+}
+.colHeaderSelected{
+	background-color:#9090D0;
+}
 div.sidebar{
 	background-color:#DDDDEE;
 	border-style:solid;

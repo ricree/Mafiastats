@@ -1,9 +1,12 @@
 {%extends "sitePage.html"%}
 {%block content%}
+	<script type="text/javascript" src="/static/js/jquery-ui-1.7.2.custom.min.js">
+	</script>
 	<script type="text/javascript">
 		var sortMethod='score';
 		var sortDirection='up';
 		var newDirection={'up':'down','down':'up'};
+		//takes a url and separates out the GET params
 		function parseUrl(url){
 			var retval = {};
 			var base = url.split('?');
@@ -17,6 +20,9 @@
 			retval = {'base':base[0],'args':retval};
 			return retval;
 		}
+		//will build and return a url
+		//base is a list where ['base'] is base url
+		//['args'] is a dict of GET parameters
 		function buildUrl(base)
 		{
 			var url = parseUrl(base);
@@ -26,6 +32,14 @@
 			return (url.base+'?'+$.param(args));
 
 		}
+		function setPages()
+		{
+			$(".pageLink").each(function(obj){
+				$(this).attr("href",buildUrl($(this).attr('href')));
+			});
+		}
+		//uses jquery ajax to get a sorted version of the names on this page
+		//also changes page links so they will use same sort method
 		function sortBy(method)
 		{
 			if(method==sortMethod)
@@ -35,41 +49,58 @@
 				sortDirection='up';
 				sortMethod=method;
 			}
-			$(".pageLink").each(function(obj){
-				$(this).attr("href",buildUrl($(this).attr('href')));
-			});
+			setPages();
 			//$("#scoreContent").html('');
 			$("#scoreContent").load(buildUrl(window.location.toString()));
 		}
+		function setHighlight(){
+			var elName = "#"+sortMethod+"Label";
+			$('.colHeaderSelected').addClass('colHeaderNormal').removeClass('colHeaderSelected');
+			$(elName).addClass('colHeaderSelected').removeClass('colHeaderHover').removeClass('colHeaderNormal');
+			
+		}
 		$(document).ready(function(){
+			var params = parseUrl(window.location.toString())['args'];
+			sortMethod = params.method;
+			sortDirection = params.direction;
 			var cols = ["name","wins","losses","winPct","modded"];
+			setHighlight();
+			setPages();
 			for(var count in cols){
 				var meth = cols[count];
-				$("#"+meth+"Label").click(
-				function(methName){
+				var elName = "#"+meth+"Label";
+				$(elName).click(
+				function(methName,label){
 					return function()
 						{
 						sortBy(methName);
+						setHighlight();
 						}
-				}(meth));
+				}(meth,elName));
+				$(elName).mouseover(function(){
+					$(this).filter('.colHeaderNormal').addClass('colHeaderHover').removeClass('colHeaderNormal');
+				});
+				$(elName).mouseleave(function(){
+					$(this).filter('.colHeaderHover').addClass('colHeaderNormal').removeClass('colHeaderHover');});
 			}
 		});
 	</script>
-	<div></div>
-	<div id="nameLabel" class="span-4">
-		Name
-	</div>
-	<div id="winsLabel" class="span-3" style="text-align:center">
-		<b>Wins</b>
-	</div>
-	<div id="lossesLabel" class="span-3" style="text-align:center">
-		<b>Losses</b>
-	</div>
-	<div id="winPctLabel" class="span-3" style="text-align:center">
-		<b>Win Percentage</b>
-	</div>
-	<div id="moddedLabel" class="span-3" style="text-align:center">
-		<b>Games Moderated</b>
+	<div style="margin-bottom:10px;">
+		<div id="nameLabel" class="span-4 colHeaderNormal">
+			<b>Name</b>
+		</div>
+		<div id="winsLabel" class="span-3 colHeaderNormal" style="text-align:center">
+			<b>Wins</b>
+		</div>
+		<div id="lossesLabel" class="span-3 colHeaderNormal" style="text-align:center">
+			<b>Losses</b>
+		</div>
+		<div id="winPctLabel" class="span-4 colHeaderNormal" style="text-align:center">
+			<b>Percentage</b>
+		</div>
+		<div id="moddedLabel" class="span-4 colHeaderNormal" style="text-align:center">
+			<b>Moderated</b>
+		</div>
 	</div>
 	<div id="scoreContent">{%include "scoreBoardPresenter.html"%}</div>
 {%endblock%}
