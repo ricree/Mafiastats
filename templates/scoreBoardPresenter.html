@@ -1,0 +1,24 @@
+	{%for player in players%}
+	<div class="span-20 {%cycle 'odd' 'even'%}">
+		{#names#}
+		<div class="span-4" style="text-align:left">	
+			<a href="/stat/player/{{player.id}}/">{{player.name}}</a><br/>
+		</div>
+		{#wins#}
+		<div class="span-3">
+			{{player.wins}}
+		</div>
+		{#losses#}
+		<div class="span-3">
+			{{player.losses}}
+		</div>
+		<div class="span-3">
+			{{player.win_pct}}%
+		</div>
+		{#moderated#}
+		<div class="span-3">
+			{{player.moderated_set.all|length}}
+		</div>
+	</div>
+	{%endfor%}
+
