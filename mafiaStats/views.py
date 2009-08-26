@@ -10,6 +10,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, InvalidPage,EmptyPage
 from itertools import chain
+from django.views.decorators.cache import cache_page
 import json
 from sortMethods import *
 
@@ -94,12 +95,15 @@ def get_bounds(perPage,page,num):
 	if ((perPage * page)>num):
 		return num
 	return perPage*page
+@cache_page(60*20)
 def games(request, site_id):
+	print "I was called"
 	gamesPerPage = 5
 	site = get_object_or_404(Site,id=site_id)
 	paginator = Paginator(Game.objects.filter(site=site).order_by('-end_date'),gamesPerPage)
 	page=getPage(request,paginator)
 	return render_to_response("games.html",{'games':page.object_list,'page':page,'site':site},context_instance=RequestContext(request))
+@cache_page(60*20)
 def scoreboard(request, site_id):
 	sortMethods={'score':'score','name':'name','wins':playersByWins,'losses':playersByLosses,'winPct':playersByWinPct,'modded':playersByModerated}
 	reversals = {'up':False,'down':True}
@@ -139,6 +143,8 @@ def add(request, site_id=None):
 			moderator,created = Player.objects.get_or_create(name=form.cleaned_data['moderator'],site=site)
 			if(created):
 				moderator.save()
+			else:
+				moderator.clearCache()
 			game = Game(title=form.cleaned_data['title'],moderator=moderator,start_date = form.cleaned_data['start_date'], end_date=form.cleaned_data['end_date'],site=site,gameType=form.cleaned_data['type'])
 			game.save()
 			for tForm in formset.forms:
@@ -154,6 +160,7 @@ def add(request, site_id=None):
 				for p in players:
 					team.players.add(p)
 					p.updateDates(game)
+					p.clearCache()
 				team.save()
 				game.team_set.add(team)
 			game.save()

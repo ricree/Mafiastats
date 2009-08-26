@@ -62,6 +62,8 @@ TEMPLATE_CONTEXT_PROCESSORS = ("django.core.context_processors.auth",
 MIDDLEWARE_CLASSES = (
 	'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.gzip.GZipMiddleware',
+    'django.middleware.http.ConditionalGetMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'django_authopenid.middleware.OpenIDMiddleware',

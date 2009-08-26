@@ -1,9 +1,23 @@
 from django.db.models.query import QuerySet
 from django.db import models
-
+from django.core.cache import cache
 
 
 # Create your models here.
+
+def cacheResult(fn):
+	def functionCache(*args,**kwargs):
+		self = args[0]
+		cName = '%s_%s_%s'%(self.site.id,self.name,fn.func_name)
+		result = cache.get(cName)
+		if(result is not None):#as opposed to something else evaluating to False
+			return result
+		calcResult =  fn(*args,**kwargs)
+		cache.set(cName,calcResult)
+		return calcResult
+	functionCache.needsCleaning = "%s_%s_%s"%('%s','%s',fn.func_name)
+	functionCache.func_name=fn.func_name
+	return functionCache
 
 
 class Site(models.Model):
@@ -49,10 +63,24 @@ class Player(models.Model):
 	lastGame = models.ForeignKey("Game",related_name="lastGame_set",null=True,blank=True)
 	score = models.FloatField()
 	played = models.IntegerField(default=0)
+	def clearCache(self):
+		"""deletes all related keys from the cache"""
+		for selfAttr in self.__dict__.values():
+			if hasattr(selfAttr,'needsCacheCleaning'):
+				cache.delete(selfAttr.needsCacheCleaning%(self.site.id,self.name))
+
+	@cacheResult
 	def wins(self):
+		#cName = '%s_%s_wins'%(self.site.id,self.name)
+		#wins = cache.get(cName)
+		#if(wins):
+		#	return wins
+		#else:
 		return Team.objects.filter(players=self,won=True).count()
+	@cacheResult
 	def losses(self):
 		return Team.objects.filter(players=self,won=False).count()
+	@cacheResult
 	def winPct(self):
 		if(self.played>0):
 			return (100*Team.objects.filter(players=self,won=True).count())/self.played
@@ -71,11 +99,11 @@ class Player(models.Model):
 		self.played=self.playedCalc()
 		super(Player,self).save(force_insert,force_update)
 	def updateDates(self,game):
-		if(game.start_date < p.firstGame.start_date):
-			p.firstGame =game
-		if(p.lastGame.end_date < game.end_date):
-			p.lastGame = game
-		p.save()
+		if(game.start_date < self.firstGame.start_date):
+			self.firstGame =game
+		if(self.lastGame.end_date < game.end_date):
+			self.lastGame = game
+		self.save()
 	
 	def oldScore(self):#currently too slow.  needs caching.  might do later
 		site = self.site
