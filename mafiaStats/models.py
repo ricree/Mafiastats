@@ -53,6 +53,11 @@ class Player(models.Model):
 		return Team.objects.filter(players=self,won=True).count()
 	def losses(self):
 		return Team.objects.filter(players=self,won=False).count()
+	def winPct(self):
+		if(self.played>0):
+			return (100*Team.objects.filter(players=self,won=True).count())/self.played
+		else:
+			return 0
 	def playedCalc(self):
 		return Team.objects.filter(players=self).count()
 	def freshScore(self):

@@ -7,15 +7,25 @@
 		function parseUrl(url){
 			var retval = {};
 			var base = url.split('?');
-			if(length(base)>1){
+			if(base.length>1){
 				var params = base[1].split('&');
 				for( var count in params){
-					var temp = params.split('=');
-					retval[temp[0]] = temp[1];}
+					var temp = params[count].split('=');
+					retval[temp[0]] = temp[1];
+				}
 			}
+			retval = {'base':base[0],'args':retval};
 			return retval;
-		};
-		alert(parseUrl('foo.com?width=20'));
+		}
+		function buildUrl(base)
+		{
+			var url = parseUrl(base);
+			var args = url.args
+			args.method=sortMethod;
+			args.direction = sortDirection;
+			return (url.base+'?'+$.param(args));
+
+		}
 		function sortBy(method)
 		{
 			if(method==sortMethod)
@@ -25,26 +35,41 @@
 				sortDirection='up';
 				sortMethod=method;
 			}
-		};
-		$(document).ready(){
-			$("#nameLabel").click(function(){sortyBy("name");});
-			$("#winLabel").click(function(){sortBy("wins")
+			$(".pageLink").each(function(obj){
+				$(this).attr("href",buildUrl($(this).attr('href')));
+			});
+			//$("#scoreContent").html('');
+			$("#scoreContent").load(buildUrl(window.location.toString()));
 		}
+		$(document).ready(function(){
+			var cols = ["name","wins","losses","winPct","modded"];
+			for(var count in cols){
+				var meth = cols[count];
+				$("#"+meth+"Label").click(
+				function(methName){
+					return function()
+						{
+						sortBy(methName);
+						}
+				}(meth));
+			}
+		});
 	</script>
+	<div></div>
 	<div id="nameLabel" class="span-4">
-    <b>Name</b>
+		Name
 	</div>
-	<div id="winLabel" class="span-3" style="text-align:center">
-        <b>Wins</b>
+	<div id="winsLabel" class="span-3" style="text-align:center">
+		<b>Wins</b>
 	</div>
-	<div id="lossLabel" class="span-3" style="text-align:center">
-        <b>Losses</b>
+	<div id="lossesLabel" class="span-3" style="text-align:center">
+		<b>Losses</b>
 	</div>
-	<div class="span-3" style="text-align:center">
+	<div id="winPctLabel" class="span-3" style="text-align:center">
 		<b>Win Percentage</b>
 	</div>
-	<div class="span-3" style="text-align:center">
+	<div id="moddedLabel" class="span-3" style="text-align:center">
 		<b>Games Moderated</b>
 	</div>
-	<div id="content">{%include "scoreBoardPresenter.html"%}</div>
+	<div id="scoreContent">{%include "scoreBoardPresenter.html"%}</div>
 {%endblock%}

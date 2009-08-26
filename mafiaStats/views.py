@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, InvalidPage,EmptyPage
 from itertools import chain
 import json
-from sortMethods import sortQuery, playersByWins,playersByLosses
+from sortMethods import *
 
 def getPage(request,paginator,default=1,indexRange=2):
 	try:
@@ -101,10 +101,12 @@ def games(request, site_id):
 	page=getPage(request,paginator)
 	return render_to_response("games.html",{'games':page.object_list,'page':page,'site':site},context_instance=RequestContext(request))
 def scoreboard(request, site_id):
-	sortMethods={'score':'score','name':'name','wins':playersByWins,'losses':playersByLosses}
-	reversals = {'up':True,'down':False}
+	sortMethods={'score':'score','name':'name','wins':playersByWins,'losses':playersByLosses,'winPct':playersByWinPct,'modded':playersByModerated}
+	reversals = {'up':False,'down':True}
 	site = get_object_or_404(Site, pk=site_id)
-	players = Player.objects.filter(site=site,played__gt=0).order_by('-score')
+	methodStr = request.GET['method'] if 'method' in request.GET else 'score'
+	methodDir = request.GET['direction'] if 'direction' in request.GET else 'down'
+	players = sortQuery(Player.objects.filter(site=site,played__gt=0),sortMethods[methodStr],reversals[methodDir])
 #	players = [(player,player.score()) for player in players if player.played()>0]
 #	players.sort(cmp=(lambda (x,xs),(y,ys): cmp(ys,xs)))
 #	players,scores = zip(*players)
@@ -112,6 +114,8 @@ def scoreboard(request, site_id):
 	page=getPage(request,paginator)
 	for player in page.object_list:
 		player.win_pct = (100* player.wins())/(player.losses() + player.wins())
+	if(request.is_ajax()):
+		return render_to_response('scoreBoardPresenter.html',{'site':site,'players':page.object_list,'page':page},context_instance=RequestContext(request))
 	return render_to_response('scoreboard.html', {'site':site,'players':page.object_list,'page':page},context_instance=RequestContext(request))
 def moderators(request,site_id,page=1):
 	page=int(page)

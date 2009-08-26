@@ -41,19 +41,19 @@
 		{%if page.has_other_pages%}
 		<div class="span-20"id="pageListing">
 			{%if page.has_previous%}
-			<a href="?page={{page.previous_page_number}}">previous</a>
+			<a class="pageLink" href="?page={{page.previous_page_number}}">previous</a>
 			{%else%}
 				previous
 			{%endif%}
 			{%for p in page.pre_list%}
-				<a href="?page={{p}}">{{p}}</a>
+				<a class="pageLink" href="?page={{p}}">{{p}}</a>
 			{%endfor%}
 			{{page.number}}
 			{%for p in page.post_list%}
-				<a href="?page={{p}}">{{p}}</a>
+				<a class="pageLink" href="?page={{p}}">{{p}}</a>
 			{%endfor%}
 			{%if page.has_next%}
-				<a href="?page={{page.next_page_number}}">next</a>
+				<a class="pageLink" href="?page={{page.next_page_number}}">next</a>
 			{%else%}
 				next
 			{%endif%}
