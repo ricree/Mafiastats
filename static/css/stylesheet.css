@@ -84,10 +84,12 @@ a.menuItem{
     -webkit-border-radius:4px;*/
 	background-color:#C0C0D0;
 	cursor:pointer;
+	padding-bottom:3px;
 }
 .colHeaderSelected{
 	background-color:#9090D0;
 	cursor:pointer;
+	padding-bottom:3px;
 }
 div.sidebar{
 	background-color:#DDDDEE;

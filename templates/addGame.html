@@ -1,4 +1,10 @@
 {%extends "sitePage.html"%}
+{%block extra_scripts%}
+<script type="text/javascript" src="/static/js/jquery-ui-1.7.2.custom.min.js"></script>
+{%endblock%}
+{%block extra_sheets%}
+<link type="text/css" src="/static/css/redmond/jquery-ui-1.7.2.custom.css"></link>
+{%endblock%}
 {%block title%}Add New Game to {{site}}{%endblock%}
 {%block header %}<h1>Add New Game {%if site%}to {{site}}{%endif%}</h1>{%endblock%}
 {%block content%}
@@ -17,7 +23,8 @@ $(document).ready(function(){
 	$("form").keydown(function(event){
 		if(event.which == 13){
 			return false;}
-	})
+	});
+	$("#tabs").tabs();
 })
 </script>
 <script type="text/javascript">
@@ -40,18 +47,24 @@ $(document).ready(function(){
 </div>
 {%endfor%}
 </div>
-<div class="span-12">
+<div class="span-12 last" style="margin-bottom:15px;">
 <br/>
 <a href="javascript:void(0)" class="add-row menuItem">add team</a>
 <input type="submit" value="Add Game"/>
 {%comment%}<a href="javascript:void(0)" class="menuItem" id="populate_fake">Populate Players</a>{%endcomment%}
-</div>
+</div><br/><br/>
 <div>
+<div id="tabs" class="span-22">
+<ul>
+	<li><a href="#teams"><span>Teams</span></a></li>
+	<li><a href="#roles"><span>Roles</span></a></li>
+</ul>
+<div id="teams">
 	{%for form in formset.forms %}
-		<div class="dynamic-form span-22 last">
-			<div class="span-10">
+		<div class="dynamic-form span-20 last">
+			<div class="span-8">
 				{%for label,attr,at_name in form.left_attrs%}
-				<div class="span-7">
+				<div class="span-6">
 					<div class="span-3">
 						<label for="{{form.prefix}}_{{at_name}}">{{label}}</label>
 					</div>
@@ -64,7 +77,7 @@ $(document).ready(function(){
 				</div>
 				{%endfor%}
 			</div>
-			<div class="span-10">
+			<div class="span-8">
 				<label for="{{form.prefix}}-players_text">Players</label>
 				{{form.players}}<br/>
 				{{form.players.errors}}
@@ -75,6 +88,11 @@ $(document).ready(function(){
 		</div>
 	{%endfor%}
 </div><br/>
+<div id="roles">
+	Not yet implemented
+</div>
+</div>
+</div>
 <div>
 {{formset.management_form}}
 </div>

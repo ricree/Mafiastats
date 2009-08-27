@@ -33,10 +33,10 @@ def normLength(lists):
 
 def makeTeam(game,dline,category,prefix,site):
 	cat = Category.objects.get(title=category)
-	for suff,title,won in [('Win',' Winners',True),('Loss',' Losers',False)]:
+	for suff,title,won in [('Win','Winning ',True),('Loss','Losing ',False)]:
 		players = getNames(dline[prefix+suff])
 		if players:
-			team,created = Team.objects.get_or_create(title=(category+title),game=game,site=site,defaults={'won':won,'category':cat})
+			team,created = Team.objects.get_or_create(title=(title+category),game=game,site=site,defaults={'won':won,'category':cat})
 			team.save()
 			for pName in players:
 				p,created = Player.objects.get_or_create(name=pName,site=site,defaults={'firstGame':game,'lastGame':game})

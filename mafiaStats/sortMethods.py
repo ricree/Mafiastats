@@ -9,15 +9,12 @@ def attrSort(items,attr,reverse):
 
 def sortQuery(query,sortMethod,reverse):
 	"""Returns a sorted queryset Will use sort_by if sortMethod is a string 	Will pass a sequence pulled from query if sortMethod is callable"""
-	print "I GOT CALLED"
 	if(type(sortMethod) is str):
-		print 'str sort'
 		if type(query) is QuerySet:
 			if reverse:
 				sortMethod = '-'+sortMethod
 			return query.order_by(sortMethod)
 		else:
-			print 'list sort'
 			return attrSort(query,sortMethod,reverse)
 	items = query.all() if type(query) is QuerySet else query
 	if(hasattr(sortMethod,'__call__')):
@@ -35,3 +32,12 @@ def playersByWinPct(players,reverse):
 
 def playersByModerated(players,reverse):
 	return sorted(players,(lambda x,y:cmp(x.modded(),y.modded())),reverse=reverse)
+
+def modsByLargestGame(mods,reverse):
+	return sorted(mods,(lambda x,y:cmp(x.largestModdedCount(),y.largestModdedCount())),reverse=reverse)
+
+def gamesByLength(games,reverse):
+	return sorted(games,(lambda x,y:cmp(x.length(),y.length())),reverse=reverse)
+
+def gamesByPlayers(games,reverse):
+	return sorted(games,(lambda x,y:cmp(x.num_players(),y.num_players())),reverse=reverse)

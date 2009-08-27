@@ -1,27 +1,27 @@
 {% extends "sitePage.html"%}
-
+{%block extra_scripts%}<script type="text/javascript" src="/static/js/jqueryAjaxDivSort.js"></script>{%endblock%}
 {%block  title %} {{site.shortName}} Games - Mafia Stats{%endblock%}
 
 {% block content%}
-{%for game in games%}
-<div class="span-23 infoBox">
-	<div class = "span-8">
-		<b><a href="/stat/game/{{game.id}}">{{game.title}}</a></b><br/>
-		Moderated By: <a href="/stat/player/{{game.moderator.id}}">{{game.moderator}}</a><br/>
-		Length: {{game.length.days}} days<br/>
-		Players: {{game.num_players}}<br/>
+<script type="text/javascript">
+	$(document).ready(function(){
+		ajaxDivSort_register({{sortMethods|safe}},"#listing");
+	});
+</script>
+<div id="sortButtons">
+	<div class="span-22">
+	<div class="span-2"><b>Sort By:</b></div>
+	{%for meth in sortMethods%}	
+		{%ifnotequal meth "default"%}
+		<div id="{{meth}}Label" class="colHeaderNormal span-2" style="text-align:center;border-style:solid;border-width:1px;margin-left:1px!important;margin-right:1px!important;padding-left:3px;padding-right:3px;margin-bottom:10px">{{meth}}</div>
+		{%endifnotequal%}
+	{%endfor%}
 	</div>
-	<div class="span-6">
-		<br/>
-		Started: {{game.start_date}}<br/>
-		Ended: {{game.end_date}}</br/>
+	<div class="span-5">
+	{%include "pagePrint.html"%}
 	</div>
-	<div class="span-8 last">
-        <b>Winning Team{{game.winningTeams|pluralize}}:</b><br/>
-        {% for team in game.winningTeams %}
-        <a href="/stat/game/{{game.id}}/#{{team.id}}">{{team.title}}</a><br/>
-        {%endfor%}
-    </div>
 </div>
-{%endfor%}
+<div id="listing">
+{%include "gamesListing.html"%}
+</div>
 {%endblock%}

@@ -6,6 +6,7 @@
   <!--[if lt IE 8]><link rel="stylesheet" href="../../blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
 <!--<link rel="stylesheet" href="/static/css/blueprint/plugins/fancy-type/screen.css" type="text/css" media="screen, projection">-->
 <link rel="stylesheet" href="/static/css/stylesheet.css"/>
+{%block extra_sheets%}{%endblock%}
 {%block sheets%}{%if sheets%}{%for sheet in sheets%}
 {{sheet|safe}}{%endfor%}
 	{%endif%}{%endblock%}
@@ -38,28 +39,8 @@
 		{% block content %}{%endblock%}
 		<br/>
 		{%block pageControls%}
-		{%if page.has_other_pages%}
-		<div class="span-20"id="pageListing">
-			{%if page.has_previous%}
-			<a class="pageLink" href="?page={{page.previous_page_number}}">previous</a>
-			{%else%}
-				previous
-			{%endif%}
-			{%for p in page.pre_list%}
-				<a class="pageLink" href="?page={{p}}">{{p}}</a>
-			{%endfor%}
-			{{page.number}}
-			{%for p in page.post_list%}
-				<a class="pageLink" href="?page={{p}}">{{p}}</a>
-			{%endfor%}
-			{%if page.has_next%}
-				<a class="pageLink" href="?page={{page.next_page_number}}">next</a>
-			{%else%}
-				next
-			{%endif%}
-		</div>
-		{%endif%}
-	{%endblock%}
+		{%include "pagePrint.html"%}
+		{%endblock%}
 	</div><br/>
 	<div id="techButtons" class="span-24">
 	<a href="http://www.djangoproject.com/"><img src="http://media.djangoproject.com/img/badges/djangosite80x15.gif" border="0" alt="A Django site." title="A Django site." /></a>

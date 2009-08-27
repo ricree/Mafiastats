@@ -5,12 +5,7 @@
 {%block content%}
 	<script type="text/javascript">
 		$(document).ready(function(){
-			var cols = ["name","wins","losses","winPct","modded"];
-			for(var count in cols){
-				var meth = cols[count];
-				var elName = "#"+meth+"Label";
-				$(elName).ajaxDivSort(cols[count],"#scoreContent",{});
-			}
+			ajaxDivSort_register(["name","wins","losses","winPct","modded"],"#scoreContent");
 		});
 	</script>
 	<div style="margin-bottom:10px;">
