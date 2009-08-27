@@ -19,25 +19,19 @@ class AutoTextBox(ClassedTextInput):
 	_init_class = 'AutoSuggestBox'
 	class Media:
 		css= {'all':('/static/js/JSONSuggestBox/jsonSuggest.css',)}
-		js = ('/static/js/jquery-1.3.2.min.js',
-				'/static/js/JSONSuggestBox/json2.js',
+		js = ('/static/js/JSONSuggestBox/json2.js',
 				'/static/js/JSONSuggestBox/jquery.jsonSuggest-dev.js',
-				'/static/js/widget/suggest.js',
-				'/static/js/JSONSuggestBox/testData/testData.js')
+				'/static/js/widget/suggest.js',)
 class JQueryDateWidget(ClassedTextInput):
 	_init_class = 'DateInput'
 	class Media:
-		css={'all':('/static/css/redmond/jquery-ui-1.7.2.custom.css',)}
 #'http://jqueryui.com/latest/themes/ui-lightness/ui.all.css',)}
 #/statis/css/ui-lightness/jquery-ui-1.7.2.custom.css',)}
-		js= ('/static/js/jquery-1.3.2.min.js',
-			'/static/js/jquery-ui-1.7.2.custom.min.js',
-			'/static/js/widget/datePicker.js')
+		js= ('/static/js/widget/datePicker.js',)
 
 class NameBox(forms.SelectMultiple):
 	class Media:
-		js=('/static/js/jquery-1.3.2.min.js',
-			'/static/js/widget/nameBox.js',
+		js=('/static/js/widget/nameBox.js',
 			'/static/js/jquery.contextMenu.js')
 		css={'all':('/static/css/jquery.contextMenu.css',)}
 	def render(self, name, value,attrs={},choices=()):

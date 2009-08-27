@@ -5,8 +5,8 @@
 {%block extra_sheets%}
 <link type="text/css" src="/static/css/redmond/jquery-ui-1.7.2.custom.css"></link>
 {%endblock%}
-{%block title%}Add New Game to {{site}}{%endblock%}
-{%block header %}<h1>Add New Game {%if site%}to {{site}}{%endif%}</h1>{%endblock%}
+{%block title%}Add New Game to {{site.shortName}}{%endblock%}
+{%block header %}<h1>Add New Game {%if site%}to {{site.shortName}}{%endif%}</h1>{%endblock%}
 {%block content%}
 <script type="text/javascript" src="/static/js/js_formset.js"></script>
 <script type="text/javascript">
@@ -49,8 +49,8 @@ $(document).ready(function(){
 </div>
 <div class="span-12 last" style="margin-bottom:15px;">
 <br/>
-<a href="javascript:void(0)" class="add-row menuItem">add team</a>
-<input type="submit" value="Add Game"/>
+<a href="javascript:void(0)" class="add-row ui-corner-all ui-state-default" style="padding:2px;">add team</a>
+<input type="submit" value="Save Game" class="ui-corner-all ui-state-default" style="padding:2px;"/>
 {%comment%}<a href="javascript:void(0)" class="menuItem" id="populate_fake">Populate Players</a>{%endcomment%}
 </div><br/><br/>
 <div>
@@ -83,7 +83,7 @@ $(document).ready(function(){
 				{{form.players.errors}}
 			</div>
 			<div class="span-1">
-				<a href="javascript:void(0)" class="delete-row menuItem">delete</a>
+				<a href="javascript:void(0)" class="delete-row ui-corner-all menuItem ui-state-default">delete</a>
 			</div>
 		</div>
 	{%endfor%}

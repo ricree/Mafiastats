@@ -107,7 +107,8 @@ def games(request, site_id):
 	paginator = Paginator(p,gamesPerPage)
 	page=getPage(request,paginator)
 	respTemplate = "gamesListing.html" if request.is_ajax() else "games.html"
-	return render_to_response(respTemplate,{'games':page.object_list,'page':page,'site':site,'sortMethods':sorted(sortMethods.keys())},context_instance=RequestContext(request))
+	sortMethods = sorted((key, (len(key)/3)+1) for key in sortMethods );
+	return render_to_response(respTemplate,{'games':page.object_list,'page':page,'site':site,'sortMethods':sortMethods},context_instance=RequestContext(request))
 
 def sortTable(GET,methods,query,defaultDir='down'):
 	reversals = {'up':False,'down':True}
