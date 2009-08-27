@@ -1,0 +1,6 @@
+{%for mod in moderators%}
+<div class="span-15 {%cycle 'odd' 'even'%}">
+<div class="span-5" style="text-align:left;"><a href="/stat/player/{{mod.id}}/">{{mod.name}}</a></div>
+<div class="span-6">{{mod.moderated_set.count}}</div>
+</div>
+{%endfor%}
