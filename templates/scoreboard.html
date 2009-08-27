@@ -1,87 +1,15 @@
 {%extends "sitePage.html"%}
+{%block extra_scripts%}
+<script type="text/javascript" src="/static/js/jqueryAjaxDivSort.js"></script>
+{%endblock%}
 {%block content%}
-	<script type="text/javascript" src="/static/js/jquery-ui-1.7.2.custom.min.js">
-	</script>
 	<script type="text/javascript">
-		var sortMethod='score';
-		var sortDirection='up';
-		var newDirection={'up':'down','down':'up'};
-		//takes a url and separates out the GET params
-		function parseUrl(url){
-			var retval = {};
-			var base = url.split('?');
-			if(base.length>1){
-				var params = base[1].split('&');
-				for( var count in params){
-					var temp = params[count].split('=');
-					retval[temp[0]] = temp[1];
-				}
-			}
-			retval = {'base':base[0],'args':retval};
-			return retval;
-		}
-		//will build and return a url
-		//base is a list where ['base'] is base url
-		//['args'] is a dict of GET parameters
-		function buildUrl(base)
-		{
-			var url = parseUrl(base);
-			var args = url.args
-			args.method=sortMethod;
-			args.direction = sortDirection;
-			return (url.base+'?'+$.param(args));
-
-		}
-		function setPages()
-		{
-			$(".pageLink").each(function(obj){
-				$(this).attr("href",buildUrl($(this).attr('href')));
-			});
-		}
-		//uses jquery ajax to get a sorted version of the names on this page
-		//also changes page links so they will use same sort method
-		function sortBy(method)
-		{
-			if(method==sortMethod)
-			{
-				sortDirection=newDirection[sortDirection];
-			}else{
-				sortDirection='up';
-				sortMethod=method;
-			}
-			setPages();
-			//$("#scoreContent").html('');
-			$("#scoreContent").load(buildUrl(window.location.toString()));
-		}
-		function setHighlight(){
-			var elName = "#"+sortMethod+"Label";
-			$('.colHeaderSelected').addClass('colHeaderNormal').removeClass('colHeaderSelected');
-			$(elName).addClass('colHeaderSelected').removeClass('colHeaderHover').removeClass('colHeaderNormal');
-			
-		}
 		$(document).ready(function(){
-			var params = parseUrl(window.location.toString())['args'];
-			sortMethod = params.method;
-			sortDirection = params.direction;
 			var cols = ["name","wins","losses","winPct","modded"];
-			setHighlight();
-			setPages();
 			for(var count in cols){
 				var meth = cols[count];
 				var elName = "#"+meth+"Label";
-				$(elName).click(
-				function(methName,label){
-					return function()
-						{
-						sortBy(methName);
-						setHighlight();
-						}
-				}(meth,elName));
-				$(elName).mouseover(function(){
-					$(this).filter('.colHeaderNormal').addClass('colHeaderHover').removeClass('colHeaderNormal');
-				});
-				$(elName).mouseleave(function(){
-					$(this).filter('.colHeaderHover').addClass('colHeaderNormal').removeClass('colHeaderHover');});
+				$(elName).ajaxDivSort(cols[count],"#scoreContent",{});
 			}
 		});
 	</script>

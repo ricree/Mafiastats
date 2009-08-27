@@ -86,6 +86,9 @@ class Player(models.Model):
 			return (100*Team.objects.filter(players=self,won=True).count())/self.played
 		else:
 			return 0
+	@cacheResult
+	def modded(self):
+		return self.moderated_set.count()
 	def playedCalc(self):
 		return Team.objects.filter(players=self).count()
 	def freshScore(self):

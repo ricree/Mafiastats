@@ -103,14 +103,23 @@ def games(request, site_id):
 	paginator = Paginator(Game.objects.filter(site=site).order_by('-end_date'),gamesPerPage)
 	page=getPage(request,paginator)
 	return render_to_response("games.html",{'games':page.object_list,'page':page,'site':site},context_instance=RequestContext(request))
+
+def sortTable(GET,methods,query,defaultDir='down'):
+	reversals = {'up':False,'down':True}
+	methodStr = GET['method'] if 'method' in GET else 'default'
+	methodDir = GET['direction'] if 'direction' in GET else defaultDir
+	if methodStr in methods:
+		methodDir = methodDir if methodDir in ['up','down'] else defaultDir
+	else:
+		methodStr = 'default'
+		methodDir = defaultDir
+	return sortQuery(query,methods[methodStr],reversals[methodDir])
+
 @cache_page(60*20)
 def scoreboard(request, site_id):
-	sortMethods={'score':'score','name':'name','wins':playersByWins,'losses':playersByLosses,'winPct':playersByWinPct,'modded':playersByModerated}
-	reversals = {'up':False,'down':True}
+	sortMethods={'score':'score','name':'name','wins':playersByWins,'losses':playersByLosses,'winPct':playersByWinPct,'modded':playersByModerated,'default':'score'}
 	site = get_object_or_404(Site, pk=site_id)
-	methodStr = request.GET['method'] if 'method' in request.GET else 'score'
-	methodDir = request.GET['direction'] if 'direction' in request.GET else 'down'
-	players = sortQuery(Player.objects.filter(site=site,played__gt=0),sortMethods[methodStr],reversals[methodDir])
+	players = sortTable(request.GET,sortMethods,Player.objects.filter(site=site,played__gt=0))
 #	players = [(player,player.score()) for player in players if player.played()>0]
 #	players.sort(cmp=(lambda (x,xs),(y,ys): cmp(ys,xs)))
 #	players,scores = zip(*players)
@@ -122,14 +131,16 @@ def scoreboard(request, site_id):
 		return render_to_response('scoreBoardPresenter.html',{'site':site,'players':page.object_list,'page':page},context_instance=RequestContext(request))
 	return render_to_response('scoreboard.html', {'site':site,'players':page.object_list,'page':page},context_instance=RequestContext(request))
 def moderators(request,site_id,page=1):
+	sortMethods={'name':'name','modded':playersByModerated,'default':'name'}
 	page=int(page)
 	modsPerPage=15
 	moderators = list(set([game.moderator for game in Game.objects.filter(site=site_id)]))
-	moderators = sorted(moderators, lambda x,y:cmp(x.name,y.name))
+	moderators = sortTable(request.GET,sortMethods,moderators)
 	paginator=Paginator(moderators,modsPerPage,orphans=5)
 	page = getPage(request,paginator)
 	site = get_object_or_404(Site,id=site_id)
-	return render_to_response("moderators.html",{'page':page,'moderators':page.object_list,'site':site},context_instance=RequestContext(request))
+	responseTemplate = "moderatorsListing.html" if request.is_ajax() else "moderators.html"
+	return render_to_response(responseTemplate,{'page':page,'moderators':page.object_list,'site':site},context_instance=RequestContext(request))
 	return HttpResponse("Not yet implemented")
 @login_required()
 def add(request, site_id=None):
@@ -146,6 +157,8 @@ def add(request, site_id=None):
 			else:
 				moderator.clearCache()
 			game = Game(title=form.cleaned_data['title'],moderator=moderator,start_date = form.cleaned_data['start_date'], end_date=form.cleaned_data['end_date'],site=site,gameType=form.cleaned_data['type'])
+			if (form.cleaned_data['url'] is not ''):
+				game.url = form.cleaned_data['url']
 			game.save()
 			for tForm in formset.forms:
 				title = tForm.cleaned_data['title']

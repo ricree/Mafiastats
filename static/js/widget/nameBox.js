@@ -52,7 +52,7 @@ function SetChooser()
 	if(e.which == 0xD){
 		CopyToBox(node)(null);
 	}
-});
+	});
 			var src = $(node).children("select").get(0);
 			var dest = $(node).children("#team_result").get(0);
 			$(src.option).change(CopyToResult(src,dest));
