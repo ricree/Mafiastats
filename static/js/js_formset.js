@@ -17,12 +17,14 @@ function addForm(btn, prefix){
 //	alert($(row).html());
 //	$(row).insertAfter($('.dynamic-form:last'));
 	//alert($(row).children().not(':last').html());
-	$(row).children().not(":last").children().children().children().each(function() {
+	$("*[name^="+prefix+"]",row).each(function() {
 //		alert($(this).html());
 		updateElementIndex(this, prefix, formCount);
 		$(this).val('').attr('checked',false).filter("option").remove()
 		
 	});
+	$("*[for^="+prefix+"]",row).each(function(){
+		updateElementIndex(this,prefix,formCount);});
 	$(row).find('.delete-row').click(function() {
 		deleteForm(this, prefix);
 	});

@@ -7,7 +7,8 @@
 <div class="span-19">
 <div class="span-15 infoBox">
 	<div class = "span-7">
-		<b>{{game.title}}</b><br/>
+		{{game.url}}
+		<b>{%if game.url%}<a href="{{game.url}}">{%endif%}{{game.title}}{%if game.url%}</a>{%endif%}</b><br/>
 		Moderated By: <a href="/stat/player/{{game.moderator.id}}">{{game.moderator}}</a><br/>
 		Length: {{length.days}} days<br/>
 		Players: {{game.num_players}}<br/>

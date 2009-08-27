@@ -1,10 +1,26 @@
 {% extends "sitePage.html"%}
+{%block extra_scripts%}
+<script type="text/javascript" src="/static/js/jqueryAjaxDivSort.js"></script>
+{%endblock%}
 {%block title%} {{site.short_name}} Moderators - Mafia Stats{%endblock%}
 {% block content%}
-{%for mod in moderators%}
-<div class="span-15 {%cycle 'odd' 'even'%}">
-<div class="span-5"><a href="/stat/player/{{mod.id}}/">{{mod.name}}</a></div>
-<div class="span-7">Games Moderated: {{mod.moderated_set.count}}</div>
+<script type="text/javascript">
+	$(document).ready(function(){
+		var cols = ["name","modded"];
+		for (var count in cols){
+			meth=cols[count];
+			elName = "#"+meth+"Label";
+			$(elName).ajaxDivSort(meth,"#listing",{});
+		}
+	});
+</script>
+<div class="span-20">
+<div class="span-5 colHeaderNormal" id="nameLabel">
+Name</div>
+<div class="span-6 colHeaderNormal" id="moddedLabel" style="text-align:center;">
+Games Moderated</div>
 </div>
-{%endfor%}
+<div id="listing">
+{%include "moderatorsListing.html"%}
+</div>
 {%endblock%}
