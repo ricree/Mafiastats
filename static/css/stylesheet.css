@@ -79,8 +79,6 @@ a.menuItem{
 	padding-bottom:3px;
 	}
 .colHeaderHover{
-	/*-moz-border-radius:4px;
-    -webkit-border-radius:4px;*/
 	background-color:#C0C0D0;
 	cursor:pointer;
 }
