@@ -48,9 +48,11 @@ def site(request,site_id):
 	games = Game.objects.filter(site=p).order_by('-end_date')
 	stats = {'played': games.count(),'players':Player.objects.filter(site=p).count()}
 	if (games.count()>0):
-		stats['mostRecent'] = games[games.count()-1]
+		stats['mostRecent'] = games[0]
 	else:
 		stats['mostRecent']=None
+	stats['largest'] = max(((len(g.players()),g) for g in  Game.objects.filter(site=p)))[1]
+	stats['winningest'] = max(((g.wins(),g) for g in Player.objects.filter(site=p)))[1]
 	paginator = Paginator(games,15)
 	gamesPage = getPage(request,paginator,1)
 	newest= None
@@ -100,9 +102,12 @@ def games(request, site_id):
 	print "I was called"
 	gamesPerPage = 5
 	site = get_object_or_404(Site,id=site_id)
-	paginator = Paginator(Game.objects.filter(site=site).order_by('-end_date'),gamesPerPage)
+	sortMethods = {'name':'title','moderator':'moderator','length':gamesByLength,'start':'start_date','end':'end_date','players':gamesByPlayers,'default':'end_date'}
+	p = sortTable(request.GET,sortMethods,Game.objects.filter(site=site))
+	paginator = Paginator(p,gamesPerPage)
 	page=getPage(request,paginator)
-	return render_to_response("games.html",{'games':page.object_list,'page':page,'site':site},context_instance=RequestContext(request))
+	respTemplate = "gamesListing.html" if request.is_ajax() else "games.html"
+	return render_to_response(respTemplate,{'games':page.object_list,'page':page,'site':site,'sortMethods':sorted(sortMethods.keys())},context_instance=RequestContext(request))
 
 def sortTable(GET,methods,query,defaultDir='down'):
 	reversals = {'up':False,'down':True}
@@ -131,7 +136,7 @@ def scoreboard(request, site_id):
 		return render_to_response('scoreBoardPresenter.html',{'site':site,'players':page.object_list,'page':page},context_instance=RequestContext(request))
 	return render_to_response('scoreboard.html', {'site':site,'players':page.object_list,'page':page},context_instance=RequestContext(request))
 def moderators(request,site_id,page=1):
-	sortMethods={'name':'name','modded':playersByModerated,'default':'name'}
+	sortMethods={'name':'name','modded':playersByModerated,'largest':modsByLargestGame,'default':'name'}
 	page=int(page)
 	modsPerPage=15
 	moderators = list(set([game.moderator for game in Game.objects.filter(site=site_id)]))

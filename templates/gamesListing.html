@@ -1,0 +1,21 @@
+{%for game in games%}
+<div class="span-23 infoBox">
+    <div class = "span-8">
+        <b><a href="/stat/game/{{game.id}}">{{game.title}}</a></b><br/>
+        Moderated By: <a href="/stat/player/{{game.moderator.id}}">{{game.moderator}}</a><br/>
+        Length: {{game.length.days}} days<br/>
+        Players: {{game.num_players}}<br/>
+    </div>
+    <div class="span-6">
+        <br/>
+        Started: {{game.start_date|date:"F d Y"}}<br/>
+        Ended: {{game.end_date|date:"F d Y"}}</br/>
+    </div>
+    <div class="span-8 last">
+        <b>Winning Team{{game.winningTeams|pluralize}}:</b><br/>
+        {% for team in game.winningTeams %}
+        <a href="/stat/game/{{game.id}}/#{{team.id}}">{{team.title}}</a><br/>
+        {%endfor%}
+    </div>
+</div>
+{%endfor%}

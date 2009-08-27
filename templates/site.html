@@ -5,11 +5,13 @@
 <div class="infoBox span-20">
 <div class="span-8">
 Games Played: {{stats.played}}<br/>
-Most Recent Game: <a href="/stat/game/{{stats.mostRecent.id}}">{{stats.mostRecent.title}}</a>
+Most Recent Game: <a href="/stat/game/{{stats.mostRecent.id}}">{{stats.mostRecent.title}}</a><br/>
+Largest Game: <a href="/stat/game/{{stats.largest.id}}">{{stats.largest.title}}</a><br/>
 </div>
 <div class="span-8">
 Total Players:{{stats.players}}<br/>
-Newest Player:&nbsp;<a href="/stat/player/{{newest.id}}">{{newest.name}}</a>
+Newest Player:&nbsp;<a href="/stat/player/{{newest.id}}">{{newest.name}}</a><br/>
+Winningest Player:&nbsp;<a href="/stat/player/{{stats.winningest.id}}">{{stats.winningest.name}}</a>
 </div>
 </div>
 <br/>

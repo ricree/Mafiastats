@@ -6,19 +6,15 @@
 {% block content%}
 <script type="text/javascript">
 	$(document).ready(function(){
-		var cols = ["name","modded"];
-		for (var count in cols){
-			meth=cols[count];
-			elName = "#"+meth+"Label";
-			$(elName).ajaxDivSort(meth,"#listing",{});
-		}
+		ajaxDivSort_register(["name","modded","largest"],"#listing");
 	});
 </script>
-<div class="span-20">
+<div class="span-20" style="margin-bottom:10px;">
 <div class="span-5 colHeaderNormal" id="nameLabel">
 Name</div>
-<div class="span-6 colHeaderNormal" id="moddedLabel" style="text-align:center;">
+<div class="span-5 colHeaderNormal" id="moddedLabel" style="text-align:center;">
 Games Moderated</div>
+<div class="span-5 colHeaderNormal" id="largestLabel" style="text-align:center;">Largest Game</div>
 </div>
 <div id="listing">
 {%include "moderatorsListing.html"%}

@@ -1,6 +1,13 @@
 var sortMethod;
 var sortDirection;
 var newDirection={'up':'down','down':'up'};
+function ajaxDivSort_register(elements,destination){
+	for (var count in elements){
+		var meth=elements[count];
+		var elName = "#"+meth+"Label";
+		$(elName).ajaxDivSort(meth,destination,{});
+	}
+};
 (function($){
 	$.fn.ajaxDivSort = function(method,containerQuery,settings){
 	var defaults = {};

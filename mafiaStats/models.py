@@ -8,7 +8,7 @@ from django.core.cache import cache
 def cacheResult(fn):
 	def functionCache(*args,**kwargs):
 		self = args[0]
-		cName = '%s_%s_%s'%(self.site.id,self.name,fn.func_name)
+		cName = '%s_%s_%s'%(type(self).__name__,self.id,fn.func_name)
 		result = cache.get(cName)
 		if(result is not None):#as opposed to something else evaluating to False
 			return result
@@ -19,6 +19,12 @@ def cacheResult(fn):
 	functionCache.func_name=fn.func_name
 	return functionCache
 
+def makeClearCache():
+	def clearCache(self):
+		for selfAttr in self.__dict__.values():
+			if hasattr(selfAttr,'needsCacheCleaning'):
+				cache.delete(selfAttr.needsCacheCleaning%(type(self).__name__,self.name))
+	return clearCache
 
 class Site(models.Model):
 	def __unicode__(self):
@@ -63,11 +69,7 @@ class Player(models.Model):
 	lastGame = models.ForeignKey("Game",related_name="lastGame_set",null=True,blank=True)
 	score = models.FloatField()
 	played = models.IntegerField(default=0)
-	def clearCache(self):
-		"""deletes all related keys from the cache"""
-		for selfAttr in self.__dict__.values():
-			if hasattr(selfAttr,'needsCacheCleaning'):
-				cache.delete(selfAttr.needsCacheCleaning%(self.site.id,self.name))
+	clearCache = makeClearCache()
 
 	@cacheResult
 	def wins(self):
@@ -86,6 +88,12 @@ class Player(models.Model):
 			return (100*Team.objects.filter(players=self,won=True).count())/self.played
 		else:
 			return 0
+	@cacheResult
+	def largestModded(self):
+		return max(Game.objects.filter(moderator=self))
+	@cacheResult
+	def largestModdedCount(self):
+		return len(self.largestModded().players())
 	@cacheResult
 	def modded(self):
 		return self.moderated_set.count()
@@ -139,12 +147,20 @@ class Game(models.Model):
 	#moderator = models.CharField(max_length=50)
 	start_date = models.DateField()
 	end_date = models.DateField()
+	timestamp = models.DateField(auto_now_add = True)
+	gameType = models.CharField(max_length=25,choices = [(u'full','Full Game'),
+		(u'mini','Mini Game'), (u'irc','IRC Game')])
+	livedToEnd = models.ManyToManyField(Player, blank=True)
+	site = models.ForeignKey(Site)
+	clearCache = makeClearCache()
+	@cacheResult
 	def length(self):
 		return self.end_date - self.start_date
 	def winningTeams(self):
 		return self.team_set.filter(won=True)
 	def players(self):
 		return [player for team in self.team_set.all() for player in team.players.all()]
+	@cacheResult
 	def num_players(self):
 		return sum((team.players.count() for team in self.team_set.all()))
 	def save(self, force_insert=False, force_update=False):
@@ -152,11 +168,6 @@ class Game(models.Model):
 		for p in self.players():
 			p.save()
 		self.moderator.save()
-	timestamp = models.DateField(auto_now_add = True)
-	gameType = models.CharField(max_length=25,choices = [(u'full','Full Game'),
-		(u'mini','Mini Game'), (u'irc','IRC Game')])
-	livedToEnd = models.ManyToManyField(Player, blank=True)
-	site = models.ForeignKey(Site)
 class Team(models.Model):
 	def __unicode__(self):
 		return ''.join([self.game.title,':',self.title])
