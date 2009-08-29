@@ -181,4 +181,8 @@ class Team(models.Model):
 		super(Team,self).save(force_insert,force_update)
 		for p in self.players.all():
 			p.save()
-	
+class Role(models.Model):
+	game = models.ForeignKey(Game)
+	player = models.ForeignKey(Player)
+	title = models.CharField(max_length=50)
+	text = models.CharField(max_length=5000)

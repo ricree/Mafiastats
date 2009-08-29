@@ -90,6 +90,17 @@
 		settings = $.extend(defaults, settings);  
 		return this.each(function() {
 			
+			function blockOnEnterHandler(event){
+				if (event.which == 13){
+					return false;
+				}
+			}
+			function setBlockOnEnter(){
+				$("form").keydown(blockOnEnterHandler);
+			}
+			function unsetBlockOnEnter(){
+				$("form").unbind("keydown",blockOnEnterHandler);
+			}
 			function regexEscape(txt, omit) {
 				var specials = ['/', '.', '*', '+', '?', '|',
 								'(', ')', '[', ']', '{', '}', '\\'];
@@ -139,6 +150,7 @@
 				var bOddRow = true, i, iFound = 0,
 					filterPatt = settings.caseSensitive ? new RegExp(sFilterTxt, "g") : new RegExp(sFilterTxt, "ig");
 					
+				setupInputBox();
 				$(results).html('').hide();
 				
 				for (i = 0; i < resultObjects.length; i += 1) {
@@ -163,7 +175,7 @@
 					$(item).addClass('resultItem').
 						addClass((bOddRow) ? 'odd' : 'even').
 						click(function(n) { return function() {
-							selectResultItem(resultObjects[n]);						
+							selectResultItem(resultObjects[n]);												unsetBlockOnEnter();
 						};}(i)).
 						mouseover(function(el) { return function() { 
 							setHoverClass(el); 
@@ -180,6 +192,7 @@
 				}
 				
 				if ($('div', results).length > 0) {
+					setBlockOnEnter();
 					currentSelection = undefined;
 					$(results).show().css('height', 'auto');
 					
@@ -292,23 +305,28 @@
 			// Prepare the input box to show suggest results by adding in the events
 			// that will initiate the search and placing the element on the page
 			// that will show the results.
-			$(results).addClass('jsonSuggestResults').
-				css({
-					'top': (obj.position().top + obj.height() + 5) + 'px',
-					'left': obj.position().left + 'px',
-					'width': obj.width() + 'px'
-				}).hide();
-				
+			// moved into own function so that box can be auto repositioned at results time.
+			// This is necessary since functions that transform the page
+			// (ie, jquery tabs, etc) can sometimes fuck things up
+			function setupInputBox(){
+				$(results).addClass('jsonSuggestResults').
+					css({
+						'top': (obj.position().top + obj.height() + 5) + 'px',
+						'left': obj.position().left + 'px',
+						'width': obj.width() + 'px'
+					}).hide();
+				}	
+			setupInputBox();
 			obj.after(results).
 				keyup(keyListener).
 				blur(function(e) {
-					// We need to make sure we don't hide the result set
-					// if the input blur event is called because of clicking on
-					// a result item.
+				// We need to make sure we don't hide the result set
+				// if the input blur event is called because of clicking on
+				// a result item.
 					var resPos = $(results).offset();
 					resPos.bottom = resPos.top + $(results).height();
 					resPos.right = resPos.left + $(results).width();
-					
+				
 					if (pageY < resPos.top || pageY > resPos.bottom || pageX < resPos.left || pageX > resPos.right) {
 						$(results).hide();
 					}

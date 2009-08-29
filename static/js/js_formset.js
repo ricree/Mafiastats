@@ -9,9 +9,12 @@ function updateElementIndex(el, prefix, ndx){
 	if (el.name) el.name = el.name.replace(id_regex, replacement);
 }
 
-function addForm(btn, prefix){
+function addForm(btn, prefix,context){
+	if(context==null){
+		context=$(document);
+	}
 	var formCount = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());
-	var row = $(".dynamic-form:first").clone(true);
+	var row = $(".dynamic-form:first",context).clone(true);
 	//alert("text" + $(row).hasClass('dynamic-form') + 'text');
 	//alert($('.dynamic-form:first').html());
 //	alert($(row).html());
@@ -28,7 +31,7 @@ function addForm(btn, prefix){
 	$(row).find('.delete-row').click(function() {
 		deleteForm(this, prefix);
 	});
-	$(row).insertAfter($('.dynamic-form:last'));
+	$(row).insertAfter($('.dynamic-form:last',context));
 	$('#id_' + prefix + '-TOTAL_FORMS').val(formCount + 1);
 	return false;
 }

@@ -15,12 +15,6 @@
 	{%endif%}{%endblock%}
 <script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery-ui-1.7.2.custom.min.js"></script>
-{%block extra_css%}
-{%endblock%}
-{%block bodyscripts%}{%if bodyscripts %}{%for script in bodyscripts%}
-{{script|safe}} {%endfor%}  {%endif%}
-	{%endblock%}
-{%block extra_scripts%}{%endblock%}
 <title>{% block title %}{%endblock%} - Mafia Stats</title>
 </head>
 <body>
@@ -59,6 +53,10 @@
 	<a href='http://jquery.com/' title='jQuery JavaScript Library'><img src='http://jquery.com/files/buttons/jquery-icon.png' alt='jQuery JavaScript Library' title='jQuery JavaScript Library' style='border:none;'/></a>
 	</div>
 	</div>
+{%block bodyscripts%}{%if bodyscripts %}{%for script in bodyscripts%}
+{{script|safe}} {%endfor%}  {%endif%}
+    {%endblock%}
+{%block extra_scripts%}{%endblock%}
 <!--getsatisfaction widget-->
 <script type="text/javascript" charset="utf-8">
   var is_ssl = ("https:" == document.location.protocol);

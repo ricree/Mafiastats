@@ -1,8 +1,8 @@
 # Create your views here.
 from django.http import HttpResponse, Http404,HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
-from Mafiastats.mafiaStats.models import Site, Game, Team, Category,Player
-from Mafiastats.mafiaStats.forms import AddGameForm,TeamFormSet,AddTeamForm
+from Mafiastats.mafiaStats.models import Site, Game, Team, Category,Player,Role
+from Mafiastats.mafiaStats.forms import AddGameForm,TeamFormSet,AddTeamForm,RoleFormSet
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.contrib.auth.forms import UserCreationForm
@@ -12,6 +12,7 @@ from django.core.paginator import Paginator, InvalidPage,EmptyPage
 from itertools import chain
 from django.views.decorators.cache import cache_page
 import json
+from postmarkup import render_bbcode
 from sortMethods import *
 
 def getPage(request,paginator,default=1,indexRange=2):
@@ -76,7 +77,8 @@ def game(request, game_id):
 	winners = teams.filter(won=True)
 	numWinners =teams.filter(won=True).count()
 	teams=[(team,team.players.all().order_by('name')) for team in teams]
-	return render_to_response('game.html', {'game':game, 'teams':teams, 'num_players' : numPlayers, 'length':length, 'players':players,'winners':winners},context_instance=RequestContext(request))
+	roles=Role.objects.filter(game=game)
+	return render_to_response('game.html', {'game':game, 'teams':teams, 'num_players' : numPlayers, 'length':length, 'players':players,'winners':winners,'roles':roles},context_instance=RequestContext(request))
 
 def player(request,player_id):
 	player = get_object_or_404(Player, pk=player_id)
@@ -148,15 +150,15 @@ def moderators(request,site_id,page=1):
 	responseTemplate = "moderatorsListing.html" if request.is_ajax() else "moderators.html"
 	return render_to_response(responseTemplate,{'page':page,'moderators':page.object_list,'site':site},context_instance=RequestContext(request))
 	return HttpResponse("Not yet implemented")
-@login_required()
 def add(request, site_id=None):
 	if request.method=='POST':
 		form = AddGameForm(request.POST)
-		formset = TeamFormSet(request.POST)
-		if(form.is_valid() and formset.is_valid()):
+		teamFormset = TeamFormSet(request.POST,prefix='teamForm')
+		roleFormset = RoleFormSet(request.POST,prefix='roleForm')
+		if(form.is_valid() and teamFormset.is_valid() and roleFormset.is_valid()):
 			#return HttpResponse(formset.forms[0].cleaned_data['players'])
 			site = Site.objects.get(pk=site_id)
-			name = formset.forms[0].cleaned_data['players']
+			name = teamFormset.forms[0].cleaned_data['players']
 			moderator,created = Player.objects.get_or_create(name=form.cleaned_data['moderator'],site=site)
 			if(created):
 				moderator.save()
@@ -166,7 +168,7 @@ def add(request, site_id=None):
 			if (form.cleaned_data['url'] is not ''):
 				game.url = form.cleaned_data['url']
 			game.save()
-			for tForm in formset.forms:
+			for tForm in teamFormset.forms:
 				title = tForm.cleaned_data['title']
 				category = Category.objects.get(title=tForm.cleaned_data['type'][0])
 #				category = tForm.cleaned_data['type']
@@ -182,28 +184,36 @@ def add(request, site_id=None):
 					p.clearCache()
 				team.save()
 				game.team_set.add(team)
+			for rForm in roleFormset.forms:
+				title = rForm.cleaned_data['title']
+				pName = rForm.cleaned_data['player']
+				text = render_bbcode(rForm.cleaned_data['text'])
+				player,created = Player.objects.get_or_create(name=pName,site=site,defaults={'firstGame':game,'lastGame':game})
+				role,created = Role.objects.get_or_create(title=title,game=game,player=player,text=text)
+				role.save()
 			game.save()
 			return HttpResponseRedirect('/stat/game/'+str(game.id)+'/')
 			return HttpResponse("Not yet implemented "+ str(name)+str(request.POST['form-0-players']))
 	else:
 		form =  AddGameForm()
-		formset = TeamFormSet()	
+		teamFormset = TeamFormSet(prefix='teamForm')	
+		roleFormset = RoleFormSet(prefix='roleForm')
 	def boxIfString(val):#render either returns an iterable or
 		if type(val) is str: #a string.  a string screws with the template
 			retval = [val,] #so we must box strings up in a list
 		else:
 			retval = val
 		return retval
-	sheets = boxIfString((form.media + formset.media).render_css())
-	bodyscripts = boxIfString((form.media+formset.media).render_js())
+	sheets = boxIfString((form.media + teamFormset.media).render_css())
+	bodyscripts = boxIfString((form.media+teamFormset.media).render_js())
 	if (site_id):
 		site = Site.objects.get(pk=site_id)
 	else:
 		site = None
 	left_attrs = [("Team Name:","title"),('Team Type:','type'),('Won:','won')]
-	for tform in formset.forms:
+	for tform in teamFormset.forms:
 		tform.left_attrs = [(label,tform[property],property) for label,property in left_attrs]
-	return render_to_response('addGame.html',{'game_form':form,'formset': formset,'bodyscripts':bodyscripts,'sheets':sheets,'site':site,'id':site_id,},context_instance=RequestContext(request))
+	return render_to_response('addGame.html',{'game_form':form,'roleFormset':roleFormset,'teamFormset': teamFormset,'bodyscripts':bodyscripts,'sheets':sheets,'site':site,'id':site_id,},context_instance=RequestContext(request))
 def nameLookup(request):
 	if 'text' not in request.GET:
 		return HttpResponse("[]")

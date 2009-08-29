@@ -15,6 +15,12 @@ class AddGameForm(forms.Form):
 	type = forms.ChoiceField([(u'full','Full Game'),
         (u'mini','Mini Game'), (u'irc','IRC Game')])
 	#site = forms.ModelChoiceField(Site)
+class AddRoleForm(forms.Form):
+	title = forms.CharField(max_length=50)
+	player = forms.CharField(max_length=75,widget=AutoTextBox())
+	text = forms.CharField(max_length=3000, widget=forms.Textarea)
+RoleFormSet = formset_factory(AddRoleForm)
+
 class AddTeamForm(forms.Form):
 	title = forms.CharField(max_length=50)
 	won = forms.BooleanField(required=False)

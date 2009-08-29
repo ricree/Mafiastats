@@ -68,7 +68,7 @@ def importCsv(siteDetails,fileName,csvColumns):
 			moderator,created = Player.objects.get_or_create(name=modName,site=site)
 			if(created):
 				moderator.save()
-			game,gCreated = Game.objects.get_or_create(title=dln['GName'],defaults={'url':'','start_date':start,'end_date':end,'moderator':moderator,'gameType':dln['Type'],'site':site})
+			game,gCreated = Game.objects.get_or_create(title=dln['GName'],defaults={'url':'','start_date':start,'end_date':end,'moderator':moderator,'gameType':dln['Type'],'site':site,'url':dln['url']})
 			if(created):
 				game.save()
 			for category in categoryNames:
