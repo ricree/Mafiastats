@@ -5,8 +5,8 @@
 {%block content%}
 <script type="text/javascript">
 	$(document).ready(function(){
+		$("#roleAccordian").accordion();
 		$("#tabs").tabs();
-		$("#roleAccordian").accordian();
 	});
 </script>
 <div class="span-23">
@@ -60,7 +60,7 @@
 				<div id="roles" class="span-17">
 					<div id="roleAccordian">
 						{%for role in roles%}
-						<a href="#">{{role.title}} - {{role.player.name}}</a>
+						<h4><a href="#">{{role.title}} - {{role.player.name}}</a></h4>
 						<div>{{role.text|safe}}</div>
 						</a>
 						{%endfor%}
