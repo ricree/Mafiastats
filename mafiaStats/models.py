@@ -30,7 +30,7 @@ class Site(models.Model):
 	def __unicode__(self):
 		return self.title
 	title = models.CharField(max_length=50, blank = False)
-	url = models.CharField(max_length=50, blank=True)
+	url = models.CharField(max_length=250, blank=True)
 	shortName = models.CharField(max_length=10,blank=False)
 	description = models.CharField(max_length=1000, blank = True)
 class Category(models.Model):
@@ -142,7 +142,7 @@ class Game(models.Model):
 	def __unicode__(self):
 		return self.title
 	title = models.CharField(max_length=50, blank = False)
-	url = models.URLField(max_length=75, blank=True)
+	url = models.URLField(max_length=250, blank=True)
 	moderator = models.ForeignKey(Player, related_name='moderated_set')
 	#moderator = models.CharField(max_length=50)
 	start_date = models.DateField()
