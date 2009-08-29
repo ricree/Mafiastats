@@ -8,11 +8,11 @@ class ClassedTextInput(forms.TextInput):
 	def __init__(self, attrs={}):
 		if self._init_class == None:
 			raise NotImplementedError, "Child class did not define _init_class"
-		if ('class' in attrs):
-			if (self._init_class not in attrs['class']):
-				attrs['class'] = ' '.join([attrs['class'],self._init_class])
-		else:
-			attrs['class'] = self._init_class
+#		if ('class' in attrs):
+#			if (self._init_class not in attrs['class']):
+#				attrs['class'] = ' '.join([attrs['class'],self._init_class])
+#		else:
+		attrs['class'] = self._init_class
 		super(forms.TextInput,self).__init__(attrs=attrs)
 
 class AutoTextBox(ClassedTextInput):

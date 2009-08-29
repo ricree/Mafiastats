@@ -11,18 +11,25 @@
 <script type="text/javascript" src="/static/js/js_formset.js"></script>
 <script type="text/javascript">
 $(function () {
-	$('.add-row').click(function(){
-		addForm(this,'form');
+	$('#add-team').click(function(){
+		addForm(this,"{{teamFormset.prefix}}",$("#teams"));
 		SetChooser();
 	});
+	$('#add-role').click(function(){
+		addForm(this,'{{roleFormset.prefix}}',$("#roles"));
+		$(".AutoSuggestBox").each(function(){
+			$(this).unbind();});
+		setupSuggestBoxes();
+	});
 	$('.delete-row').click(function(){
-		return deleteForm(this, 'form');
+		return deleteForm(this, "{{teamFormset.prefix}}");
 	})
 })
 $(document).ready(function(){
 	$("form").keydown(function(event){
 		if(event.which == 13){
-			return false;}
+			return true;	
+			}
 	});
 	$("#tabs").tabs();
 })
@@ -49,7 +56,6 @@ $(document).ready(function(){
 </div>
 <div class="span-12 last" style="margin-bottom:15px;">
 <br/>
-<a href="javascript:void(0)" class="add-row ui-corner-all ui-state-default" style="padding:2px;">add team</a>
 <input type="submit" value="Save Game" class="ui-corner-all ui-state-default" style="padding:2px;"/>
 {%comment%}<a href="javascript:void(0)" class="menuItem" id="populate_fake">Populate Players</a>{%endcomment%}
 </div><br/><br/>
@@ -60,7 +66,7 @@ $(document).ready(function(){
 	<li><a href="#roles"><span>Roles</span></a></li>
 </ul>
 <div id="teams">
-	{%for form in formset.forms %}
+	{%for form in teamFormset.forms %}
 		<div class="dynamic-form span-20 last">
 			<div class="span-8">
 				{%for label,attr,at_name in form.left_attrs%}
@@ -86,15 +92,47 @@ $(document).ready(function(){
 				<a href="javascript:void(0)" class="delete-row ui-corner-all menuItem ui-state-default">delete</a>
 			</div>
 		</div>
+		<a id="add-team" href="javascript:void(0)" class="add-row ui-corner-all ui-state-default" style="padding:2px;">add team</a>
 	{%endfor%}
 </div><br/>
 <div id="roles">
-	Not yet implemented
+	<div class="span-20">
+	{%for form in roleFormset.forms%}
+		<div class="dynamic-form span-16 last">
+		<div class="span-12">
+			<div class="span-4">
+			<label for="{{form.prefix}}-title">Role Name</label>
+			</div>
+			<div class="span-6">
+			{{form.title}}
+			</div>
+			<div class="span-4">
+			<label for="{{form.prefix}}-title">Player</label>
+			</div>
+			<div class="span-6">
+			{{form.player}}
+			</div><br/>
+			<div class="span-10 last">
+			<label for="{{form.prefix}}-text">Role Description (basic BBCode allowed)</label>
+			</div><br/>
+			<div class="span-10 last">
+			{{form.text}}
+			</div>
+		</div>
+		<div class="span-3">
+			<div class="span-2 deleteRow ui-corner-all menuItem ui-state-default">delete</div>
+		</div>
+		<br/>
+		</div>
+	{%endfor%}
+	</div>
+	<a href="javascript:void(0)" id="add-role" class="span-3 add-row ui-corner-all menuItem ui-state-default">Add Role</a>
 </div>
 </div>
 </div>
 <div>
-{{formset.management_form}}
+{{teamFormset.management_form}}
+{{roleFormset.management_form}}
 </div>
 </form>
 </div>
