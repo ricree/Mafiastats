@@ -3,18 +3,18 @@
 
 <html>
 <head>
-<link rel="stylesheet" href="/static/css/blueprint/screen.css" type="text/css" media="screen, projection">
-<link rel="stylesheet" href="/static/css/blueprint/print.css" type="text/css" media="print">
-<link rel="stylesheet" href="/static/css/theme/jquery-ui-1.7.2.custom.css" type="text/css">
+<link rel="stylesheet" href="{{MEDIA_URL}}css/blueprint/screen.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="{{MEDIA_URL}}css/blueprint/print.css" type="text/css" media="print">
+<link rel="stylesheet" href="{{MEDIA_URL}}css/theme/jquery-ui-1.7.2.custom.css" type="text/css">
   <!--[if lt IE 8]><link rel="stylesheet" href="../../blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
-<!--<link rel="stylesheet" href="/static/css/blueprint/plugins/fancy-type/screen.css" type="text/css" media="screen, projection">-->
-<link rel="stylesheet" href="/static/css/stylesheet.css"/>
+<!--<link rel="stylesheet" href="{{MEDIA_URL}}css/blueprint/plugins/fancy-type/screen.css" type="text/css" media="screen, projection">-->
+<link rel="stylesheet" href="{{MEDIA_URL}}css/stylesheet.css"/>
 {%block extra_sheets%}{%endblock%}
 {%block sheets%}{%if sheets%}{%for sheet in sheets%}
 {{sheet|safe}}{%endfor%}
 	{%endif%}{%endblock%}
-<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
-<script type="text/javascript" src="/static/js/jquery-ui-1.7.2.custom.min.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/jquery-ui-1.7.2.custom.min.js"></script>
 <title>{% block title %}{%endblock%} - Mafia Stats</title>
 </head>
 <body>
@@ -33,7 +33,7 @@
 	</div>
 	<div class="span-24 ui-widget-header" id="menu">
 	<div class="span-20">
-	{% block menu%}&nbsp {% endblock %}	
+	{% block menu%}&nbsp; {% endblock %}	
 	</div>
 	<div class="span-3">
 	{%if user.is_authenticated%}<b>{{user.username}}</b>[<a href="/account/signout/">logout</a>]

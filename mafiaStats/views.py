@@ -1,8 +1,8 @@
 # Create your views here.
 from django.http import HttpResponse, Http404,HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
-from Mafiastats.mafiaStats.models import Site, Game, Team, Category,Player,Role
-from Mafiastats.mafiaStats.forms import AddGameForm,TeamFormSet,AddTeamForm,RoleFormSet
+from mafiaStats.models import Site, Game, Team, Category,Player,Role
+from mafiaStats.forms import AddGameForm,TeamFormSet,AddTeamForm,RoleFormSet
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.contrib.auth.forms import UserCreationForm
@@ -164,19 +164,36 @@ def add(request, site_id=None):
 				moderator.save()
 			else:
 				moderator.clearCache()
-			game = Game(title=form.cleaned_data['title'],moderator=moderator,start_date = form.cleaned_data['start_date'], end_date=form.cleaned_data['end_date'],site=site,gameType=form.cleaned_data['type'])
+			editing = 'game_id' in request.POST
+			if('game_id' in request.POST):
+				data = form.cleaned_data
+				gId=request.POST['game_id']
+				game = Game.objects.get(pk=int(gId))
+				game.title=data['title']
+				game.url=data['url']
+				game.moderator=moderator
+				game.start_date=data['start_date']
+				game.end_date=data['end_date']
+				game.gameType=form.cleaned_data['type']
+			else:
+				game = Game(title=form.cleaned_data['title'],moderator=moderator,start_date = form.cleaned_data['start_date'], end_date=form.cleaned_data['end_date'],site=site,gameType=form.cleaned_data['type'])
+				
 			if (form.cleaned_data['url'] is not ''):
 				game.url = form.cleaned_data['url']
 			game.save()
 			for tForm in teamFormset.forms:
 				title = tForm.cleaned_data['title']
+				print tForm.cleaned_data['type']
 				category = Category.objects.get(title=tForm.cleaned_data['type'][0])
 #				category = tForm.cleaned_data['type']
 				won = tForm.cleaned_data['won']
 				players = [Player.objects.get_or_create(name=p,site=site,defaults={'firstGame':game,'lastGame':game})[0] for p in tForm.cleaned_data['players']]
 				for p in players:
 					p.save()
-				team = Team(title=title,category=category,site=site,won=won,game=game)
+				if editing:
+					team = Team.objects.get(id=tForm.cleaned_data['team_id'])
+				else:
+					team = Team(title=title,category=category,site=site,won=won,game=game)
 				team.save()
 				for p in players:
 					team.players.add(p)
@@ -240,3 +257,19 @@ def register(request):
 	else:
 		form=UserCreationForm()
 	return render_to_response("register.html",{'form':form},context_instance=RequestContext(request))
+
+def edit(request,game_id):
+	game = get_object_or_404(Game,pk=game_id)
+	teams = Team.objects.filter(game=game)
+	gameData = {'title':game.title,'url':game.url,'moderator':game.moderator.name,'start_date':game.start_date,'end_date':game.end_date,'type':game.gameType,'game_id':game.id}
+	teamData = [{'title':team.title,'won':team.won,'type':team.category.title,'team_id':team.id,'players':[p.name for p in team.players.all()]} for team in teams]
+	print "team data", [(data['title'], data['type']) for data in teamData]
+	form = AddGameForm(gameData)
+	teamForm = TeamFormSet(initial=teamData, prefix="teamForm")
+	left_attrs = [("Team Name:","title"),('Team Type:','type'),('Won:','won')]
+	for tform in teamForm.forms:
+		tform.left_attrs = [(label,tform[property],property) for label,property in left_attrs]
+	roleForm = RoleFormSet(prefix="roleForm")
+	sheets = (form.media+teamForm.media+roleForm.media).render_css()
+	bodyscripts=(form.media+teamForm.media +roleForm.media).render_js()
+	return render_to_response("addGame.html",{'game_form':form,'teamFormset':teamForm,'roleFormset':roleForm,'site':game.site,'sheets':sheets,'id':game.site.id,'bodyscripts':bodyscripts},context_instance=RequestContext(request))

@@ -1,4 +1,5 @@
 {%extends "base.html"%}
+{%load comments%}
 {%block title%}Mafia Stats - {{game.title}} - {{game.site.title}}{%endblock%}
 {%block header%}<h1>{{game.title}}</h1>{%endblock%}
 {%block menu %}<a class="menuItem" href="/stat/site/{{game.site.id}}/">{{game.site.shortName}} Stats</a>{%endblock%}
@@ -31,6 +32,7 @@
 			{%if roles%}
 			<li><a href="#roles"><span>Roles</span></a></li>
 			{%endif%}
+			<li><a href="#comments"><span>Comments</span></a></li>
 		</ul>
 			<div id="teams" class="span-19">
 				<h2> Teams in this game:</h2>
@@ -67,6 +69,10 @@
 					</div>
 				</div>
 				{%endif%}
+				<div id="comments" class="span-17">
+					Comments will be enabled soon
+					{%render_comment_form for game%}
+				</div>
 			</div>
 		</div>
 		<div class="span-3 sidebar">
