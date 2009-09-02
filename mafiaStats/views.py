@@ -78,7 +78,7 @@ def game(request, game_id):
 	numWinners =teams.filter(won=True).count()
 	teams=[(team,team.players.all().order_by('name')) for team in teams]
 	roles=Role.objects.filter(game=game)
-	return render_to_response('game.html', {'game':game, 'teams':teams, 'num_players' : numPlayers, 'length':length, 'players':players,'winners':winners,'roles':roles},context_instance=RequestContext(request))
+	return render_to_response('game.html', {'game':game, 'teams':teams, 'num_players' : numPlayers, 'length':length, 'next':'/stat/game/%s/'%game_id,'players':players,'winners':winners,'roles':roles},context_instance=RequestContext(request))
 
 def player(request,player_id):
 	player = get_object_or_404(Player, pk=player_id)
