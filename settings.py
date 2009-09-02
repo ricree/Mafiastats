@@ -93,6 +93,6 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'registration',
     'django_authopenid',
-	'django.contrib.comments',
+    'django.contrib.comments',
     'Mafiastats.mafiaStats'
 )
