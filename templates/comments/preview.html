@@ -1,0 +1,8 @@
+{%extends "base.html"%}
+{%load i18n%}
+{%block title%}{%trans "Preview your comment"%}{%endblock%}
+{%block content%}
+<div>{{comment|linebreaks}}</div>
+{%include "comments/form.html"%}
+{%endblock%}
+
