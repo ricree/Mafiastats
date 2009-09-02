@@ -1,0 +1,32 @@
+{%load comments i18n%}
+<form action="{%comment_form_target%}" method="POST">
+{% if next %}<input type="hidden" name="next" value="{{ next }}" />{% endif %}
+{%for field in form.hidden_fields%}
+{{field}}
+{%endfor%}
+{%for field in form.visible_fields%}
+<div class="span-16" style="text-size:small;{%ifequal field.name "honeypot"%}display:none;{%endifequal%}">
+	<div class="span-3">
+		{{field.label_tag}}
+	</div>
+	<div class="span-6">
+		{%ifequal field.name "email"%}
+		<input type="text" id="id_email" name="email" value="{{user.email}}">
+		{%else%}{%ifequal field.name "name"%}
+		<input type="text" id="id_name" name="name" value="{{user.username}}">
+		{%else%}
+		{{field}}
+		{%endifequal%}{%endifequal%}
+	</div>
+	<div class="span-5">
+		{{field.errors}}
+	</div>
+	</div>
+{%endfor%}
+<div class="span-10">
+<p class="submit">
+<input type="submit" name="post" class="submit-post" value="{% trans "Post" %}" />
+<input type="submit" name="preview" class="submit-preview" value="{% trans "Preview" %}" />
+</p>
+</div>
+</form>
