@@ -43,9 +43,15 @@ class NameBox(forms.SelectMultiple):
 			classes = attrs['class']
 		else:
 			classes=""
-		if((type(value) is list) and (len(value) >0)):
-			val = value[0]
-			val_list = value[0].split(',')
+		if(type(value) is list):
+			if  (len(value) >0 and len(value)<2):
+				val = value[0]
+				print 'formValue: ',value
+				val_list = value[0].split(',')
+			else:
+				print 'value',value
+				val = ','.join(value)
+				val_list = value
 		else:
 			val = ''
 			val_list = []

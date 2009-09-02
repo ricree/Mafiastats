@@ -2,7 +2,7 @@
 from django.http import HttpResponse, Http404,HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from mafiaStats.models import Site, Game, Team, Category,Player,Role
-from mafiaStats.forms import AddGameForm,TeamFormSet,AddTeamForm,RoleFormSet
+from mafiaStats.forms import AddGameForm,TeamFormSet,TeamFormSetEdit,AddTeamForm,RoleFormSet
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.contrib.auth.forms import UserCreationForm
@@ -164,19 +164,7 @@ def add(request, site_id=None):
 				moderator.save()
 			else:
 				moderator.clearCache()
-			editing = 'game_id' in request.POST
-			if('game_id' in request.POST):
-				data = form.cleaned_data
-				gId=request.POST['game_id']
-				game = Game.objects.get(pk=int(gId))
-				game.title=data['title']
-				game.url=data['url']
-				game.moderator=moderator
-				game.start_date=data['start_date']
-				game.end_date=data['end_date']
-				game.gameType=form.cleaned_data['type']
-			else:
-				game = Game(title=form.cleaned_data['title'],moderator=moderator,start_date = form.cleaned_data['start_date'], end_date=form.cleaned_data['end_date'],site=site,gameType=form.cleaned_data['type'])
+			game = Game(title=form.cleaned_data['title'],moderator=moderator,start_date = form.cleaned_data['start_date'], end_date=form.cleaned_data['end_date'],site=site,gameType=form.cleaned_data['type'])
 				
 			if (form.cleaned_data['url'] is not ''):
 				game.url = form.cleaned_data['url']
@@ -184,16 +172,13 @@ def add(request, site_id=None):
 			for tForm in teamFormset.forms:
 				title = tForm.cleaned_data['title']
 				print tForm.cleaned_data['type']
-				category = Category.objects.get(title=tForm.cleaned_data['type'][0])
+				category = Category.objects.get(title=tForm.cleaned_data['type'])
 #				category = tForm.cleaned_data['type']
 				won = tForm.cleaned_data['won']
 				players = [Player.objects.get_or_create(name=p,site=site,defaults={'firstGame':game,'lastGame':game})[0] for p in tForm.cleaned_data['players']]
 				for p in players:
 					p.save()
-				if editing:
-					team = Team.objects.get(id=tForm.cleaned_data['team_id'])
-				else:
-					team = Team(title=title,category=category,site=site,won=won,game=game)
+				team = Team(title=title,category=category,site=site,won=won,game=game)
 				team.save()
 				for p in players:
 					team.players.add(p)
@@ -202,12 +187,14 @@ def add(request, site_id=None):
 				team.save()
 				game.team_set.add(team)
 			for rForm in roleFormset.forms:
-				title = rForm.cleaned_data['title']
-				pName = rForm.cleaned_data['player']
-				text = render_bbcode(rForm.cleaned_data['text'])
-				player,created = Player.objects.get_or_create(name=pName,site=site,defaults={'firstGame':game,'lastGame':game})
-				role,created = Role.objects.get_or_create(title=title,game=game,player=player,text=text)
-				role.save()
+				print "RFORM: ", rForm.cleaned_data,', ', len(roleFormset.forms)
+				if(rForm.has_changed()):
+					title = rForm.cleaned_data['title']
+					pName = rForm.cleaned_data['player']
+					text = render_bbcode(rForm.cleaned_data['text'])
+					player,created = Player.objects.get_or_create(name=pName,site=site,defaults={'firstGame':game,'lastGame':game})
+					role,created = Role.objects.get_or_create(title=title,game=game,player=player,text=text)
+					role.save()
 			game.save()
 			return HttpResponseRedirect('/stat/game/'+str(game.id)+'/')
 			return HttpResponse("Not yet implemented "+ str(name)+str(request.POST['form-0-players']))
@@ -230,7 +217,7 @@ def add(request, site_id=None):
 	left_attrs = [("Team Name:","title"),('Team Type:','type'),('Won:','won')]
 	for tform in teamFormset.forms:
 		tform.left_attrs = [(label,tform[property],property) for label,property in left_attrs]
-	return render_to_response('addGame.html',{'game_form':form,'roleFormset':roleFormset,'teamFormset': teamFormset,'bodyscripts':bodyscripts,'sheets':sheets,'site':site,'id':site_id,},context_instance=RequestContext(request))
+	return render_to_response('addGame.html',{'game_form':form,'roleFormset':roleFormset,'teamFormset': teamFormset,'bodyscripts':bodyscripts,'sheets':sheets,'site':site,'id':site_id,'submit_link':'/stat/game/add/%s/'%site_id},context_instance=RequestContext(request))
 def nameLookup(request):
 	if 'text' not in request.GET:
 		return HttpResponse("[]")
@@ -259,17 +246,54 @@ def register(request):
 	return render_to_response("register.html",{'form':form},context_instance=RequestContext(request))
 
 def edit(request,game_id):
-	game = get_object_or_404(Game,pk=game_id)
-	teams = Team.objects.filter(game=game)
-	gameData = {'title':game.title,'url':game.url,'moderator':game.moderator.name,'start_date':game.start_date,'end_date':game.end_date,'type':game.gameType,'game_id':game.id}
-	teamData = [{'title':team.title,'won':team.won,'type':team.category.title,'team_id':team.id,'players':[p.name for p in team.players.all()]} for team in teams]
-	print "team data", [(data['title'], data['type']) for data in teamData]
-	form = AddGameForm(gameData)
-	teamForm = TeamFormSet(initial=teamData, prefix="teamForm")
+	if(request.method=="POST"):
+		form = AddGameForm(request.POST)
+		teamForm = TeamFormSetEdit(request.POST,prefix="teamForm")
+		roleForm = RoleFormSet(request.POST,prefix="roleForm")
+		if(form.is_valid() and teamForm.is_valid() and roleForm.is_valid()):
+			game = Game.objects.get(pk=form.cleaned_data['game_id'])
+			game.title = form.cleaned_data['title']
+			print 'title is: ',form.cleaned_data['title']
+			game.url = form.cleaned_data['url']
+			game.gameType = form.cleaned_data['type']
+			moderator,created = Player.objects.get_or_create(name=form.cleaned_data['moderator'],site=game.site,defaults={'firstGame':game,'lastGame':game,'score':0,'played':0})
+			if(created):
+				moderator.save()
+			game.moderator=moderator
+			game.start_date = form.cleaned_data['start_date']
+			game.end_date = form.cleaned_data['end_date']
+			game.save()
+			for t in Team.objects.filter(game=game):
+				t.delete()
+			for tForm in teamForm.forms:
+				team = Team(game=game,title=tForm.cleaned_data['title'],category=Category.objects.get(title=tForm.cleaned_data['type']),site=game.site,won=tForm.cleaned_data['won'])
+				team.save()
+				for pName in tForm.cleaned_data['players']:
+					p, created = Player.objects.get_or_create(name=pName,site=game.site,defaults={'firstGame':game,'lastGame':game,'score':0,'played':0})
+					p.save()
+					team.players.add(p)
+				team.save()
+			for role in Role.objects.filter(game=game):
+				role.delete()
+			for rForm in roleForm.forms:
+				if(rForm.has_changed()):
+					p,created = Player.objects.get_or_create(name=rForm.cleaned_data['player'],site=game.site,defaults={'firstGame':game,'lastGame':game,'score':0,'played':0})
+					role = Role(game=game,player=p,text=rForm.cleaned_data['text'],title=rForm.cleaned_data['title'])
+					role.save()
+			game.save()
+			return HttpResponseRedirect("/stat/game/%s/"%game.id)
+	else:
+		game = get_object_or_404(Game,pk=game_id)
+		teams = Team.objects.filter(game=game)
+		gameData = {'title':game.title,'url':game.url,'moderator':game.moderator.name,'start_date':game.start_date,'end_date':game.end_date,'type':game.gameType,'game_id':game.id}
+		teamData = [{'title':team.title,'won':team.won,'type':team.category.title,'team_id':team.id,'players':[p.name for p in team.players.all()]} for team in teams]
+		roleData = [{'title':role.title,'player':role.player.name,'text':role.text} for role in Role.objects.filter(game=game)]
+		form = AddGameForm(gameData)
+		teamForm = TeamFormSetEdit(initial=teamData, prefix="teamForm")
+		roleForm = RoleFormSet(prefix="roleForm")
 	left_attrs = [("Team Name:","title"),('Team Type:','type'),('Won:','won')]
 	for tform in teamForm.forms:
 		tform.left_attrs = [(label,tform[property],property) for label,property in left_attrs]
-	roleForm = RoleFormSet(prefix="roleForm")
 	sheets = (form.media+teamForm.media+roleForm.media).render_css()
 	bodyscripts=(form.media+teamForm.media +roleForm.media).render_js()
-	return render_to_response("addGame.html",{'game_form':form,'teamFormset':teamForm,'roleFormset':roleForm,'site':game.site,'sheets':sheets,'id':game.site.id,'bodyscripts':bodyscripts},context_instance=RequestContext(request))
+	return render_to_response("addGame.html",{'game_form':form,'teamFormset':teamForm,'roleFormset':roleForm,'site':game.site,'sheets':sheets,'id':game.site.id,'bodyscripts':bodyscripts,'submit_link':'/stat/game/%s/edit'%game_id},context_instance=RequestContext(request))

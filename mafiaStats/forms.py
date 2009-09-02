@@ -31,9 +31,5 @@ class AddTeamForm(forms.Form):
 	team_id = forms.CharField(max_length=100,required=False,widget=forms.HiddenInput())
 #	players = forms.MultipleChoiceField(choices=[('1','Febo'),('2','ricree'),('3','Apeiron')])
 	players = NameList(choices=[],widget=NameBox, initial=[])
-TeamFormSetParent = formset_factory(AddTeamForm, extra=1)
-class TeamFormSet(TeamFormSetParent):
-	def as_p(self):
-		"""Just the as_table with as_p instead.  no idea why this doesn't already exist."""
-		forms = u' '.join([form.as_p() for form in self.forms])
-		return mark_safe(u'\n'.join([unicode(self.management_form), forms]))
+TeamFormSet = formset_factory(AddTeamForm, extra=1)
+TeamFormSetEdit  = formset_factory(AddTeamForm,extra=0)
