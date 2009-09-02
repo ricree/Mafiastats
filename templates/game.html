@@ -1,7 +1,8 @@
 {%extends "base.html"%}
+{%load comments%}
 {%block title%}Mafia Stats - {{game.title}} - {{game.site.title}}{%endblock%}
 {%block header%}<h1>{{game.title}}</h1>{%endblock%}
-{%block menu %}<a class="menuItem" href="/stat/site/{{game.site.id}}/">{{game.site.shortName}} Stats</a>{%endblock%}
+{%block menu %}<a class="menuItem" href="/stat/site/{{game.site.id}}/">{{game.site.shortName}} Stats</a><a class="menuItem" href="/stat/game/{{game.id}}/edit">Edit Game</a>{%endblock%}
 {%block content%}
 <script type="text/javascript">
 	$(document).ready(function(){
@@ -31,6 +32,7 @@
 			{%if roles%}
 			<li><a href="#roles"><span>Roles</span></a></li>
 			{%endif%}
+			<li><a href="#comments"><span>Comments</span></a></li>
 		</ul>
 			<div id="teams" class="span-19">
 				<h2> Teams in this game:</h2>
@@ -67,6 +69,19 @@
 					</div>
 				</div>
 				{%endif%}
+				<div id="comments" class="span-17">
+					{%get_comment_list for game as comments%}
+					{%for comment in comments%}
+					<div class="comment_wrapper ui-corner-top span-16">
+						{{comment.comment}}
+					<div class="comment_poster span-15">
+						{%if comment.user_url%}<a href="{{comment.user_url}}">{%endif%}{{comment.user_name}}{%if comment.user_url%}</a>{%endif%} at {{comment.submit_date|date:"g:i A T"}} on {{comment.submit_date|date:"D M j,Y"}}
+					</div>
+					</div>
+					{%endfor%}
+					Comments will be enabled soon
+					{%render_comment_form for game%}
+				</div>
 			</div>
 		</div>
 		<div class="span-3 sidebar">

@@ -127,3 +127,15 @@ div.sidebar{
     text-padding-right:5px;
     padding:12px;
 }
+.comment_wrapper{
+	background-color:#DADAFA;
+	margin-top:20px;
+	margin-bottom:20px;
+	padding:20px;
+	padding-bottom:10px;
+}
+.comment_poster{
+	text-size:small;
+	padding-top:20px;
+	padding-left:15px;
+}

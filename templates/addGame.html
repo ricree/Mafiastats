@@ -38,7 +38,7 @@ $(document).ready(function(){
 	var siteId={{site.id}}
 </script>
 <div>
-<form action="/stat/game/add/{{site.id}}" method="post">
+<form action="{{submit_link}}" method="post">
 <div>
 {% for field in game_form%}
 <div class="span-18">
@@ -66,8 +66,14 @@ $(document).ready(function(){
 	<li><a href="#roles"><span>Roles</span></a></li>
 </ul>
 <div id="teams">
+	<ul id="nameMenu" class="contextmenu">
+		<li class="remove">
+			<a href="#remove">Remove</a>
+		</li>
+	</ul>
 	{%for form in teamFormset.forms %}
 		<div class="dynamic-form span-20 last">
+			{{form.team_id}}
 			<div class="span-8">
 				{%for label,attr,at_name in form.left_attrs%}
 				<div class="span-6">
@@ -92,8 +98,8 @@ $(document).ready(function(){
 				<a href="javascript:void(0)" class="delete-row ui-corner-all menuItem ui-state-default">delete</a>
 			</div>
 		</div>
-		<a id="add-team" href="javascript:void(0)" class="add-row ui-corner-all ui-state-default" style="padding:2px;">add team</a>
 	{%endfor%}
+	<a id="add-team" href="javascript:void(0)" class="add-row ui-corner-all ui-state-default" style="padding:2px;">add team</a>
 </div><br/>
 <div id="roles">
 	<div class="span-20">

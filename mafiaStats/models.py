@@ -1,7 +1,7 @@
 from django.db.models.query import QuerySet
 from django.db import models
 from django.core.cache import cache
-
+from postmarkup import render_bbcode
 
 # Create your models here.
 
@@ -186,3 +186,5 @@ class Role(models.Model):
 	player = models.ForeignKey(Player)
 	title = models.CharField(max_length=50)
 	text = models.CharField(max_length=5000)
+	def displayText(self):
+		return render_bbcode(self.text)
