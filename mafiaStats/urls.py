@@ -3,10 +3,10 @@ from django.conf import settings
 
 
 urlpatterns = patterns('',
-	url(r'^site/(?P<site_id>\d+)/$', 'mafiaStats.views.site',name='mafiastats_site'),
-	url(r'^site/(?P<site_id>\d+)/scoreboard/$','mafiaStats.views.scoreboard',name='mafiastats_scoreboard'),
-	url(r'^site/(?P<site_id>\d+)/games/$','mafiaStats.views.games',name='mafiastats_games'),
-	url(r'^site/(?P<site_id>\d+)/moderators/$','mafiaStats.views.moderators',name='mafiastats_moderators'),
+	url(r'^site/(?P<site_id>\d*)/$', 'mafiaStats.views.site',name='mafiastats_site'),
+	url(r'^site/scoreboard/(?P<site_id>\d*)','mafiaStats.views.scoreboard',name='mafiastats_scoreboard'),
+	url(r'^site/games/(?P<site_id>\d*)','mafiaStats.views.games',name='mafiastats_games'),
+	url(r'^site/moderators/(?P<site_id>\d*)','mafiaStats.views.moderators',name='mafiastats_moderators'),
 	url(r'^game/add/(?P<site_id>\d*)/*$','mafiaStats.views.add',name='mafiastats_add'),
 	url(r'^game/(?P<game_id>\d+)/$','mafiaStats.views.game',name='mafiastats_game'),
 	url(r'^player/(?P<player_id>\d+)/$','mafiaStats.views.player',name='mafiastats_player'),

@@ -41,7 +41,14 @@ def getPage(request,paginator,default=1,indexRange=2):
 
 def index(request):
 	site_list = Site.objects.all()[:5]
-	return render_to_response('index.html',{'site_list' : site_list},context_instance=RequestContext(request))
+	newest = Game.objects.order_by('-end_date')[0]
+	largest = max( ( (len(g.players()),g) for g in  Game.objects.all()))[1]
+	totalPlayed = Game.objects.count()
+	numPlayers = Player.objects.count()
+	mostMod = max( ( (p.modded(),p) for p in Player.objects.all()))[1]
+	mostPlayed = Player.objects.order_by('-played')[0]
+	stats= [('Newest Game',newest),('Largest Game',largest),('Games Played',totalPlayed),('Number of Players',numPlayers),('Most Prolific Mod',mostMod),('Most Games Played',mostPlayed)]
+	return render_to_response('index.html',{'stats':stats,'site_list' : site_list},context_instance=RequestContext(request))
 def site(request,site_id):
 	try:
 		p = Site.objects.get(pk=site_id)
@@ -106,14 +113,20 @@ def get_bounds(perPage,page,num):
 def games(request, site_id):
 	print "I was called"
 	gamesPerPage = 5
-	site = get_object_or_404(Site,id=site_id)
+	if(site_id !=''):
+		site = get_object_or_404(Site,id=site_id)
+		funcArgs= {'site':site}
+	else:
+		funcArgs={}
 	sortMethods = {'name':'title','moderator':'moderator','length':gamesByLength,'start':'start_date','end':'end_date','players':gamesByPlayers,'default':'end_date'}
-	p = sortTable(request.GET,sortMethods,Game.objects.filter(site=site))
+	p = sortTable(request.GET,sortMethods,Game.objects.filter(**funcArgs))
 	paginator = Paginator(p,gamesPerPage)
 	page=getPage(request,paginator)
 	respTemplate = "gamesListing.html" if request.is_ajax() else "games.html"
 	sortMethods = sorted((key, (len(key)/3)+1) for key in sortMethods );
-	return render_to_response(respTemplate,{'games':page.object_list,'page':page,'site':site,'sortMethods':sortMethods},context_instance=RequestContext(request))
+	args = {'games':page.object_list,'page':page,'sortMethods':sortMethods}
+	args.update(funcArgs)
+	return render_to_response(respTemplate,args,context_instance=RequestContext(request))
 
 def sortTable(GET,methods,query,defaultDir='down'):
 	reversals = {'up':False,'down':True}
@@ -127,10 +140,15 @@ def sortTable(GET,methods,query,defaultDir='down'):
 	return sortQuery(query,methods[methodStr],reversals[methodDir])
 
 @cache_page(60*20)
-def scoreboard(request, site_id):
+def scoreboard(request, site_id=None):
 	sortMethods={'score':'score','name':'name','wins':playersByWins,'losses':playersByLosses,'winPct':playersByWinPct,'modded':playersByModerated,'default':'score'}
-	site = get_object_or_404(Site, pk=site_id)
-	players = sortTable(request.GET,sortMethods,Player.objects.filter(site=site,played__gt=0))
+	if((site_id is not None)and(site_id != '')):
+		site = get_object_or_404(Site, pk=site_id)
+		funcArgs={'site':site}
+	else:
+		funcArgs = {}
+	print Player.objects.filter(played__gt=0,**funcArgs).count()
+	players = sortTable(request.GET,sortMethods,Player.objects.filter(played__gt=0,**funcArgs))
 #	players = [(player,player.score()) for player in players if player.played()>0]
 #	players.sort(cmp=(lambda (x,xs),(y,ys): cmp(ys,xs)))
 #	players,scores = zip(*players)
@@ -139,19 +157,30 @@ def scoreboard(request, site_id):
 	for player in page.object_list:
 		player.win_pct = (100* player.wins())/(player.losses() + player.wins())
 	if(request.is_ajax()):
-		return render_to_response('scoreBoardPresenter.html',{'site':site,'players':page.object_list,'page':page},context_instance=RequestContext(request))
-	return render_to_response('scoreboard.html', {'site':site,'players':page.object_list,'page':page},context_instance=RequestContext(request))
-def moderators(request,site_id,page=1):
+		args = {'players':page.object_list,'page':page}
+		args.update(funcArgs)
+		return render_to_response('scoreBoardPresenter.html',args,context_instance=RequestContext(request))
+	args = {'players':page.object_list,'page':page}
+	args.update(funcArgs)
+	print args
+	return render_to_response('scoreboard.html',args,context_instance=RequestContext(request))
+def moderators(request,site_id):
 	sortMethods={'name':'name','modded':playersByModerated,'largest':modsByLargestGame,'default':'name'}
 	page=int(page)
 	modsPerPage=15
-	moderators = list(set([game.moderator for game in Game.objects.filter(site=site_id)]))
+	if(site_id != ''):
+		site = get_object_or_404(Site,id=site_id)
+		funcArgs = {'site':site_id}
+	else:
+		funcArgs={}
+	moderators = list(set([game.moderator for game in Game.objects.filter(**funcArgs)]))
 	moderators = sortTable(request.GET,sortMethods,moderators)
 	paginator=Paginator(moderators,modsPerPage,orphans=5)
 	page = getPage(request,paginator)
-	site = get_object_or_404(Site,id=site_id)
 	responseTemplate = "moderatorsListing.html" if request.is_ajax() else "moderators.html"
-	return render_to_response(responseTemplate,{'page':page,'moderators':page.object_list,'site':site},context_instance=RequestContext(request))
+	args = {'page':page,'moderators':page.object_list}
+	args.update(funcArgs)
+	return render_to_response(responseTemplate,{'page':page,'moderators':page.object_list},context_instance=RequestContext(request))
 	return HttpResponse("Not yet implemented")
 def add(request, site_id=None):
 	if request.method=='POST':

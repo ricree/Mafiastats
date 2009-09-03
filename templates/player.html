@@ -8,8 +8,8 @@
 	</div>
 	<div class="span-7">
 		<b>Games Moderated:&nbsp</b>{{moderated|length}}<br/>
-		<b>First Game:&nbsp</b><a href="{%url mafiastats_game player.firstGame.id%}">{{player.firstGame.title}}</a><br/>
-		<b>Last Game:&nbsp</b><a href="{%url mafiastats_game player.lastGame.id%}">{{player.lastGame.title}}</a><br/>
+		{%if player.firstGame%}<b>First Game:&nbsp</b><a href="{%url mafiastats_game player.firstGame.id%}">{{player.firstGame.title}}</a><br/>{%endif%}
+		{%if player.lastGame%}<b>Last Game:&nbsp</b><a href="{%url mafiastats_game player.lastGame.id%}">{{player.lastGame.title}}</a><br/>{%endif%}
 	</div>
 </div>
 <div class="span-20">

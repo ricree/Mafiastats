@@ -42,6 +42,7 @@ def makeTeam(game,dline,category,prefix,site):
 				p,created = Player.objects.get_or_create(name=pName,site=site,defaults={'firstGame':game,'lastGame':game})
 				if created:
 					p.save()
+				p.updateDates(game)
 				team.players.add(p)
 				team.save()
 
@@ -75,4 +76,12 @@ def importCsv(siteDetails,fileName,csvColumns):
 			for category in categoryNames:
 				prefix=categoryNames[category]
 				makeTeam(game,dln,category,prefix,site)
+			for pName in getNames(dln['lToEnd']):
+				player,created = Player.objects.get_or_create(name=pName,site=site)
+				if(created):
+					player.save()
+				print pName
+				player.updateDates(game)
+				game.livedToEnd.add(player)
+			game.save()
 			print "Added %s, modded by %s to %s" %(dln['GName'],modName,siteDetails['title'])

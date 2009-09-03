@@ -2,12 +2,35 @@
 {%block header%}
 <h1>Mafia Statistics</h1>
 {%endblock %}
+{%block menu%}
+<a class="menuItem" href="{%url mafiastats_scoreboard ''%}">Scoreboard</a>
+<a class="menuItem" href="{%url mafiastats_games ''%}">Games</a>
+<a class="menuItem" href="{%url mafiastats_moderators ''%}">Moderators</a>
+{%endblock%}
 {%block content %}{% if site_list %}
+<div class="span-10">
 	<ul>
 	{% for site in site_list %}
 		<li><a href="{%url mafiastats_site site.id%}"> {{site.title}}</a></li>
 	{%endfor%}
 	</ul>
+</div>
+<div class="span-10 infoBox">
+	{% for label,stat in stats%}
+		<div class="span-4">
+			{{label}}
+		</div>
+		<div class="span-5">
+		{%if stat.name%}
+			<a href="{%url mafiastats_player stat.id%}">{{stat.name}}</a>
+		{%else%}{%if stat.title%}
+			<a href="{%url mafiastats_game stat.id%}">{{stat.title}}</a>
+			{%else%}
+			{{stat}}
+		{%endif%}{%endif%}
+		</div>
+	{%endfor%}
+</div>
 {%else %}
 	<p>There do not seem to be any sites available</p>
 {%endif%}

@@ -110,6 +110,10 @@ class Player(models.Model):
 		self.played=self.playedCalc()
 		super(Player,self).save(force_insert,force_update)
 	def updateDates(self,game):
+		if(not self.firstGame):
+			self.firstGame = game
+		if(not self.lastGame):
+			self.lastGame = game
 		if(game.start_date < self.firstGame.start_date):
 			self.firstGame =game
 		if(self.lastGame.end_date < game.end_date):
