@@ -5,25 +5,30 @@
 <div class="infoBox span-20">
 <div class="span-8">
 Games Played: {{stats.played}}<br/>
-Most Recent Game: <a href="/stat/game/{{stats.mostRecent.id}}">{{stats.mostRecent.title}}</a><br/>
-Largest Game: <a href="/stat/game/{{stats.largest.id}}">{{stats.largest.title}}</a><br/>
+Most Recent Game: <a href="{%url mafiastats_game stats.mostRecent.id%}">{{stats.mostRecent.title}}</a><br/>
+Largest Game: <a href="{%url mafiastats_game stats.largest.id%}">{{stats.largest.title}}</a><br/>
 </div>
 <div class="span-8">
 Total Players:{{stats.players}}<br/>
-Newest Player:&nbsp;<a href="/stat/player/{{newest.id}}">{{newest.name}}</a><br/>
-Winningest Player:&nbsp;<a href="/stat/player/{{stats.winningest.id}}">{{stats.winningest.name}}</a>
+Newest Player:&nbsp;<a href="{%url mafiastats_player newest.id%}">{{newest.name}}</a><br/>
+Winningest Player:&nbsp;<a href="{%url mafiastats_player stats.winningest.id%}">{{stats.winningest.name}}</a>
 </div>
 </div>
 <br/>
 {%endif%}
-<div class="span-16">
+<div class="span-8">
 {%if page %}
 <ul>
 	{%for game in page.object_list%}
-	<li><b><a href="/stat/game/{{game.pk}}">{{game.title}}</a></b></li>		{%endfor%}
+	<li><b><a href="{%url mafiastats_game game.pk%}">{{game.title}}</a></b></li>		{%endfor%}
 </ul>
 {%else%}
 This site does not have any games yet
 {%endif%}
 </div>
+{%if page%}
+<div class="span-10">
+	<img src="{{MEDIA_URL}}{{catImg}}" alt="Category Comparison" style="padding:2px;;" />
+</div>
+{%endif%}
 {%endblock%}

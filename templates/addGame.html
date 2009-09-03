@@ -1,14 +1,14 @@
 {%extends "sitePage.html"%}
 {%block extra_scripts%}
-<script type="text/javascript" src="/static/js/jquery-ui-1.7.2.custom.min.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/jquery-ui-1.7.2.custom.min.js"></script>
 {%endblock%}
 {%block extra_sheets%}
-<link type="text/css" src="/static/css/redmond/jquery-ui-1.7.2.custom.css"></link>
+<link type="text/css" src="{{MEDIA_URL}}css/redmond/jquery-ui-1.7.2.custom.css"></link>
 {%endblock%}
 {%block title%}Add New Game to {{site.shortName}}{%endblock%}
 {%block header %}<h1>Add New Game {%if site%}to {{site.shortName}}{%endif%}</h1>{%endblock%}
 {%block content%}
-<script type="text/javascript" src="/static/js/js_formset.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/js_formset.js"></script>
 <script type="text/javascript">
 $(function () {
 	$('#add-team').click(function(){

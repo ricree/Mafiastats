@@ -2,7 +2,7 @@
 {%load comments%}
 {%block title%}Mafia Stats - {{game.title}} - {{game.site.title}}{%endblock%}
 {%block header%}<h1>{{game.title}}</h1>{%endblock%}
-{%block menu %}<a class="menuItem" href="/stat/site/{{game.site.id}}/">{{game.site.shortName}} Stats</a><a class="menuItem" href="/stat/game/{{game.id}}/edit">Edit Game</a>{%endblock%}
+{%block menu %}<a class="menuItem" href="{%url mafiastats_site game.site.id%}">{{game.site.shortName}} Stats</a><a class="menuItem" href="{%url mafiastats_edit game.id%}">Edit Game</a>{%endblock%}
 {%block content%}
 <script type="text/javascript">
 	$(document).ready(function(){
@@ -15,7 +15,7 @@
 		<div class="span-15 infoBox">
 			<div class = "span-7">
 				<b>{%if game.url%}<a href="{{game.url}}">{%endif%}{{game.title}}{%if game.url%}</a>{%endif%}</b><br/>
-				Moderated By: <a href="/stat/player/{{game.moderator.id}}">{{game.moderator}}</a><br/>
+				Moderated By: <a href="{%url mafiastats_player game.moderator.id%}">{{game.moderator}}</a><br/>
 				Length: {{length.days}} days<br/>
 				Players: {{game.num_players}}<br/>
 			</div>
@@ -52,7 +52,7 @@
 						</div>
 						<div class="hlist">
 							{%for player in tplayers%}
-							<a href="/stat/player/{{player.id}}/">{{player.name}}</a>
+							<a href="{%url mafiastats_player player.id%}">{{player.name}}</a>
 							{%endfor%}
 						</div>
 					</div>
@@ -79,7 +79,6 @@
 					</div>
 					</div>
 					{%endfor%}
-					Comments will be enabled soon
 					{%render_comment_form for game%}
 				</div>
 			</div>
@@ -87,7 +86,7 @@
 		<div class="span-3 sidebar">
 			<h3>Players</h3>
 			{%for player in players%}
-			<a href="/stat/player/{{player.id}}/">{{player}}</a><br/>
+			<a href="{%url mafiastats_player player.id%}">{{player}}</a><br/>
 			{%endfor%}
 		</div>
 	</div>
