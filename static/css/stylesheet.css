@@ -75,8 +75,6 @@ div.odd{
 	cursor:pointer;
 	}
 .colHeaderHover{
-	/*-moz-border-radius:4px;
-    -webkit-border-radius:4px;*/
 	background-color:#C0C0D0;
 	cursor:pointer;
 	padding-bottom:3px;
