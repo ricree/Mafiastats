@@ -9,11 +9,13 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, InvalidPage,EmptyPage
+from django.core.urlresolvers import reverse
 from itertools import chain
 from django.views.decorators.cache import cache_page
 import json
 from postmarkup import render_bbcode
 from sortMethods import *
+from mafiaStats.signalHandlers import getSiteImage
 
 def getPage(request,paginator,default=1,indexRange=2):
 	try:
@@ -63,7 +65,8 @@ def site(request,site_id):
 		if (game.firstGame_set.count() >0):
 			newest = game.firstGame_set.all()[0]
 		count+=1
-	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage,'newest':newest},context_instance=RequestContext(request))
+	imgLink = getSiteImage(Site.objects.get(pk=site_id))
+	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage,'newest':newest,'catImg':imgLink},context_instance=RequestContext(request))
 #	return HttpResponse("Not yet implemented")
 def game(request, game_id):
 	game = get_object_or_404(Game, pk=game_id)
@@ -78,7 +81,7 @@ def game(request, game_id):
 	numWinners =teams.filter(won=True).count()
 	teams=[(team,team.players.all().order_by('name')) for team in teams]
 	roles=Role.objects.filter(game=game)
-	return render_to_response('game.html', {'game':game, 'teams':teams, 'num_players' : numPlayers, 'length':length, 'next':'/stat/game/%s/'%game_id,'players':players,'winners':winners,'roles':roles},context_instance=RequestContext(request))
+	return render_to_response('game.html', {'game':game, 'teams':teams, 'num_players' : numPlayers, 'length':length, 'next':reverse('mafiastats_game',args=[int(game_id)]),'players':players,'winners':winners,'roles':roles},context_instance=RequestContext(request))
 
 def player(request,player_id):
 	player = get_object_or_404(Player, pk=player_id)
@@ -196,7 +199,7 @@ def add(request, site_id=None):
 					role,created = Role.objects.get_or_create(title=title,game=game,player=player,text=text)
 					role.save()
 			game.save()
-			return HttpResponseRedirect('/stat/game/'+str(game.id)+'/')
+			return HttpResponseRedirect(reverse('mafiastats_game',args=[game.id]))
 			return HttpResponse("Not yet implemented "+ str(name)+str(request.POST['form-0-players']))
 	else:
 		form =  AddGameForm()
@@ -217,7 +220,7 @@ def add(request, site_id=None):
 	left_attrs = [("Team Name:","title"),('Team Type:','type'),('Won:','won')]
 	for tform in teamFormset.forms:
 		tform.left_attrs = [(label,tform[property],property) for label,property in left_attrs]
-	return render_to_response('addGame.html',{'game_form':form,'roleFormset':roleFormset,'teamFormset': teamFormset,'bodyscripts':bodyscripts,'sheets':sheets,'site':site,'id':site_id,'submit_link':'/stat/game/add/%s/'%site_id},context_instance=RequestContext(request))
+	return render_to_response('addGame.html',{'game_form':form,'roleFormset':roleFormset,'teamFormset': teamFormset,'bodyscripts':bodyscripts,'sheets':sheets,'site':site,'id':site_id,'submit_link':reverse('mafiastats_add',args=[site_id])},context_instance=RequestContext(request))
 def nameLookup(request):
 	if 'text' not in request.GET:
 		return HttpResponse("[]")
@@ -281,7 +284,7 @@ def edit(request,game_id):
 					role = Role(game=game,player=p,text=rForm.cleaned_data['text'],title=rForm.cleaned_data['title'])
 					role.save()
 			game.save()
-			return HttpResponseRedirect("/stat/game/%s/"%game.id)
+			return HttpResponseRedirect(reverse('mafiastats_game',args=[game.id]))
 	else:
 		game = get_object_or_404(Game,pk=game_id)
 		teams = Team.objects.filter(game=game)
@@ -296,4 +299,4 @@ def edit(request,game_id):
 		tform.left_attrs = [(label,tform[property],property) for label,property in left_attrs]
 	sheets = (form.media+teamForm.media+roleForm.media).render_css()
 	bodyscripts=(form.media+teamForm.media +roleForm.media).render_js()
-	return render_to_response("addGame.html",{'game_form':form,'teamFormset':teamForm,'roleFormset':roleForm,'site':game.site,'sheets':sheets,'id':game.site.id,'bodyscripts':bodyscripts,'submit_link':'/stat/game/%s/edit'%game_id},context_instance=RequestContext(request))
+	return render_to_response("addGame.html",{'game_form':form,'teamFormset':teamForm,'roleFormset':roleForm,'site':game.site,'sheets':sheets,'id':game.site.id,'bodyscripts':bodyscripts,'submit_link':reverse('mafiastats_edit',args=[int(game_id)])},context_instance=RequestContext(request))

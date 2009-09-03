@@ -2,7 +2,7 @@
 	<div class="span-20 {%cycle 'odd' 'even'%}">
 		{#names#}
 		<div class="span-4" style="text-align:left">	
-			<a href="/stat/player/{{player.id}}/">{{player.name}}</a><br/>
+			<a href="{%url mafiastats_player player.id%}">{{player.name}}</a><br/>
 		</div>
 		{#wins#}
 		<div class="span-3">

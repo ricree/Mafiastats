@@ -7,9 +7,9 @@ Mafia Stats - {{site.title}} Site Statistics
 {%endblock%}
 {%block menu%}
 <a class="menuItem" href="/">Site List</a> 
-<a class="menuItem" href="/stat/site/{{site.id}}/?page=1">{{site.shortName}} Stats</a>
-<a class="menuItem" href = "/stat/site/{{site.id}}/scoreboard/?page=1">{{site.shortName}} Scoreboard</a>
-<a class="menuItem" href="/stat/site/{{site.id}}/games/">{{site.shortName}} Games</a>
-<a class="menuItem" href="/stat/site/{{site.id}}/moderators/">Moderators</a>
-<a class="menuItem" href="/stat/game/add/{{site.id}}/">Add Game</a>
+<a class="menuItem" href="{%url mafiastats_site site.id%}?page=1">{{site.shortName}} Stats</a>
+<a class="menuItem" href = "{%url mafiastats_scoreboard site.id%}?page=1">{{site.shortName}} Scoreboard</a>
+<a class="menuItem" href="{%url mafiastats_games site.id%}">{{site.shortName}} Games</a>
+<a class="menuItem" href="{%url mafiastats_moderators site.id%}">Moderators</a>
+<a class="menuItem" href="{%url mafiastats_add site.id%}">Add Game</a>
 {%endblock%}
