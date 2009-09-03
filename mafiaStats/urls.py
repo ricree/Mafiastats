@@ -1,7 +1,6 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
 
-
 urlpatterns = patterns('',
 	url(r'^site/(?P<site_id>\d*)/$', 'mafiaStats.views.site',name='mafiastats_site'),
 	url(r'^site/scoreboard/(?P<site_id>\d*)','mafiaStats.views.scoreboard',name='mafiastats_scoreboard'),
