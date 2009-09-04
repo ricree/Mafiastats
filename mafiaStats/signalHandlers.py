@@ -8,7 +8,7 @@ from matplotlib.font_manager import FontProperties
 
 def saveSiteStats(sender, **kwargs):
 	inst = kwargs['instance']
-	key = kwargs['key']
+	key = "site_saveSiteStats_%s"%inst.pk
 	if sender is Game:
 		site = inst.site
 	else:
@@ -23,9 +23,9 @@ post_delete.connect(saveSiteStats,sender=Game)
 def imageBuilder(callback):
 	def returning_dec(fn):
 		def new_func(inst,*args,**kwargs):
-			cacheString = "site_%s_%s"%(fn.__name__,inst.pk)
+			cacheString = "site_%s_%s"%(callback.__name__,inst.pk)
 			if(not cache.get(cacheString)):
-				callback(type(inst),instance=inst,key=cacheString)
+				callback(type(inst),instance=inst)
 			settings = cache.get(cacheString)
 			if(not settings['clean']):
 				retval = fn(inst,settings,*args,**kwargs)

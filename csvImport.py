@@ -69,7 +69,6 @@ def importCsv(siteDetails,fileName,csvColumns):
 			moderator,created = Player.objects.get_or_create(name=modName,site=site)
 			if(created):
 				moderator.save()
-			print dln['GName'],start,end
 			game,gCreated = Game.objects.get_or_create(title=dln['GName'],defaults={'start_date':start,'end_date':end,'moderator':moderator,'gameType':dln['Type'],'site':site,'url':dln['url']})
 			if(created):
 				game.save()
@@ -80,7 +79,6 @@ def importCsv(siteDetails,fileName,csvColumns):
 				player,created = Player.objects.get_or_create(name=pName,site=site)
 				if(created):
 					player.save()
-				print pName
 				player.updateDates(game)
 				game.livedToEnd.add(player)
 			game.save()

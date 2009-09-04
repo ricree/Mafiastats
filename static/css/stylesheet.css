@@ -139,3 +139,11 @@ div.sidebar{
 	padding-top:20px;
 	padding-left:15px;
 }
+.wonText{
+	font-weight:bold;
+	color:green;
+}
+.lossText{
+	font-weight:bold;
+	color:red;
+}

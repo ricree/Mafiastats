@@ -46,8 +46,8 @@
 							<div class="span-6">
 								{{team.category.title}}
 							</div>
-							<div class="span-2">
-								<b>{%if team.won%}Won{%else%}Lost{%endif%}</b>
+							<div class="span-2 {%if team.won%}wonText{%else%}lossText{%endif%}">
+								{%if team.won%}Won{%else%}Lost{%endif%}
 							</div>
 						</div>
 						<div class="hlist">

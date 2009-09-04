@@ -42,12 +42,14 @@ def getPage(request,paginator,default=1,indexRange=2):
 def index(request):
 	site_list = Site.objects.all()[:5]
 	newest = Game.objects.order_by('-end_date')[0]
-	largest = max( ( (len(g.players()),g) for g in  Game.objects.all()))[1]
+	games = [ (g.num_players(),g) for g in  Game.objects.all()]
+	largest = max(games)[1]
+	smallest = min(games)[1]
 	totalPlayed = Game.objects.count()
 	numPlayers = Player.objects.count()
 	mostMod = max( ( (p.modded(),p) for p in Player.objects.all()))[1]
 	mostPlayed = Player.objects.order_by('-played')[0]
-	stats= [('Newest Game',newest),('Largest Game',largest),('Games Played',totalPlayed),('Number of Players',numPlayers),('Most Prolific Mod',mostMod),('Most Games Played',mostPlayed)]
+	stats= [('Newest Game',newest),('Largest Game',largest),('Smallest Game',smallest),('Games Played',totalPlayed),('Number of Players',numPlayers),('Most Prolific Mod',mostMod),('Most Games Played',mostPlayed)]
 	return render_to_response('index.html',{'stats':stats,'site_list' : site_list},context_instance=RequestContext(request))
 def site(request,site_id):
 	try:
@@ -224,6 +226,10 @@ def add(request, site_id=None):
 			if (form.cleaned_data['url'] is not ''):
 				game.url = form.cleaned_data['url']
 			game.save()
+			for pName in form.cleaned_data['livedToEnd']:
+				player,created = Player.objects.get_or_create(name=pName,site=site,defaults={'first_game':game,'last_game':game,'score':0,'played':1})
+				player.save()
+				game.livedToEnd.add(player)
 			for tForm in teamFormset.forms:
 				title = tForm.cleaned_data['title']
 				print tForm.cleaned_data['type']
@@ -300,6 +306,7 @@ def register(request):
 	return render_to_response("register.html",{'form':form},context_instance=RequestContext(request))
 
 def edit(request,game_id):
+	game = get_object_or_404(Game,pk=game_id)
 	if(request.method=="POST"):
 		form = AddGameForm(request.POST)
 		teamForm = TeamFormSetEdit(request.POST,prefix="teamForm")
@@ -339,7 +346,7 @@ def edit(request,game_id):
 	else:
 		game = get_object_or_404(Game,pk=game_id)
 		teams = Team.objects.filter(game=game)
-		gameData = {'title':game.title,'url':game.url,'moderator':game.moderator.name,'start_date':game.start_date,'end_date':game.end_date,'type':game.gameType,'game_id':game.id}
+		gameData = {'title':game.title,'url':game.url,'livedToEnd':[p.name for p in game.livedToEnd.all()],'moderator':game.moderator.name,'start_date':game.start_date,'end_date':game.end_date,'type':game.gameType,'game_id':game.id}
 		teamData = [{'title':team.title,'won':team.won,'type':team.category.title,'team_id':team.id,'players':[p.name for p in team.players.all()]} for team in teams]
 		roleData = [{'title':role.title,'player':role.player.name,'text':role.text} for role in Role.objects.filter(game=game)]
 		form = AddGameForm(gameData)

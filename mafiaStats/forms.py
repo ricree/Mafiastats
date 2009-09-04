@@ -15,6 +15,8 @@ class AddGameForm(forms.Form):
 	game_id = forms.CharField(max_length=100,required=False,widget=forms.HiddenInput())
 	type = forms.ChoiceField([(u'full','Full Game'),
         (u'mini','Mini Game'), (u'irc','IRC Game')])
+	livedToEnd=NameList(choices=[],widget=NameBox, initial=[])
+
 	#site = forms.ModelChoiceField(Site)
 class AddRoleForm(forms.Form):
 	title = forms.CharField(max_length=50)
