@@ -191,7 +191,6 @@ def scoreboard(request, site_id=None):
 	return render_to_response('scoreboard.html',args,context_instance=RequestContext(request))
 def moderators(request,site_id):
 	sortMethods={'name':'name','modded':playersByModerated,'largest':modsByLargestGame,'default':'name'}
-	page=int(page)
 	modsPerPage=15
 	if(site_id != ''):
 		site = get_object_or_404(Site,id=site_id)
