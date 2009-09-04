@@ -74,7 +74,6 @@ def site(request,site_id):
 		count+=1
 	imgLink = getSiteImage(Site.objects.get(pk=site_id))
 	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage,'newest':newest,'catImg':imgLink},context_instance=RequestContext(request))
-#	return HttpResponse("Not yet implemented")
 def game(request, game_id):
 	game = get_object_or_404(Game, pk=game_id)
 	teams = Team.objects.filter(game=game).order_by('-won')
@@ -98,8 +97,34 @@ def player(request,player_id):
 	moderated = player.moderated_set.all()
 	return render_to_response('player.html',{'player':player,'played':played,'moderated':moderated, 'won':won,'lost':lost},context_instance=RequestContext(request))
 def playerPlayed(request,player_id):
-	return HttpResponse("Not yet implemented")
+	player = get_object_or_404(Player, pk=player_id)
+	sortMethods = {'team':'title','game':teamsByGame,'length':teamsByLength,'won':'won','default':'title'}
+	if (not request.is_ajax()):
+		def getCats():
+			for cat in Category.objects.all():
+				teams = [t for t in player.team_set.all() if t.category==cat]
+				total = len(teams)
+				wins = len([t for t in teams if t.won])
+				losses = total-wins
+				yield (cat.title,wins,losses,total)
+		cats = list(getCats())
+	else:
+		cats=[]
+	if(player.played >0):
+		survivalPercentage = (player.lived() *100)/player.played
+	else:
+		survivalPercentage = "N/A"
+	games = sortTable(request.GET,sortMethods,player.team_set.all())
+	paginator = Paginator(games,5)
+	page=getPage(request,paginator)
+	if request.is_ajax():
+		return render_to_response("playerGamesListing.html",{'player':player,'teams':page.object_list},context_instance=RequestContext(request))
+	sortMethods = sorted((key, (len(key)/3)+1) for key in sortMethods );
+	stats={'survivalPercentage':survivalPercentage}
+	return render_to_response('played.html',{'stats':stats,'sortMethods':sortMethods,'page':page,'player':player,'teams':page.object_list,'categories':cats},context_instance=RequestContext(request))
 def playerModerated(request,player_id):
+	player = get_object_or_404(Player,pk=player_id)
+	return render_to_response('modded.html',{'player':player},context_instance=RequestContext(request))
 	return HttpResponse("Not yet implemented")
 def get_bounds(perPage,page,num):
 	if (page <1):
@@ -181,7 +206,6 @@ def moderators(request,site_id):
 	args = {'page':page,'moderators':page.object_list}
 	args.update(funcArgs)
 	return render_to_response(responseTemplate,{'page':page,'moderators':page.object_list},context_instance=RequestContext(request))
-	return HttpResponse("Not yet implemented")
 def add(request, site_id=None):
 	if request.method=='POST':
 		form = AddGameForm(request.POST)
@@ -229,7 +253,6 @@ def add(request, site_id=None):
 					role.save()
 			game.save()
 			return HttpResponseRedirect(reverse('mafiastats_game',args=[game.id]))
-			return HttpResponse("Not yet implemented "+ str(name)+str(request.POST['form-0-players']))
 	else:
 		form =  AddGameForm()
 		teamFormset = TeamFormSet(prefix='teamForm')	

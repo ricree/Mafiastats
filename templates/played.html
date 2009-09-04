@@ -1,0 +1,58 @@
+{%extends "playerPage.html"%}
+{%block extra_scripts%}
+<script type="text/javascript" src="{{MEDIA_URL}}js/jqueryAjaxDivSort.js"></script>
+{%endblock%}
+{%block content%}
+<script type="text/javascript">
+	$(document).ready(function(){
+		{%for key,width in sortMethods%}
+			$("#{{key}}Label").ajaxDivSort("{{key}}","#listing");
+		{%endfor%}
+	});
+</script>
+<div class="span-22">
+	<div class="span-8 infoBox">
+		Games Played: {{player.played}}<br/>
+		Games Won: {{player.wins}}<br/>
+		Games Lost: {{player.losses}}<br/>
+		Percent of Games Survived: {{stats.survivalPercentage}}%<br/>
+	</div>
+	<div class="span-2">&nbsp;</div>
+	<div class="span-10 infoBox">
+		<div class="span-3">
+		Game Type
+		</div>
+		<div class="span-2" style="text-align:center;">
+		Won
+		</div>
+		<div class="span-2"  style="text-align:center;">
+		Lost
+		</div>
+		<div class="span-2" style="text-align:center;">
+		Total
+		</div>
+		<div class="span-8" id="catListing">
+		{%include "playedCatlisting.html"%}
+		</div>
+	</div>
+</div>
+<div class="span-20">
+<div class="span-9">
+<div id="sortButtons">
+	<div class="span-22">
+	<div class="span-2"><b>Sort By:</b></div>
+	{%for meth,width in sortMethods%}
+		{%ifnotequal meth "default"%}
+		<div id="{{meth}}Label" class="colHeaderNormal span-{{width}}" style="text-align:center;border-style:solid;border-width:1px;margin-left:1px!important;margin-right:1px!important;padding-left:3px;padding-right:3px;margin-bottom:10px">{{meth}}</div>
+		{%endifnotequal%}
+	{%endfor%}
+	</div>
+	<div class="span-5">
+	{%include "pagePrint.html"%}
+	</div>
+</div>
+<div id="listing">
+{%include "playerGamesListing.html"%}
+</div>
+</div>
+{%endblock%}

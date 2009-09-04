@@ -72,6 +72,9 @@ class Player(models.Model):
 	clearCache = makeClearCache()
 
 	@cacheResult
+	def lived(self):
+		return self.game_set.count()
+	@cacheResult
 	def wins(self):
 		#cName = '%s_%s_wins'%(self.site.id,self.name)
 		#wins = cache.get(cName)
