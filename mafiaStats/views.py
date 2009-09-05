@@ -351,7 +351,8 @@ def edit(request,game_id):
 	else:
 		game = get_object_or_404(Game,pk=game_id)
 		teams = Team.objects.filter(game=game)
-		gameData = {'title':game.title,'url':game.url,'livedToEnd':[p.name for p in game.livedToEnd.all()],'moderator':game.moderator.name,'start_date':game.start_date,'end_date':game.end_date,'type':game.gameType,'game_id':game.id}
+		dateFormat = "%m/%d/%Y"
+		gameData = {'title':game.title,'url':game.url,'livedToEnd':[p.name for p in game.livedToEnd.all()],'moderator':game.moderator.name,'start_date':game.start_date.strftime(dateFormat),'end_date':game.end_date.strftime(dateFormat),'type':game.gameType,'game_id':game.id}
 		teamData = [{'title':team.title,'won':team.won,'type':team.category.title,'team_id':team.id,'players':[p.name for p in team.players.all()]} for team in teams]
 		roleData = [{'title':role.title,'player':role.player.name,'text':role.text} for role in Role.objects.filter(game=game)]
 		form = AddGameForm(gameData)
