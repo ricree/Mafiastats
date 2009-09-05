@@ -23,7 +23,7 @@ div#pageContent{
 	padding:5px;
 	padding-bottom:20px;
 	min-height:500px;
-	font-size: medium;
+	font-size: 1.3em;
 }
 fieldset{
 background-color:#DDDDE0;
@@ -36,7 +36,7 @@ padding:0px;
 div.infoBox
 {
 	margin-bottom:15px;
-	background-color: #C1C6DC;
+	background-color: #FDFDFD;/*#C1C6DC;*/
 	-moz-border-radius:10px;
 	-webkit-border-radius:10px;
 	border-width: 2px;

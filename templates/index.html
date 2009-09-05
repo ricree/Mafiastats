@@ -10,13 +10,15 @@
 {%block content %}{% if site_list %}
 <div class="span-10">
 	<ul>
+	<h3>Sites Being Tracked</h3>
 	{% for site in site_list %}
 		<li><a href="{%url mafiastats_site site.id%}"> {{site.title}}</a></li>
 	{%endfor%}
 	</ul>
 </div>
+<div class="span-10">
 <div class="span-10 infoBox">
-	{% for label,stat in stats%}
+	{% for label,stat in stats.sidebar%}
 		<div class="span-4">
 			{{label}}
 		</div>
@@ -30,6 +32,25 @@
 		{%endif%}{%endif%}
 		</div>
 	{%endfor%}
+</div>
+<div class="span-15" style="padding-right:5%">
+	<div class="span-7">
+		<h5>Most Winning</h5>
+		<ol>
+		{%for player in stats.win_list%}
+		<li><a href="{%url mafiastats_player player.id%}">{{player.name}}</a> - <a href="{%url mafiastats_site player.site.id%}">{{player.site.shortName}}</a>: {{player.wins}}
+		{%endfor%}
+		</ol>
+	</div>
+	<div class="span-7">
+		<h5>Most Losing</h5>
+		<ol>
+		{%for player in stats.loss_list%}
+		<li><a href="{%url mafiastats_player player.id%}">{{player.name}}</a> - <a href="{%url mafiastats_site player.site.id%}">{{player.site.shortName}}</a>: {{player.losses}}
+		{%endfor%}
+		</ol>
+	</div>
+</div>
 </div>
 {%else %}
 	<p>There do not seem to be any sites available</p>

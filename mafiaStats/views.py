@@ -7,7 +7,7 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,permission_required,user_passes_test
 from django.core.paginator import Paginator, InvalidPage,EmptyPage
 from django.core.urlresolvers import reverse
 from itertools import chain
@@ -47,9 +47,12 @@ def index(request):
 	smallest = min(games)[1]
 	totalPlayed = Game.objects.count()
 	numPlayers = Player.objects.count()
+	totalPlayers = Player.objects.count()
+	win_list = playersByWins(Player.objects.all(),True)[0:5]
+	loss_list = playersByLosses(Player.objects.all(),True)[0:5]
 	mostMod = max( ( (p.modded(),p) for p in Player.objects.all()))[1]
 	mostPlayed = Player.objects.order_by('-played')[0]
-	stats= [('Newest Game',newest),('Largest Game',largest),('Smallest Game',smallest),('Games Played',totalPlayed),('Number of Players',numPlayers),('Most Prolific Mod',mostMod),('Most Games Played',mostPlayed)]
+	stats= {'win_list':win_list,'loss_list':loss_list,'sidebar':[('Newest Game',newest),('Largest Game',largest),('Smallest Game',smallest),('Games Played',totalPlayed),('Number of Players',numPlayers),('Most Prolific Mod',mostMod),('Most Games Played',mostPlayed)]}
 	return render_to_response('index.html',{'stats':stats,'site_list' : site_list},context_instance=RequestContext(request))
 def site(request,site_id):
 	try:
@@ -305,6 +308,7 @@ def register(request):
 		form=UserCreationForm()
 	return render_to_response("register.html",{'form':form},context_instance=RequestContext(request))
 
+@permission_required('mafiaStats.game')
 def edit(request,game_id):
 	game = get_object_or_404(Game,pk=game_id)
 	if(request.method=="POST"):

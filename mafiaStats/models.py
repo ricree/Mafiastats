@@ -40,6 +40,14 @@ class Category(models.Model):
 	class Meta:
 		verbose_name = 'Category'
 		verbose_name_plural = 'Categories'
+	@cacheResult
+	def avgWinPct(self):
+		wins = Team.objects.filter(category=self,won=True).count()
+		total = Team.objects.filter
+		if (total>0):
+			return (wins*100)/total
+		else:
+			 return "N/A"
 	def games_won(self, site):
 		return Team.objects.filter(site=site, category = self, won=True).count()
 	def games_lost(self, site):
