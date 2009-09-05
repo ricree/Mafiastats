@@ -309,7 +309,8 @@ def register(request):
 		form=UserCreationForm()
 	return render_to_response("register.html",{'form':form},context_instance=RequestContext(request))
 
-@permission_required('mafiaStats.game')
+#@permission_required('mafiaStats.game')
+@login_required
 def edit(request,game_id):
 	game = get_object_or_404(Game,pk=game_id)
 	if(request.method=="POST"):
@@ -329,6 +330,12 @@ def edit(request,game_id):
 			game.start_date = form.cleaned_data['start_date']
 			game.end_date = form.cleaned_data['end_date']
 			game.save()
+			game.livedToEnd.clear()
+			for pName in form.cleaned_data['livedToEnd']:
+				player, created = Player.objects.get_or_create(name=pName,site=game.site,defaults={'firstGame':game,'lastGame':game})
+				if created:
+					player.save()
+				game.livedToEnd.add(player)
 			for t in Team.objects.filter(game=game):
 				t.delete()
 			for tForm in teamForm.forms:
@@ -351,7 +358,8 @@ def edit(request,game_id):
 	else:
 		game = get_object_or_404(Game,pk=game_id)
 		teams = Team.objects.filter(game=game)
-		gameData = {'title':game.title,'url':game.url,'livedToEnd':[p.name for p in game.livedToEnd.all()],'moderator':game.moderator.name,'start_date':game.start_date,'end_date':game.end_date,'type':game.gameType,'game_id':game.id}
+		dateFormat = "%m/%d/%Y"
+		gameData = {'title':game.title,'url':game.url,'livedToEnd':[p.name for p in game.livedToEnd.all()],'moderator':game.moderator.name,'start_date':game.start_date.strftime(dateFormat),'end_date':game.end_date.strftime(dateFormat),'type':game.gameType,'game_id':game.id}
 		teamData = [{'title':team.title,'won':team.won,'type':team.category.title,'team_id':team.id,'players':[p.name for p in team.players.all()]} for team in teams]
 		roleData = [{'title':role.title,'player':role.player.name,'text':role.text} for role in Role.objects.filter(game=game)]
 		form = AddGameForm(gameData)
