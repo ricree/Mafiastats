@@ -41,3 +41,11 @@ def gamesByLength(games,reverse):
 
 def gamesByPlayers(games,reverse):
 	return sorted(games,(lambda x,y:cmp(x.num_players(),y.num_players())),reverse=reverse)
+def teamsByGame(teams,reverse):
+	return sorted(teams,(lambda x,y:cmp(x.game.title,y.game.title)),reverse=reverse)
+def teamsByLength(teams,reverse):
+	return sorted(teams,(lambda x,y:cmp(x.game.length(),y.game.length())),reverse=reverse)
+def sequenceByElmnt(elNumb):
+	def sortFunc(sequence,reverse):
+		return sorted(sequence,(lambda x,y:cmp(x[elNumb],y[elNumb])),reverse=reverse)
+	return sortFunc

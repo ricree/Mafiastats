@@ -1,0 +1,17 @@
+		{%for label, won,lost,total in categories%}
+		<div class="span-10">
+			<div class="span-3">
+				{{label}}
+			</div>
+			<div class="span-2" style="text-align:center;">
+				{{won}}
+			</div>
+			<div class="span-2" style="text-align:center;">
+				{{lost}}
+			</div>
+			<div class="span-2" style="text-align:center;">
+				{{total}}
+			</div>
+		</div>
+		{%endfor%}
+

@@ -2,7 +2,7 @@
 {%load comments%}
 {%block title%}Mafia Stats - {{game.title}} - {{game.site.title}}{%endblock%}
 {%block header%}<h1>{{game.title}}</h1>{%endblock%}
-{%block menu %}<a class="menuItem" href="/stat/site/{{game.site.id}}/">{{game.site.shortName}} Stats</a><a class="menuItem" href="/stat/game/{{game.id}}/edit">Edit Game</a>{%endblock%}
+{%block menu %}<a class="menuItem" href="{%url mafiastats_site game.site.id%}">{{game.site.shortName}} Stats</a>{%if can_edit%}<a class="menuItem" href="{%url mafiastats_edit game.id%}">Edit Game</a>{%endif%}{%endblock%}
 {%block content%}
 <script type="text/javascript">
 	$(document).ready(function(){
@@ -15,7 +15,7 @@
 		<div class="span-15 infoBox">
 			<div class = "span-7">
 				<b>{%if game.url%}<a href="{{game.url}}">{%endif%}{{game.title}}{%if game.url%}</a>{%endif%}</b><br/>
-				Moderated By: <a href="/stat/player/{{game.moderator.id}}">{{game.moderator}}</a><br/>
+				Moderated By: <a href="{%url mafiastats_player game.moderator.id%}">{{game.moderator}}</a><br/>
 				Length: {{length.days}} days<br/>
 				Players: {{game.num_players}}<br/>
 			</div>
@@ -46,13 +46,13 @@
 							<div class="span-6">
 								{{team.category.title}}
 							</div>
-							<div class="span-2">
-								<b>{%if team.won%}Won{%else%}Lost{%endif%}</b>
+							<div class="span-2 {%if team.won%}wonText{%else%}lossText{%endif%}">
+								{%if team.won%}Won{%else%}Lost{%endif%}
 							</div>
 						</div>
 						<div class="hlist">
 							{%for player in tplayers%}
-							<a href="/stat/player/{{player.id}}/">{{player.name}}</a>
+							<a href="{%url mafiastats_player player.id%}">{{player.name}}</a>
 							{%endfor%}
 						</div>
 					</div>
@@ -78,16 +78,17 @@
 						{%if comment.user_url%}<a href="{{comment.user_url}}">{%endif%}{{comment.user_name}}{%if comment.user_url%}</a>{%endif%} at {{comment.submit_date|date:"g:i A T"}} on {{comment.submit_date|date:"D M j,Y"}}
 					</div>
 					</div>
+					{%empty%}
+						<h5>No one has commented on this game yet</h5><br/><br/>
 					{%endfor%}
-					Comments will be enabled soon
 					{%render_comment_form for game%}
 				</div>
 			</div>
 		</div>
 		<div class="span-3 sidebar">
-			<h3>Players</h3>
-			{%for player in players%}
-			<a href="/stat/player/{{player.id}}/">{{player}}</a><br/>
+			<h4>Survived</h4>
+			{%for player in game.livedToEnd.all%}
+			<a href="{%url mafiastats_player player.id%}">{{player}}</a><br/>
 			{%endfor%}
 		</div>
 	</div>

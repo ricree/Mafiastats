@@ -1,0 +1,6 @@
+{%for team in teams%}
+<div class="span-11 ui-corners-all" style="margin:10px;padding:2px;background-color:#E0E0E0;">
+	<a href="{%url mafiastats_game team.game.id%}">{{team.game.title}}</a> {{team.game.start_date|date:"d M y"}} - {{team.game.end_date|date:"d M y"}} <br/>
+{%if team.won%}won{%else%}lost{%endif%} with <a href="{%url mafiastats_game team.game.id%}#{{team.id}}">{{team.title}}</a>
+</div>
+{%endfor%}

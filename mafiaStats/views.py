@@ -1,19 +1,21 @@
 # Create your views here.
 from django.http import HttpResponse, Http404,HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
-from mafiaStats.models import Site, Game, Team, Category,Player,Role
-from mafiaStats.forms import AddGameForm,TeamFormSet,TeamFormSetEdit,AddTeamForm,RoleFormSet
+from models import Site, Game, Team, Category,Player,Role
+from forms import AddGameForm,TeamFormSet,TeamFormSetEdit,AddTeamForm,RoleFormSet
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,permission_required,user_passes_test
 from django.core.paginator import Paginator, InvalidPage,EmptyPage
+from django.core.urlresolvers import reverse
 from itertools import chain
 from django.views.decorators.cache import cache_page
 import json
 from postmarkup import render_bbcode
 from sortMethods import *
+from mafiaStats.signalHandlers import getSiteImage
 
 def getPage(request,paginator,default=1,indexRange=2):
 	try:
@@ -39,7 +41,19 @@ def getPage(request,paginator,default=1,indexRange=2):
 
 def index(request):
 	site_list = Site.objects.all()[:5]
-	return render_to_response('index.html',{'site_list' : site_list},context_instance=RequestContext(request))
+	newest = Game.objects.order_by('-end_date')[0]
+	games = [ (g.num_players(),g) for g in  Game.objects.all()]
+	largest = max(games)[1]
+	smallest = min(games)[1]
+	totalPlayed = Game.objects.count()
+	numPlayers = Player.objects.count()
+	totalPlayers = Player.objects.count()
+	win_list = playersByWins(Player.objects.all(),True)[0:5]
+	loss_list = playersByLosses(Player.objects.all(),True)[0:5]
+	mostMod = max( ( (p.modded(),p) for p in Player.objects.all()))[1]
+	mostPlayed = Player.objects.order_by('-played')[0]
+	stats= {'win_list':win_list,'loss_list':loss_list,'sidebar':[('Newest Game',newest),('Largest Game',largest),('Smallest Game',smallest),('Games Played',totalPlayed),('Number of Players',numPlayers),('Most Prolific Mod',mostMod),('Most Games Played',mostPlayed)]}
+	return render_to_response('index.html',{'stats':stats,'site_list' : site_list},context_instance=RequestContext(request))
 def site(request,site_id):
 	try:
 		p = Site.objects.get(pk=site_id)
@@ -63,8 +77,8 @@ def site(request,site_id):
 		if (game.firstGame_set.count() >0):
 			newest = game.firstGame_set.all()[0]
 		count+=1
-	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage,'newest':newest},context_instance=RequestContext(request))
-#	return HttpResponse("Not yet implemented")
+	imgLink = getSiteImage(Site.objects.get(pk=site_id))
+	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage,'newest':newest,'catImg':imgLink},context_instance=RequestContext(request))
 def game(request, game_id):
 	game = get_object_or_404(Game, pk=game_id)
 	teams = Team.objects.filter(game=game).order_by('-won')
@@ -78,7 +92,8 @@ def game(request, game_id):
 	numWinners =teams.filter(won=True).count()
 	teams=[(team,team.players.all().order_by('name')) for team in teams]
 	roles=Role.objects.filter(game=game)
-	return render_to_response('game.html', {'game':game, 'teams':teams, 'num_players' : numPlayers, 'length':length, 'next':'/stat/game/%s/'%game_id,'players':players,'winners':winners,'roles':roles},context_instance=RequestContext(request))
+	can_edit = request.user.has_perm('mafiaStats.game')
+	return render_to_response('game.html', {'can_edit':can_edit,'game':game, 'teams':teams, 'num_players' : numPlayers, 'length':length, 'next':reverse('mafiastats_game',args=[int(game_id)]),'players':players,'winners':winners,'roles':roles},context_instance=RequestContext(request))
 
 def player(request,player_id):
 	player = get_object_or_404(Player, pk=player_id)
@@ -88,8 +103,34 @@ def player(request,player_id):
 	moderated = player.moderated_set.all()
 	return render_to_response('player.html',{'player':player,'played':played,'moderated':moderated, 'won':won,'lost':lost},context_instance=RequestContext(request))
 def playerPlayed(request,player_id):
-	return HttpResponse("Not yet implemented")
+	player = get_object_or_404(Player, pk=player_id)
+	sortMethods = {'team':'title','game':teamsByGame,'length':teamsByLength,'won':'won','default':'title'}
+	if (not request.is_ajax()):
+		def getCats():
+			for cat in Category.objects.all():
+				teams = [t for t in player.team_set.all() if t.category==cat]
+				total = len(teams)
+				wins = len([t for t in teams if t.won])
+				losses = total-wins
+				yield (cat.title,wins,losses,total)
+		cats = list(getCats())
+	else:
+		cats=[]
+	if(player.played >0):
+		survivalPercentage = (player.lived() *100)/player.played
+	else:
+		survivalPercentage = "N/A"
+	games = sortTable(request.GET,sortMethods,player.team_set.all())
+	paginator = Paginator(games,5)
+	page=getPage(request,paginator)
+	if request.is_ajax():
+		return render_to_response("playerGamesListing.html",{'player':player,'teams':page.object_list},context_instance=RequestContext(request))
+	sortMethods = sorted((key, (len(key)/3)+1) for key in sortMethods );
+	stats={'survivalPercentage':survivalPercentage}
+	return render_to_response('played.html',{'stats':stats,'sortMethods':sortMethods,'page':page,'player':player,'teams':page.object_list,'categories':cats},context_instance=RequestContext(request))
 def playerModerated(request,player_id):
+	player = get_object_or_404(Player,pk=player_id)
+	return render_to_response('modded.html',{'player':player},context_instance=RequestContext(request))
 	return HttpResponse("Not yet implemented")
 def get_bounds(perPage,page,num):
 	if (page <1):
@@ -103,14 +144,20 @@ def get_bounds(perPage,page,num):
 def games(request, site_id):
 	print "I was called"
 	gamesPerPage = 5
-	site = get_object_or_404(Site,id=site_id)
+	if(site_id !=''):
+		site = get_object_or_404(Site,id=site_id)
+		funcArgs= {'site':site}
+	else:
+		funcArgs={}
 	sortMethods = {'name':'title','moderator':'moderator','length':gamesByLength,'start':'start_date','end':'end_date','players':gamesByPlayers,'default':'end_date'}
-	p = sortTable(request.GET,sortMethods,Game.objects.filter(site=site))
+	p = sortTable(request.GET,sortMethods,Game.objects.filter(**funcArgs))
 	paginator = Paginator(p,gamesPerPage)
 	page=getPage(request,paginator)
 	respTemplate = "gamesListing.html" if request.is_ajax() else "games.html"
 	sortMethods = sorted((key, (len(key)/3)+1) for key in sortMethods );
-	return render_to_response(respTemplate,{'games':page.object_list,'page':page,'site':site,'sortMethods':sortMethods},context_instance=RequestContext(request))
+	args = {'games':page.object_list,'page':page,'sortMethods':sortMethods}
+	args.update(funcArgs)
+	return render_to_response(respTemplate,args,context_instance=RequestContext(request))
 
 def sortTable(GET,methods,query,defaultDir='down'):
 	reversals = {'up':False,'down':True}
@@ -124,10 +171,15 @@ def sortTable(GET,methods,query,defaultDir='down'):
 	return sortQuery(query,methods[methodStr],reversals[methodDir])
 
 @cache_page(60*20)
-def scoreboard(request, site_id):
+def scoreboard(request, site_id=None):
 	sortMethods={'score':'score','name':'name','wins':playersByWins,'losses':playersByLosses,'winPct':playersByWinPct,'modded':playersByModerated,'default':'score'}
-	site = get_object_or_404(Site, pk=site_id)
-	players = sortTable(request.GET,sortMethods,Player.objects.filter(site=site,played__gt=0))
+	if((site_id is not None)and(site_id != '')):
+		site = get_object_or_404(Site, pk=site_id)
+		funcArgs={'site':site}
+	else:
+		funcArgs = {}
+	print Player.objects.filter(played__gt=0,**funcArgs).count()
+	players = sortTable(request.GET,sortMethods,Player.objects.filter(played__gt=0,**funcArgs))
 #	players = [(player,player.score()) for player in players if player.played()>0]
 #	players.sort(cmp=(lambda (x,xs),(y,ys): cmp(ys,xs)))
 #	players,scores = zip(*players)
@@ -136,20 +188,29 @@ def scoreboard(request, site_id):
 	for player in page.object_list:
 		player.win_pct = (100* player.wins())/(player.losses() + player.wins())
 	if(request.is_ajax()):
-		return render_to_response('scoreBoardPresenter.html',{'site':site,'players':page.object_list,'page':page},context_instance=RequestContext(request))
-	return render_to_response('scoreboard.html', {'site':site,'players':page.object_list,'page':page},context_instance=RequestContext(request))
-def moderators(request,site_id,page=1):
+		args = {'players':page.object_list,'page':page}
+		args.update(funcArgs)
+		return render_to_response('scoreBoardPresenter.html',args,context_instance=RequestContext(request))
+	args = {'players':page.object_list,'page':page}
+	args.update(funcArgs)
+	print args
+	return render_to_response('scoreboard.html',args,context_instance=RequestContext(request))
+def moderators(request,site_id):
 	sortMethods={'name':'name','modded':playersByModerated,'largest':modsByLargestGame,'default':'name'}
-	page=int(page)
 	modsPerPage=15
-	moderators = list(set([game.moderator for game in Game.objects.filter(site=site_id)]))
+	if(site_id != ''):
+		site = get_object_or_404(Site,id=site_id)
+		funcArgs = {'site':site_id}
+	else:
+		funcArgs={}
+	moderators = list(set([game.moderator for game in Game.objects.filter(**funcArgs)]))
 	moderators = sortTable(request.GET,sortMethods,moderators)
 	paginator=Paginator(moderators,modsPerPage,orphans=5)
 	page = getPage(request,paginator)
-	site = get_object_or_404(Site,id=site_id)
 	responseTemplate = "moderatorsListing.html" if request.is_ajax() else "moderators.html"
-	return render_to_response(responseTemplate,{'page':page,'moderators':page.object_list,'site':site},context_instance=RequestContext(request))
-	return HttpResponse("Not yet implemented")
+	args = {'page':page,'moderators':page.object_list}
+	args.update(funcArgs)
+	return render_to_response(responseTemplate,{'page':page,'moderators':page.object_list},context_instance=RequestContext(request))
 def add(request, site_id=None):
 	if request.method=='POST':
 		form = AddGameForm(request.POST)
@@ -169,6 +230,10 @@ def add(request, site_id=None):
 			if (form.cleaned_data['url'] is not ''):
 				game.url = form.cleaned_data['url']
 			game.save()
+			for pName in form.cleaned_data['livedToEnd']:
+				player,created = Player.objects.get_or_create(name=pName,site=site,defaults={'first_game':game,'last_game':game,'score':0,'played':1})
+				player.save()
+				game.livedToEnd.add(player)
 			for tForm in teamFormset.forms:
 				title = tForm.cleaned_data['title']
 				print tForm.cleaned_data['type']
@@ -196,8 +261,7 @@ def add(request, site_id=None):
 					role,created = Role.objects.get_or_create(title=title,game=game,player=player,text=text)
 					role.save()
 			game.save()
-			return HttpResponseRedirect('/stat/game/'+str(game.id)+'/')
-			return HttpResponse("Not yet implemented "+ str(name)+str(request.POST['form-0-players']))
+			return HttpResponseRedirect(reverse('mafiastats_game',args=[game.id]))
 	else:
 		form =  AddGameForm()
 		teamFormset = TeamFormSet(prefix='teamForm')	
@@ -217,7 +281,7 @@ def add(request, site_id=None):
 	left_attrs = [("Team Name:","title"),('Team Type:','type'),('Won:','won')]
 	for tform in teamFormset.forms:
 		tform.left_attrs = [(label,tform[property],property) for label,property in left_attrs]
-	return render_to_response('addGame.html',{'game_form':form,'roleFormset':roleFormset,'teamFormset': teamFormset,'bodyscripts':bodyscripts,'sheets':sheets,'site':site,'id':site_id,'submit_link':'/stat/game/add/%s/'%site_id},context_instance=RequestContext(request))
+	return render_to_response('addGame.html',{'game_form':form,'roleFormset':roleFormset,'teamFormset': teamFormset,'bodyscripts':bodyscripts,'sheets':sheets,'site':site,'id':site_id,'submit_link':reverse('mafiastats_add',args=[site_id])},context_instance=RequestContext(request))
 def nameLookup(request):
 	if 'text' not in request.GET:
 		return HttpResponse("[]")
@@ -245,7 +309,9 @@ def register(request):
 		form=UserCreationForm()
 	return render_to_response("register.html",{'form':form},context_instance=RequestContext(request))
 
+@permission_required('mafiaStats.game')
 def edit(request,game_id):
+	game = get_object_or_404(Game,pk=game_id)
 	if(request.method=="POST"):
 		form = AddGameForm(request.POST)
 		teamForm = TeamFormSetEdit(request.POST,prefix="teamForm")
@@ -281,11 +347,11 @@ def edit(request,game_id):
 					role = Role(game=game,player=p,text=rForm.cleaned_data['text'],title=rForm.cleaned_data['title'])
 					role.save()
 			game.save()
-			return HttpResponseRedirect("/stat/game/%s/"%game.id)
+			return HttpResponseRedirect(reverse('mafiastats_game',args=[game.id]))
 	else:
 		game = get_object_or_404(Game,pk=game_id)
 		teams = Team.objects.filter(game=game)
-		gameData = {'title':game.title,'url':game.url,'moderator':game.moderator.name,'start_date':game.start_date,'end_date':game.end_date,'type':game.gameType,'game_id':game.id}
+		gameData = {'title':game.title,'url':game.url,'livedToEnd':[p.name for p in game.livedToEnd.all()],'moderator':game.moderator.name,'start_date':game.start_date,'end_date':game.end_date,'type':game.gameType,'game_id':game.id}
 		teamData = [{'title':team.title,'won':team.won,'type':team.category.title,'team_id':team.id,'players':[p.name for p in team.players.all()]} for team in teams]
 		roleData = [{'title':role.title,'player':role.player.name,'text':role.text} for role in Role.objects.filter(game=game)]
 		form = AddGameForm(gameData)
@@ -296,4 +362,4 @@ def edit(request,game_id):
 		tform.left_attrs = [(label,tform[property],property) for label,property in left_attrs]
 	sheets = (form.media+teamForm.media+roleForm.media).render_css()
 	bodyscripts=(form.media+teamForm.media +roleForm.media).render_js()
-	return render_to_response("addGame.html",{'game_form':form,'teamFormset':teamForm,'roleFormset':roleForm,'site':game.site,'sheets':sheets,'id':game.site.id,'bodyscripts':bodyscripts,'submit_link':'/stat/game/%s/edit'%game_id},context_instance=RequestContext(request))
+	return render_to_response("addGame.html",{'game_form':form,'teamFormset':teamForm,'roleFormset':roleForm,'site':game.site,'sheets':sheets,'id':game.site.id,'bodyscripts':bodyscripts,'submit_link':reverse('mafiastats_edit',args=[int(game_id)])},context_instance=RequestContext(request))

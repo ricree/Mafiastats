@@ -40,6 +40,14 @@ class Category(models.Model):
 	class Meta:
 		verbose_name = 'Category'
 		verbose_name_plural = 'Categories'
+	@cacheResult
+	def avgWinPct(self):
+		wins = Team.objects.filter(category=self,won=True).count()
+		total = Team.objects.filter
+		if (total>0):
+			return (wins*100)/total
+		else:
+			 return "N/A"
 	def games_won(self, site):
 		return Team.objects.filter(site=site, category = self, won=True).count()
 	def games_lost(self, site):
@@ -71,6 +79,9 @@ class Player(models.Model):
 	played = models.IntegerField(default=0)
 	clearCache = makeClearCache()
 
+	@cacheResult
+	def lived(self):
+		return self.game_set.count()
 	@cacheResult
 	def wins(self):
 		#cName = '%s_%s_wins'%(self.site.id,self.name)
@@ -110,6 +121,10 @@ class Player(models.Model):
 		self.played=self.playedCalc()
 		super(Player,self).save(force_insert,force_update)
 	def updateDates(self,game):
+		if(not self.firstGame):
+			self.firstGame = game
+		if(not self.lastGame):
+			self.lastGame = game
 		if(game.start_date < self.firstGame.start_date):
 			self.firstGame =game
 		if(self.lastGame.end_date < game.end_date):

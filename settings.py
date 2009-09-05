@@ -10,7 +10,6 @@ ADMINS = (
 MANAGERS = ADMINS
 
 import os
-print 'Python path ', os.environ.get('PYTHONPATH')
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -95,6 +94,6 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'registration',
     'django_authopenid',
-	'django.contrib.comments',
+    'django.contrib.comments',
     'Mafiastats.mafiaStats'
 )

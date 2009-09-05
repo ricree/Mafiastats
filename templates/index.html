@@ -2,12 +2,56 @@
 {%block header%}
 <h1>Mafia Statistics</h1>
 {%endblock %}
+{%block menu%}
+<a class="menuItem" href="{%url mafiastats_scoreboard ''%}">Scoreboard</a>
+<a class="menuItem" href="{%url mafiastats_games ''%}">Games</a>
+<a class="menuItem" href="{%url mafiastats_moderators ''%}">Moderators</a>
+{%endblock%}
 {%block content %}{% if site_list %}
+<div class="span-10">
 	<ul>
+	<h3 style="padding-top:5px;">Sites Being Tracked</h3>
 	{% for site in site_list %}
-		<li><a href="/stat/site/{{site.pk}}/"> {{site.title}}</a></li>
+		<li style="padding-top:8px;"><a style="font-size:large;font-weight:bold;" href="{%url mafiastats_site site.id%}">{{site.title}}</a></li>
 	{%endfor%}
 	</ul>
+</div>
+<div class="span-10">
+<div class="span-10 infoBox">
+	{% for label,stat in stats.sidebar%}
+		<div class="span-4">
+			{{label}}
+		</div>
+		<div class="span-5">
+		{%if stat.name%}
+			<a href="{%url mafiastats_player stat.id%}">{{stat.name}}</a>
+		{%else%}{%if stat.title%}
+			<a href="{%url mafiastats_game stat.id%}">{{stat.title}}</a>
+			{%else%}
+			{{stat}}
+		{%endif%}{%endif%}
+		</div>
+	{%endfor%}
+</div>
+<div class="span-15" style="padding-right:5%">
+	<div class="span-7">
+		<h5>Most Winning</h5>
+		<ol>
+		{%for player in stats.win_list%}
+		<li><a href="{%url mafiastats_player player.id%}">{{player.name}}</a> - <a href="{%url mafiastats_site player.site.id%}">{{player.site.shortName}}</a>: {{player.wins}}
+		{%endfor%}
+		</ol>
+	</div>
+	<div class="span-7">
+		<h5>Most Losing</h5>
+		<ol>
+		{%for player in stats.loss_list%}
+		<li><a href="{%url mafiastats_player player.id%}">{{player.name}}</a> - <a href="{%url mafiastats_site player.site.id%}">{{player.site.shortName}}</a>: {{player.losses}}
+		{%endfor%}
+		</ol>
+	</div>
+</div>
+</div>
 {%else %}
 	<p>There do not seem to be any sites available</p>
 {%endif%}

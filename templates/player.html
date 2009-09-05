@@ -8,8 +8,8 @@
 	</div>
 	<div class="span-7">
 		<b>Games Moderated:&nbsp</b>{{moderated|length}}<br/>
-		<b>First Game:&nbsp</b><a href="/stat/game/{{player.firstGame.id}}/">{{player.firstGame.title}}</a><br/>
-		<b>Last Game:&nbsp</b><a href="/stat/game/{{player.lastGame.id}}/">{{player.lastGame.title}}</a><br/>
+		{%if player.firstGame%}<b>First Game:&nbsp</b><a href="{%url mafiastats_game player.firstGame.id%}">{{player.firstGame.title}}</a><br/>{%endif%}
+		{%if player.lastGame%}<b>Last Game:&nbsp</b><a href="{%url mafiastats_game player.lastGame.id%}">{{player.lastGame.title}}</a><br/>{%endif%}
 	</div>
 </div>
 <div class="span-20">
@@ -17,13 +17,13 @@
 	<a name="moderated"></a>
 	<h2>Games {{player.name}} has Moderated</h2>
 	{%for game in moderated%}
-	<a href="/stat/game/{{game.id}}/">{{game.title}}</a><br/>
+	<a href="{%url mafiastats_game game.id%}">{{game.title}}</a><br/>
 	{%endfor%}
 	{%endif%}
 	{%if played%}
-	<a name="stats/played"></a><h2>Games {{player.name}} Has Played</h2>
+	<a name="{%url mafiastats_played player.id%}"></a><h2>Games {{player.name}} Has Played</h2>
 	{%for team in played%}
-	<a href="/stat/game/{{team.game.id}}/">{{team.game.title}}</a> - {%if team.won%}Won{%else%}Lost{%endif%} as {{team.title}}<br/>
+	<a href="{%url mafiastats_game team.game.id%}">{{team.game.title}}</a> - {%if team.won%}Won{%else%}Lost{%endif%} as {{team.title}}<br/>
 	{%endfor%}
 	{%endif%}
 </div>

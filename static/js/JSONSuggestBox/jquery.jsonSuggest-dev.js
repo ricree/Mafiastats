@@ -222,8 +222,6 @@
 				}
 				sFilterTxt = sFilterTxt || '.*';
 				sFilterTxt = settings.wildCard ? '^' + sFilterTxt : sFilterTxt;
-//				alert(settings.wildCard);
-//				alert(sFilterTxt);
 				filterPatt = settings.caseSensitive ? new RegExp(sFilterTxt) : new RegExp(sFilterTxt,"i");
 				
 				// Get the results from the correct place. If settings.ajaxResults then results are retrieved from
@@ -233,9 +231,7 @@
 					if (settings.useJQueryAjax == true){
 						param = settings.requestParams;
 						param[settings.JQueryAjaxParam] = this.value
-//						alert("I got called: " + param["text"] + "\n" + this.value+"\n"+searchData);
 						$.getJSON(searchData,param,function(data,textstatus){
-							//alert("I got results\n"+data);
 							buildResults(data, sFilterTxt);});
 					}
 					else{
@@ -256,7 +252,6 @@
 						}
 					}
 				}
-				//alert(resultObjects);
 				buildResults(resultObjects, sFilterTxt);
 			}
 			

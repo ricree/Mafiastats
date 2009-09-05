@@ -54,7 +54,7 @@ function ajaxDivSort_register(elements,destination){
 	{
 		sortDirection=newDirection[sortDirection];
 	}else{
-		sortDirection='up';
+		sortDirection='down';
 		sortMethod=method;
 	}
 	setPages();
