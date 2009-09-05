@@ -10,9 +10,9 @@
 {%block content %}{% if site_list %}
 <div class="span-10">
 	<ul>
-	<h3>Sites Being Tracked</h3>
+	<h3 style="padding-top:5px;">Sites Being Tracked</h3>
 	{% for site in site_list %}
-		<li><a href="{%url mafiastats_site site.id%}"> {{site.title}}</a></li>
+		<li style="padding-top:8px;"><a style="font-size:large;font-weight:bold;" href="{%url mafiastats_site site.id%}">{{site.title}}</a></li>
 	{%endfor%}
 	</ul>
 </div>
