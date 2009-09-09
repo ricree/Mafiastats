@@ -14,7 +14,7 @@
 	<div class="span-19">
 		<div class="span-15 infoBox">
 			<div class = "span-7">
-				<b>{%if game.url%}<a href="{{game.url}}">{%endif%}{{game.title}}{%if game.url%}</a>{%endif%}</b><br/>
+				<b>{%if game.url%}<a style="position:relative;" href="{{game.url}}" target="_blank">{%endif%}{{game.title}}{%if game.url%}<span style="position:absolute;top:50%;right:0%;margin-top:-8px;margin-right:-18px;" class="icon-button ui-icon ui-icon-extlink"></span></a>{%endif%}</b><br/>
 				Moderated By: <a href="{%url mafiastats_player game.moderator.id%}">{{game.moderator}}</a><br/>
 				Length: {{length.days}} days<br/>
 				Players: {{game.num_players}}<br/>
