@@ -185,8 +185,6 @@ def scoreboard(request, site_id=None):
 #	players,scores = zip(*players)
 	paginator=Paginator(players,25)
 	page=getPage(request,paginator)
-	for player in page.object_list:
-		player.win_pct = (100* player.wins())/(player.losses() + player.wins())
 	if(request.is_ajax()):
 		args = {'players':page.object_list,'page':page}
 		args.update(funcArgs)
