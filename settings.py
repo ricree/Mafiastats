@@ -97,3 +97,5 @@ INSTALLED_APPS = (
     'django.contrib.comments',
     'Mafiastats.mafiaStats'
 )
+
+ACCOUNT_ACTIVATION_DAYS=7

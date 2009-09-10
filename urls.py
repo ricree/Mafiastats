@@ -2,6 +2,7 @@ from django.conf.urls.defaults import *
 from django.conf import settings
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
+from registration import views as reg_views
 admin.autodiscover()
 from Mafiastats.mafiaStats import urls as statUrls
 
@@ -19,6 +20,7 @@ urlpatterns = patterns('',
      (r'^stat/',include('Mafiastats.mafiaStats.urls')),
      url(r'^account/profile','Mafiastats.auth.views.profile',name='account_profile'),
      url(r'^account/register/$', 'django_authopenid.views.register', {'send_email':False},name='user_register'),
+     url(r'^account/signup/$',reg_views.register,name='registration_register'),
      url(r'^account/associate/complete/$', 'django_authopenid.views.complete_associate', {'send_email':False},name='user_complete_associate'),
      (r'^account/',include('django_authopenid.urls')),
      (r'^comments/',include('django.contrib.comments.urls')),
