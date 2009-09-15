@@ -1,8 +1,10 @@
 # Create your views here.
+import logging
 from django.http import HttpResponse, Http404,HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from models import Site, Game, Team, Category,Player,Role
 from forms import AddGameForm,TeamFormSet,TeamFormSetEdit,AddTeamForm,RoleFormSet
+from django.db import transaction
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.contrib.auth.forms import UserCreationForm
@@ -16,6 +18,12 @@ import json
 from postmarkup import render_bbcode
 from sortMethods import *
 from mafiaStats.signalHandlers import getSiteImage
+from django.conf import settings
+
+LOGGING_FILE = settings.SITE_ROOT+'/debug_log'
+logging.basicConfig(filename=LOGGING_FILE,level=logging.ERROR)
+
+
 
 def getPage(request,paginator,default=1,indexRange=2):
 	try:
@@ -209,57 +217,62 @@ def moderators(request,site_id):
 	args = {'page':page,'moderators':page.object_list}
 	args.update(funcArgs)
 	return render_to_response(responseTemplate,{'page':page,'moderators':page.object_list},context_instance=RequestContext(request))
+@transaction.commit_on_success
 def add(request, site_id=None):
 	if request.method=='POST':
 		form = AddGameForm(request.POST)
 		teamFormset = TeamFormSet(request.POST,prefix='teamForm')
 		roleFormset = RoleFormSet(request.POST,prefix='roleForm')
 		if(form.is_valid() and teamFormset.is_valid() and roleFormset.is_valid()):
+			try:
 			#return HttpResponse(formset.forms[0].cleaned_data['players'])
-			site = Site.objects.get(pk=site_id)
-			name = teamFormset.forms[0].cleaned_data['players']
-			moderator,created = Player.objects.get_or_create(name=form.cleaned_data['moderator'],site=site)
-			if(created):
-				moderator.save()
-			else:
-				moderator.clearCache()
-			game = Game(title=form.cleaned_data['title'],moderator=moderator,start_date = form.cleaned_data['start_date'], end_date=form.cleaned_data['end_date'],site=site,gameType=form.cleaned_data['type'])
-				
-			if (form.cleaned_data['url'] is not ''):
-				game.url = form.cleaned_data['url']
-			game.save()
-			for pName in form.cleaned_data['livedToEnd']:
-				player,created = Player.objects.get_or_create(name=pName,site=site,defaults={'first_game':game,'last_game':game,'score':0,'played':1})
-				player.save()
-				game.livedToEnd.add(player)
-			for tForm in teamFormset.forms:
-				title = tForm.cleaned_data['title']
-				print tForm.cleaned_data['type']
-				category = Category.objects.get(title=tForm.cleaned_data['type'])
-#				category = tForm.cleaned_data['type']
-				won = tForm.cleaned_data['won']
-				players = [Player.objects.get_or_create(name=p,site=site,defaults={'firstGame':game,'lastGame':game})[0] for p in tForm.cleaned_data['players']]
-				for p in players:
-					p.save()
-				team = Team(title=title,category=category,site=site,won=won,game=game)
-				team.save()
-				for p in players:
-					team.players.add(p)
-					p.updateDates(game)
-					p.clearCache()
-				team.save()
-				game.team_set.add(team)
-			for rForm in roleFormset.forms:
-				print "RFORM: ", rForm.cleaned_data,', ', len(roleFormset.forms)
-				if(rForm.has_changed()):
-					title = rForm.cleaned_data['title']
-					pName = rForm.cleaned_data['player']
-					text = render_bbcode(rForm.cleaned_data['text'])
-					player,created = Player.objects.get_or_create(name=pName,site=site,defaults={'firstGame':game,'lastGame':game})
-					role,created = Role.objects.get_or_create(title=title,game=game,player=player,text=text)
-					role.save()
-			game.save()
-			return HttpResponseRedirect(reverse('mafiastats_game',args=[game.id]))
+				site = Site.objects.get(pk=site_id)
+				name = teamFormset.forms[0].cleaned_data['players']
+				moderator,created = Player.objects.get_or_create(name=form.cleaned_data['moderator'],site=site)
+				if(created):
+					moderator.save()
+				else:
+					moderator.clearCache()
+				game = Game(title=form.cleaned_data['title'],moderator=moderator,start_date = form.cleaned_data['start_date'], end_date=form.cleaned_data['end_date'],site=site,gameType=form.cleaned_data['type'])
+					
+				if (form.cleaned_data['url'] is not ''):
+					game.url = form.cleaned_data['url']
+				game.save()
+				for pName in form.cleaned_data['livedToEnd']:
+					player,created = Player.objects.get_or_create(name=pName,site=site,defaults={'firstGame':game,'lastGame':game,'score':0,'played':1})
+					player.save()
+					game.livedToEnd.add(player)
+				for tForm in teamFormset.forms:
+					title = tForm.cleaned_data['title']
+					print tForm.cleaned_data['type']
+					category = Category.objects.get(title=tForm.cleaned_data['type'])
+	#				category = tForm.cleaned_data['type']
+					won = tForm.cleaned_data['won']
+					players = [Player.objects.get_or_create(name=p,site=site,defaults={'firstGame':game,'lastGame':game})[0] for p in tForm.cleaned_data['players']]
+					for p in players:
+						p.save()
+					team = Team(title=title,category=category,site=site,won=won,game=game)
+					team.save()
+					for p in players:
+						team.players.add(p)
+						p.updateDates(game)
+						p.clearCache()
+					team.save()
+					game.team_set.add(team)
+				for rForm in roleFormset.forms:
+					print "RFORM: ", rForm.cleaned_data,', ', len(roleFormset.forms)
+					if(rForm.has_changed()):
+						title = rForm.cleaned_data['title']
+						pName = rForm.cleaned_data['player']
+						text = render_bbcode(rForm.cleaned_data['text'])
+						player,created = Player.objects.get_or_create(name=pName,site=site,defaults={'firstGame':game,'lastGame':game})
+						role,created = Role.objects.get_or_create(title=title,game=game,player=player,text=text)
+						role.save()
+				game.save()
+				return HttpResponseRedirect(reverse('mafiastats_game',args=[game.id]))
+			except Exception as e:
+				logging.exception(e.message)
+				raise e#let the default behavior handle the error, we just want to log it
 	else:
 		form =  AddGameForm()
 		teamFormset = TeamFormSet(prefix='teamForm')	

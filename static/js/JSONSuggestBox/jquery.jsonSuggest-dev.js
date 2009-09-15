@@ -175,7 +175,7 @@
 					$(item).addClass('resultItem').
 						addClass((bOddRow) ? 'odd' : 'even').
 						click(function(n) { return function() {
-							selectResultItem(resultObjects[n]);												unsetBlockOnEnter();
+							selectResultItem(resultObjects[n]);												//unsetBlockOnEnter();
 						};}(i)).
 						mouseover(function(el) { return function() { 
 							setHoverClass(el); 
@@ -192,7 +192,7 @@
 				}
 				
 				if ($('div', results).length > 0) {
-					setBlockOnEnter();
+					//setBlockOnEnter();
 					currentSelection = undefined;
 					$(results).show().css('height', 'auto');
 					
