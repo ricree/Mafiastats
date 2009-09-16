@@ -354,6 +354,7 @@ def edit(request,game_id):
 				team.save()
 				for pName in tForm.cleaned_data['players']:
 					p, created = Player.objects.get_or_create(name=pName,site=game.site,defaults={'firstGame':game,'lastGame':game,'score':0,'played':0})
+					p.updateDates()
 					p.save()
 					team.players.add(p)
 				team.save()
