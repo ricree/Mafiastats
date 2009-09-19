@@ -251,6 +251,7 @@ def add(request, site_id=None):
 					players = [Player.objects.get_or_create(name=p,site=site,defaults={'firstGame':game,'lastGame':game})[0] for p in tForm.cleaned_data['players']]
 					for p in players:
 						p.save()
+					print "team %s: won: %s"%(title,won)
 					team = Team(title=title,category=category,site=site,won=won,game=game)
 					team.save()
 					for p in players:
@@ -354,7 +355,7 @@ def edit(request,game_id):
 				team.save()
 				for pName in tForm.cleaned_data['players']:
 					p, created = Player.objects.get_or_create(name=pName,site=game.site,defaults={'firstGame':game,'lastGame':game,'score':0,'played':0})
-					p.updateDates()
+					p.updateDates(game)
 					p.save()
 					team.players.add(p)
 				team.save()

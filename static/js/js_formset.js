@@ -23,7 +23,7 @@ function addForm(btn, prefix,context){
 	$("*[name^="+prefix+"]",row).each(function() {
 //		alert($(this).html());
 		updateElementIndex(this, prefix, formCount);
-		$(this).val('').attr('checked',false).filter("option").remove();
+		$(this).attr('checked',false).filter("[type!=checkbox]").val('').filter("option").remove();
 		if ($(this).hasClass("NameBox")){
 			$(this).empty();
 		}

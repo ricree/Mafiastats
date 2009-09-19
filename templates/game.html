@@ -2,7 +2,7 @@
 {%load comments%}
 {%block title%}Mafia Stats - {{game.title}} - {{game.site.title}}{%endblock%}
 {%block header%}<h1>{{game.title}}</h1>{%endblock%}
-{%block menu %}<a class="menuItem" href="{%url mafiastats_site game.site.id%}">{{game.site.shortName}} Stats</a>{%if can_edit%}<a class="menuItem" href="{%url mafiastats_edit game.id%}">Edit Game</a>{%endif%}{%endblock%}
+{%block menu %}<a class="menuItem" href="{%url mafiastats_site game.site.id%}">{{game.site.shortName}} Stats</a>{%if user.is_authenticated%}<a class="menuItem" href="{%url mafiastats_edit game.id%}">Edit Game</a>{%endif%}{%endblock%}
 {%block content%}
 <script type="text/javascript">
 	$(document).ready(function(){
