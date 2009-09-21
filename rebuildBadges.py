@@ -1,4 +1,4 @@
-from Mafiastats.mafiaStats.signalHandlers import setColorBadge,BuildColorBadgeForPlayer
+from Mafiastats.mafiaStats.signalHandlers import setColorBadge,buildColorBadgeForPlayer
 from Mafiastats.mafiaStats.models import Player
 
 def buildBadges():
