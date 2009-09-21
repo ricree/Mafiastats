@@ -1,6 +1,6 @@
 {%extends "playerPage.html"%}
 {%block content%}
-<div class="span-16 infoBox">
+<div class="span-20 infoBox">
 	<div class="span-8">
 		<b>Games Played:&nbsp</b>{{played|length}}<br/>
 		Games Won:{{won|length}}<br/>
@@ -12,7 +12,7 @@
 		{%if player.lastGame%}<b>Last Game:&nbsp</b><a href="{%url mafiastats_game player.lastGame.id%}">{{player.lastGame.title}}</a><br/>{%endif%}
 	</div>
 </div>
-<div class="span-20">
+<div class="span-12">
 	{%if moderated%}
 	<a name="moderated"></a>
 	<h2>Games {{player.name}} has Moderated</h2>
@@ -26,5 +26,13 @@
 	<a href="{%url mafiastats_game team.game.id%}">{{team.game.title}}</a> - {%if team.won%}Won{%else%}Lost{%endif%} as {{team.title}}<br/>
 	{%endfor%}
 	{%endif%}
+</div>
+<div class="span-8 infoBox">
+	<h3>This you?</h3>
+	<h4>Show off your stats.</h4>
+	<img src="{{MEDIA_URL}}images/badges/badge_norm_{{player.site.id}}_{{player.id}}.png"></img>
+	<br/>
+	Copy and past the following code to share you stats with the world:
+	<pre style="overflow:auto;">[url={{request.get_host}}{%url mafiastats_player player.id%}][img]{{request.get_host}}{{MEDIA_URL}}images/badges/badge_norm_{{player.site.id}}_{{player.id}}.png[/img][/url]</pre>
 </div>
 {%endblock%}

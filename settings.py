@@ -1,5 +1,5 @@
 # Django settings for Mafiastats.project.
-from deploy_settings import DATABASE_ENGINE,DATABASE_NAME,DATABASE_USER,DATABASE_PASSWORD,DATABASE_HOST,DATABASE_PORT,SECRET_KEY,SITE_ROOT,DEBUG,FONT_DIRECTORY
+from deploy_settings import DATABASE_ENGINE,DATABASE_NAME,DATABASE_USER,DATABASE_PASSWORD,DATABASE_HOST,DATABASE_PORT,SECRET_KEY,SITE_ROOT,DEBUG,FONT_DIRECTORY,DOMAIN_NAME
 
 TEMPLATE_DEBUG = DEBUG
 
@@ -56,7 +56,7 @@ TEMPLATE_CONTEXT_PROCESSORS = ("django.core.context_processors.auth",
 "django.core.context_processors.debug",
 "django.core.context_processors.i18n",
 "django.core.context_processors.media",
-"django.core.context_processors.debug",
+"django.core.context_processors.request",
 'django_authopenid.context_processors.authopenid',
 )
 
