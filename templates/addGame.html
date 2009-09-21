@@ -38,6 +38,11 @@ $(document).ready(function(){
 	var siteId={{site.id}}
 </script>
 <div>
+{%if game_form.errors or teamFormset.errors or roleFormset.errors%}
+<div class="ui-state-error span-18" style="position:relative;margin-top:5px;margin-bottom:5px;padding-left:20px;">
+	<span class="ui-icon ui-icon-alert" style="position:absolute;top:50%;left:0%;margin-top:-8px;margin-right:-18px;"></span> This form has errors that need to be fixed before the game can be saved
+</div>
+{%endif%}
 <form action="{{submit_link}}" method="post">
 <div class="span-12">
 {% for field in game_form%}

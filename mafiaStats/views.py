@@ -19,6 +19,7 @@ from postmarkup import render_bbcode
 from sortMethods import *
 from mafiaStats.signalHandlers import getSiteImage
 from django.conf import settings
+import datetime
 
 LOGGING_FILE = settings.SITE_ROOT+'/debug_log'
 logging.basicConfig(filename=LOGGING_FILE,level=logging.ERROR)
@@ -46,6 +47,8 @@ def getPage(request,paginator,default=1,indexRange=2):
 			retval.post_list+=[paginator.num_pages]
 	return retval
 
+#def tFroms(start):
+#	return ((datetime.datetime.now()-start).microseconds / 1000)
 
 def index(request):
 	site_list = Site.objects.all()[:5]

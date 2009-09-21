@@ -5,6 +5,7 @@ from django.core.cache import cache
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.font_manager import FontProperties
+import Image,ImageDraw,ImageFont
 
 def saveSiteStats(sender, **kwargs):
 	inst = kwargs['instance']
@@ -19,6 +20,44 @@ def saveSiteStats(sender, **kwargs):
 
 post_save.connect(saveSiteStats,sender=Game)
 post_delete.connect(saveSiteStats,sender=Game)
+
+def setColorBadge():
+	normFont = settings.FONT_DIRECTORY + "DejaVuSans.ttf"
+	boldFont = settings.FONT_DIRECTORY + "DejaVuSans-Bold.ttf"
+	fontUname = ImageFont.truetype(boldFont,13)
+	fontText = ImageFont.truetype(normFont,11)
+	fontTitle = ImageFont.truetype(boldFont,11)
+	base = Image.open(settings.MEDIA_ROOT+"/images/badgeBase.png")
+	mask = Image.open(settings.MEDIA_ROOT + "/images/badgeMask.png")
+	img = Image.new("RGB",base.size)
+	img.putalpha(0)
+	img.paste(base, (0,0)+base.size,mask)
+	return (img,{'name':fontUname,'title':fontTitle,'text':fontText})
+def BuildColorBadgeForPlayer(player,image_base,fonts):
+	img = image_base.copy()
+	textString = "%s Wins In %s Games"
+	drawing = ImageDraw.Draw(img)
+	drawing.text((2,18),"Mafia Stats",font=fonts['title'],fill="white")
+	drawing.text((5,2),player.name,font=fonts['name'],fill="white")
+	drawing.text((84,18),textString%(player.wins(),player.playedCalc()),font=fonts['text'],fill="white")
+	img.save(settings.MEDIA_ROOT+"/images/badges/badge_norm_%s_%s.png"%(player.site.id,player.id))
+
+
+
+def buildColorBadge(sender, **kwargs):
+	inst = kwargs['instance']
+	if sender is Game:
+		players = sender.players()
+	else:
+		players = []
+	img,fonts = setColorBadge()
+	for p in players:
+		buildColorBadgeForPlayer(p,img,fonts)
+
+post_save.connect(buildColorBadge,sender=Game)
+post_delete.connect(buildColorBadge,sender=Game)
+
+
 
 def imageBuilder(callback):
 	def returning_dec(fn):

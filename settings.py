@@ -1,5 +1,5 @@
 # Django settings for Mafiastats.project.
-from deploy_settings import DATABASE_ENGINE,DATABASE_NAME,DATABASE_USER,DATABASE_PASSWORD,DATABASE_HOST,DATABASE_PORT,SECRET_KEY,SITE_ROOT,DEBUG
+from deploy_settings import DATABASE_ENGINE,DATABASE_NAME,DATABASE_USER,DATABASE_PASSWORD,DATABASE_HOST,DATABASE_PORT,SECRET_KEY,SITE_ROOT,DEBUG,FONT_DIRECTORY
 
 TEMPLATE_DEBUG = DEBUG
 
@@ -63,7 +63,10 @@ TEMPLATE_CONTEXT_PROCESSORS = ("django.core.context_processors.auth",
 MIDDLEWARE_CLASSES = (
 	'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.gzip.GZipMiddleware',
+    'django.middleware.gzip.GZipMiddleware',)
+#if DEBUG:
+#	MIDDLEWARE_CLASSES +=('debug_toolbar.middleware.DebugToolbarMiddleware',)
+MIDDLEWARE_CLASSES +=(
     'django.middleware.http.ConditionalGetMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -95,6 +98,7 @@ INSTALLED_APPS = (
     'registration',
     'django_authopenid',
     'django.contrib.comments',
+    'debug_toolbar',
     'Mafiastats.mafiaStats'
 )
 
