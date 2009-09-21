@@ -21,9 +21,13 @@ def cacheResult(fn):
 
 def makeClearCache():
 	def clearCache(self):
-		for selfAttr in self.__dict__.values():
-			if hasattr(selfAttr,'needsCacheCleaning'):
-				cache.delete(selfAttr.needsCacheCleaning%(type(self).__name__,self.name))
+		for selfKey in dir(self):
+			try:
+				selfAttr = getattr(self,selfKey)
+			except:
+				selfAttr = None#we can't access certain attributes
+			if hasattr(selfAttr,'needsCleaning'):
+				cache.delete(selfAttr.needsCleaning%(type(self).__name__,self.pk))
 	return clearCache
 
 class Site(models.Model):

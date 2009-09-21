@@ -272,7 +272,9 @@ def add(request, site_id=None):
 						player,created = Player.objects.get_or_create(name=pName,site=site,defaults={'firstGame':game,'lastGame':game})
 						role,created = Role.objects.get_or_create(title=title,game=game,player=player,text=text)
 						role.save()
+				print 'starting save'
 				game.save()
+				print 'save done'
 				return HttpResponseRedirect(reverse('mafiastats_game',args=[game.id]))
 			except Exception as e:
 				logging.exception(e.message)

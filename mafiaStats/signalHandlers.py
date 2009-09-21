@@ -1,5 +1,5 @@
 from mafiaStats.models import Site,Game,Team,Category
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, post_delete,pre_save,pre_delete
 from django.conf import settings
 from django.core.cache import cache
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -33,7 +33,7 @@ def setColorBadge():
 	img.putalpha(0)
 	img.paste(base, (0,0)+base.size,mask)
 	return (img,{'name':fontUname,'title':fontTitle,'text':fontText})
-def BuildColorBadgeForPlayer(player,image_base,fonts):
+def buildColorBadgeForPlayer(player,image_base,fonts):
 	img = image_base.copy()
 	textString = "%s Wins In %s Games"
 	drawing = ImageDraw.Draw(img)
@@ -45,9 +45,10 @@ def BuildColorBadgeForPlayer(player,image_base,fonts):
 
 
 def buildColorBadge(sender, **kwargs):
+	print 'badge start'
 	inst = kwargs['instance']
 	if sender is Game:
-		players = sender.players()
+		players = inst.players()
 	else:
 		players = []
 	img,fonts = setColorBadge()
@@ -56,6 +57,23 @@ def buildColorBadge(sender, **kwargs):
 
 post_save.connect(buildColorBadge,sender=Game)
 post_delete.connect(buildColorBadge,sender=Game)
+
+
+def clearAll(sender, **kwargs):
+	inst = kwargs['instance']
+	if sender is Game:
+		players = inst.players()
+		if hasattr(inst,'clearCache'):
+			inst.clearCache()
+		if hasattr(inst.site,'clearCache'):
+			inst.site.clearCache()
+		for p in players:
+			if hasattr(p,'clearCache'):
+				p.clearCache()
+
+#clear beforehand so anything with a post handler is getting clear data
+pre_save.connect(clearAll,sender=Game)
+pre_delete.connect(clearAll,sender=Game)
 
 
 
