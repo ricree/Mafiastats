@@ -246,7 +246,10 @@ def add(request, site_id=None):
 					player.save()
 					game.livedToEnd.add(player)
 				for tForm in teamFormset.forms:
-					title = tForm.cleaned_data['title']
+					if 'title' in tForm.cleaned_data:
+						title = tForm.cleaned_data['title']
+					else:
+						title = tForm.cleaned_data['type'].title()
 					print tForm.cleaned_data['type']
 					category = Category.objects.get(title=tForm.cleaned_data['type'])
 	#				category = tForm.cleaned_data['type']
@@ -356,7 +359,11 @@ def edit(request,game_id):
 			for t in Team.objects.filter(game=game):
 				t.delete()
 			for tForm in teamForm.forms:
-				team = Team(game=game,title=tForm.cleaned_data['title'],category=Category.objects.get(title=tForm.cleaned_data['type']),site=game.site,won=tForm.cleaned_data['won'])
+				if 'title' in tForm.cleaned_data:
+					title = tForm.cleaned_data['title']
+				else:
+					title = tForm.cleaned_data['type'].title()
+				team = Team(game=game,title=title,category=Category.objects.get(title=tForm.cleaned_data['type']),site=game.site,won=tForm.cleaned_data['won'])
 				team.save()
 				for pName in tForm.cleaned_data['players']:
 					p, created = Player.objects.get_or_create(name=pName,site=game.site,defaults={'firstGame':game,'lastGame':game,'score':0,'played':0})
