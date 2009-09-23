@@ -246,7 +246,7 @@ def add(request, site_id=None):
 					player.save()
 					game.livedToEnd.add(player)
 				for tForm in teamFormset.forms:
-					if 'title' in tForm.cleaned_data:
+					if ('title' in tForm.cleaned_data) and (tForm.cleaned_data['title'] != ""):
 						title = tForm.cleaned_data['title']
 					else:
 						title = tForm.cleaned_data['type'].title()
@@ -359,7 +359,7 @@ def edit(request,game_id):
 			for t in Team.objects.filter(game=game):
 				t.delete()
 			for tForm in teamForm.forms:
-				if 'title' in tForm.cleaned_data:
+				if ('title' in tForm.cleaned_data) and (tForm.cleaned_data['title'] != ""):
 					title = tForm.cleaned_data['title']
 				else:
 					title = tForm.cleaned_data['type'].title()
