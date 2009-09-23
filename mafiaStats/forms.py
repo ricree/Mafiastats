@@ -26,7 +26,7 @@ RoleFormSet = formset_factory(AddRoleForm)
 
 
 class AddTeamForm(forms.Form):
-	title = forms.CharField(max_length=50)
+	title = forms.CharField(max_length=50,required=False)
 	won = forms.BooleanField(required=False)
 	choices = [(cat.title,cat.title) for cat in Category.objects.all()]
 	type = forms.ChoiceField(choices=choices)
