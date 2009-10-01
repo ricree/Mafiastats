@@ -214,3 +214,4 @@ class Role(models.Model):
 class Badge(models.Model):
 	user = models.ForeignKey(User)
 	format=models.CharField(max_length=200)
+	sites = models.ManyToManyField(Site)
