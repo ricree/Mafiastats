@@ -147,3 +147,9 @@ div.sidebar{
 	font-weight:bold;
 	color:red;
 }
+.header{
+	font-size:2.3em;
+	font-family:"Helvetica Neue",Arial,"Lucida Grande",sans-serif;
+	margin-right:20px;
+	font-weight:bold;
+}

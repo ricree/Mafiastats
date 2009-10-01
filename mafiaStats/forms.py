@@ -35,3 +35,6 @@ class AddTeamForm(forms.Form):
 	players = NameList(choices=[],widget=NameBox, initial=[])
 TeamFormSet = formset_factory(AddTeamForm, extra=1)
 TeamFormSetEdit  = formset_factory(AddTeamForm,extra=0)
+class LinkForm(forms.Form):
+	site = forms.ChoiceField(choices=[(site.id,site.title) for site in Site.objects.all()])
+	player = forms.CharField(max_length=75,widget=AutoTextBox())

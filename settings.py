@@ -61,7 +61,7 @@ TEMPLATE_CONTEXT_PROCESSORS = ("django.core.context_processors.auth",
 )
 
 MIDDLEWARE_CLASSES = (
-	'django.middleware.cache.UpdateCacheMiddleware',
+#	'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.gzip.GZipMiddleware',)
 #if DEBUG:
@@ -71,7 +71,7 @@ MIDDLEWARE_CLASSES +=(
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'django_authopenid.middleware.OpenIDMiddleware',
-	'django.middleware.cache.FetchFromCacheMiddleware',
+#	'django.middleware.cache.FetchFromCacheMiddleware',
 )
 
 ROOT_URLCONF = 'Mafiastats.urls'

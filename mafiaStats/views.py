@@ -3,7 +3,7 @@ import logging
 from django.http import HttpResponse, Http404,HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from models import Site, Game, Team, Category,Player,Role
-from forms import AddGameForm,TeamFormSet,TeamFormSetEdit,AddTeamForm,RoleFormSet
+from forms import AddGameForm,TeamFormSet,TeamFormSetEdit,AddTeamForm,RoleFormSet,LinkForm
 from django.db import transaction
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -24,6 +24,7 @@ import datetime
 LOGGING_FILE = settings.SITE_ROOT+'/debug_log'
 logging.basicConfig(filename=LOGGING_FILE,level=logging.ERROR)
 
+urlT = '<a href="%s">%s</a>'
 
 
 def getPage(request,paginator,default=1,indexRange=2):
@@ -112,7 +113,11 @@ def player(request,player_id):
 	won = player.team_set.filter(won=True)
 	lost = player.team_set.filter(won=False)
 	moderated = player.moderated_set.all()
-	return render_to_response('player.html',{'player':player,'played':played,'moderated':moderated, 'won':won,'lost':lost},context_instance=RequestContext(request))
+	stats = {'width':20,'columns':[{'width':5,'contents'
+		:[('Games Played',played.count()),('Games Won',won.count()),('Games Lost',lost.count())]},
+	{'width':9,'contents':
+		[('Games Moderated',moderated.count()),('First Game',urlT%(reverse('mafiastats_game',args=[player.firstGame.id]),player.firstGame.title)),('Last Game',urlT%(reverse('mafiastats_game',args=[player.lastGame.id]),player.lastGame.title))]}]}
+	return render_to_response('player.html',{'stats':stats,'player':player,'played':played,'moderated':moderated, 'won':won,'lost':lost},context_instance=RequestContext(request))
 def playerPlayed(request,player_id):
 	player = get_object_or_404(Player, pk=player_id)
 	sortMethods = {'team':'title','game':teamsByGame,'length':teamsByLength,'won':'won','default':'title'}
@@ -331,6 +336,7 @@ def register(request):
 
 #@permission_required('mafiaStats.game')
 @login_required
+@transaction.commit_on_success
 def edit(request,game_id):
 	game = get_object_or_404(Game,pk=game_id)
 	if(request.method=="POST"):
@@ -396,3 +402,55 @@ def edit(request,game_id):
 	sheets = (form.media+teamForm.media+roleForm.media).render_css()
 	bodyscripts=(form.media+teamForm.media +roleForm.media).render_js()
 	return render_to_response("addGame.html",{'game_form':form,'teamFormset':teamForm,'roleFormset':roleForm,'site':game.site,'sheets':sheets,'id':game.site.id,'bodyscripts':bodyscripts,'submit_link':reverse('mafiastats_edit',args=[int(game_id)])},context_instance=RequestContext(request))
+
+@transaction.commit_on_success
+@login_required
+def link(request):
+	form = LinkForm()
+	if (request.method == "POST"):
+		form = LinkForm(request.POST)
+		if (form.is_valid()):
+			site = get_object_or_404(Site,pk=int(form.cleaned_data['site']))
+			player = get_object_or_404(Player,name=form.cleaned_data['player'],site=site)
+			player.user = request.user
+			player.save()
+			return HttpResponseRedirect(reverse('account_profile'))
+	bodyscripts= form.media.render_js()
+	sheets = form.media.render_css()
+	defaultSite = form.fields['site'].choices[0][0]
+	return render_to_response("link.html",{'form':form,'default_site':defaultSite,'sheets':sheets,'bodyscripts':bodyscripts},context_instance=RequestContext(request))
+
+def profile(request,pk=""):
+	if((not request.user.is_authenticated()) and (pk =="")):
+		raise Http404
+	if ((request.user.is_authenticated() and (pk == request.user.pk)) or (pk =="")):
+		user = request.user
+		ownPage = True
+	else:
+		user = get_object_or_404(User, pk=pk)
+		ownPage=False
+	if user.players.all():
+		played = 0
+		won = 0
+		lost = 0
+		modded = 0
+		firsts = []
+		lasts = []
+		for player in user.players.all():
+			played+=player.played
+			won+=player.wins()
+			lost+=player.losses()
+			modded+=player.modded()
+		firsts+=[(player.firstGame.start_date,player.firstGame)]
+		lasts +=[(player.lastGame.end_date,player.lastGame)]
+		first = min(firsts)[1]
+		last = max(lasts)[1]
+		stats = {'width':18,'columns':[
+			{'width':4,'contents':
+				[('Games Played',played),('Games Won',won),('Games Lost',lost)]},
+			{'width':9,'contents':
+				[('Games Moderated',modded),('First Game',urlT%(reverse('mafiastats_game',args=[first.id]),first.title)),('Last Game',urlT%(reverse('mafiastats_game',args=[last.id]),last.title))]}
+			]}
+	else:
+		stats = {}
+	return render_to_response("profile.html",{'profile_user':user,'own_page':ownPage,'stats':stats},context_instance=RequestContext(request))

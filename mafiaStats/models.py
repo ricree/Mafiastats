@@ -1,7 +1,9 @@
 from django.db.models.query import QuerySet
 from django.db import models
 from django.core.cache import cache
+from django.contrib.auth.models import User
 from postmarkup import render_bbcode
+
 
 # Create your models here.
 
@@ -82,6 +84,7 @@ class Player(models.Model):
 	score = models.FloatField()
 	played = models.IntegerField(default=0)
 	clearCache = makeClearCache()
+	user = models.ForeignKey(User,related_name="players",null=True,blank=True)
 
 	@cacheResult
 	def lived(self):
@@ -207,3 +210,7 @@ class Role(models.Model):
 	text = models.CharField(max_length=5000)
 	def displayText(self):
 		return render_bbcode(self.text)
+
+class Badge(models.Model):
+	user = models.ForeignKey(User)
+	format=models.CharField(max_length=200)

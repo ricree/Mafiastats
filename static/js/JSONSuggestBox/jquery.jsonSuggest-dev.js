@@ -229,7 +229,19 @@
 				// given on contruction.
 				if (settings.ajaxResults === true) {
 					if (settings.useJQueryAjax == true){
-						param = settings.requestParams;
+						param = {};
+						for (var p in settings.requestParams){
+							if(typeof settings.requestParams[p] === "function")
+							{
+								var result = settings.requestParams[p]();
+								if(!(typeof result === 'undefined')){
+									param[p] = result;
+								}
+							}else
+							{
+								param[p]=settings.requestParams[p];
+							}
+						}
 						param[settings.JQueryAjaxParam] = this.value
 						$.getJSON(searchData,param,function(data,textstatus){
 							buildResults(data, sFilterTxt);});
