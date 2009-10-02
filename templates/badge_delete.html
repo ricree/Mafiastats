@@ -1,0 +1,25 @@
+{%extends "base.html"%}
+{%block bodyscripts%}
+{{block.super}}
+<script type="text/javascript" src="{{MEDIA_URL}}js/jquery-ui-1.7.2.custom.min.js"></script>
+{%endblock%}
+{%block sheets%}
+{{block.super}}
+<link rel="stylesheet" href="{{MEDIA_URL}}css/theme/jquery-ui-1.7.2.custom.css" type="text/css"/>
+{%endblock%}
+{%block content%}
+{%if can_delete%}
+<p style="font-weight:bold;">
+Are yousure you want to delete this badge</p>
+<form action="{%url account_badge_delete pk%}" method="POST">
+<input class="ui-state-default ui-corner-all" style="padding:20px;padding-top:10px;padding-bottom:10px;"  type="submit" value="Yes"/>
+<a class="ui-state-default ui-corner-all"  style="padding:20px;padding-top:10px;padding-bottom:10px;"href="{%url account_profile%}">No</a>
+</form>
+{%else%}
+<div class="ui-state-error" style="padding: 0pt 0.7em;">
+<p>
+<span class="ui-icon ui-icon-alert" style="float: left; margin-right: 0.3em;"></span>
+Error: {{message}}</p>
+</div>
+{%endif%}
+{%endblock%}

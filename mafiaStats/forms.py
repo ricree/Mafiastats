@@ -1,10 +1,11 @@
 from django import forms
 from django.forms.formsets import formset_factory
-from widgets import AutoTextBox, JQueryDateWidget,NameBox
+from widgets import AutoTextBox, JQueryDateWidget,NameBox,BadgeConfig
 from widgets import NameList
 from models import Site,Category
 from django.contrib.admin.widgets import AdminDateWidget
 from django.utils.safestring import mark_safe
+import pyggy
 
 class AddGameForm(forms.Form):
 	title = forms.CharField(max_length=50)
@@ -14,7 +15,7 @@ class AddGameForm(forms.Form):
 	end_date = forms.DateField(widget = JQueryDateWidget())
 	game_id = forms.CharField(max_length=100,required=False,widget=forms.HiddenInput())
 	type = forms.ChoiceField([(u'full','Full Game'),
-        (u'mini','Mini Game'), (u'irc','IRC Game')])
+		(u'mini','Mini Game'), (u'irc','IRC Game')])
 	livedToEnd=NameList(choices=[],widget=NameBox, initial=[])
 
 	#site = forms.ModelChoiceField(Site)
@@ -38,3 +39,23 @@ TeamFormSetEdit  = formset_factory(AddTeamForm,extra=0)
 class LinkForm(forms.Form):
 	site = forms.ChoiceField(choices=[(site.id,site.title) for site in Site.objects.all()])
 	player = forms.CharField(max_length=75,widget=AutoTextBox())
+class BadgeForm(forms.Form):
+	title = forms.CharField(max_length=50)
+	config = forms.CharField(max_length=200)
+	choices = [(site.id,site.title) for site in Site.objects.all()]
+	sites = forms.MultipleChoiceField(choices=choices)
+	def clean_config(self):
+		value = self.cleaned_data['config']
+		print "value is: ",value, type(value)
+		value = value.replace(r'\n','\n')
+		if(value[-1]!="\n"):#grammar requires a newline at end
+			value = value+"\n"
+		l,ltab = pyggy.getlexer("badge.pyl")
+		parser,ptab = pyggy.getparser("badge.pyg")
+		l.setinputstr(value)
+		parser.setlexer(l)
+		try:
+			parser.parse()
+		except Exception:
+			raise forms.ValidationError("Must be a valid config string")
+		return value

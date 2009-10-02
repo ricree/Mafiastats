@@ -2,8 +2,10 @@
 import logging
 from django.http import HttpResponse, Http404,HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
-from models import Site, Game, Team, Category,Player,Role
-from forms import AddGameForm,TeamFormSet,TeamFormSetEdit,AddTeamForm,RoleFormSet,LinkForm
+from models import Site, Game, Team, Category,Player,Role,Badge
+from forms import AddGameForm,TeamFormSet,TeamFormSetEdit,AddTeamForm,RoleFormSet,LinkForm,BadgeForm
+from signals import profile_link,profile_unlink
+from badgeGen import build_badge
 from django.db import transaction
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -20,6 +22,8 @@ from sortMethods import *
 from mafiaStats.signalHandlers import getSiteImage
 from django.conf import settings
 import datetime
+
+
 
 LOGGING_FILE = settings.SITE_ROOT+'/debug_log'
 logging.basicConfig(filename=LOGGING_FILE,level=logging.ERROR)
@@ -414,6 +418,12 @@ def link(request):
 			player = get_object_or_404(Player,name=form.cleaned_data['player'],site=site)
 			player.user = request.user
 			player.save()
+			print "sending signal"
+			try:
+				profile_link.send(User,user=request.user,player=player)
+			except Exception:
+				raise Http404
+			print "redirecting"
 			return HttpResponseRedirect(reverse('account_profile'))
 	bodyscripts= form.media.render_js()
 	sheets = form.media.render_css()
@@ -454,3 +464,58 @@ def profile(request,pk=""):
 	else:
 		stats = {}
 	return render_to_response("profile.html",{'profile_user':user,'own_page':ownPage,'stats':stats},context_instance=RequestContext(request))
+
+
+
+@transaction.commit_on_success
+@login_required
+def badge(request,pk=""):
+	if (request.method == 'POST'):
+		form = BadgeForm(request.POST)
+		if(form.is_valid()):
+			sites = [get_object_or_404(Site,pk=int(s)) for s in form.cleaned_data['sites']]
+			if pk:
+				badge = get_object_or_404(Badge,pk=int(pk))
+			else:
+				config = form.cleaned_data['config'].replace(r'\n','\n')
+				badge = Badge(user=request.user,format=config,title=form.cleaned_data['title'])
+				badge.save()
+				for s in sites:	
+					badge.sites.add(s)
+				badge.save()
+			badge.url = "images/badges/badge_custom_%s_%s.png"%(request.user.pk,badge.pk)
+			badge.save()	
+			build_badge(badge)
+			return HttpResponseRedirect(reverse("account_profile"))
+	else:
+		if pk:
+			badge = get_object_or_404(Badge,pk=pk)
+			config = badge.config.replace('\n','\\n')
+			formData = {'title':badge.title,'url':badge.url,'config':badge.format,'sites':[s.id for site in badge.sites]}
+			form = BadgeForm(formData)
+		else:
+			form  = BadgeForm()
+	return render_to_response("badge.html",{'form':form,'pk':pk},context_instance=RequestContext(request))
+
+@login_required
+def badge_delete(request,pk):
+	badge = get_object_or_404(Badge,pk=int(pk))
+	if(request.user.pk != badge.user.pk):
+		return render_to_response("badge_delete.html",{'can_delete':False,'message':'You cannot unlink this account'},context_instance=RequestContext(request))
+	if(request.method=="POST"):
+		badge.delete()
+		return HttpResponseRedirect(reverse("account_profile"))
+	return render_to_response("badge_delete.html",{'can_delete':True,'pk':pk},context_instance=RequestContext(request))
+@login_required
+def unlink(request,pk):
+	player = get_object_or_404(Player,pk=int(pk))
+	if(request.user.pk != player.user.pk):
+		return render_to_response("unlink.html",{'can_unlink':False,'message':'You cannot unlink this account'},context_instance=RequestContext(request))	
+	if (request.method=="POST"):
+		player.user = None
+		player.save()
+		profile_unlink.send(User,user=request.user,player=player)
+		print "redirecting"
+		return HttpResponseRedirect(reverse('account_profile'))
+	return render_to_response("unlink.html",{'can_unlink':True,'message':'This message should not show up','pk':pk},context_instance=RequestContext(request))
+	

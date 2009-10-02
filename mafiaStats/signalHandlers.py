@@ -5,7 +5,11 @@ from django.core.cache import cache
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.font_manager import FontProperties
+from signals import profile_link,profile_unlink
+from badgeGen import build_badge
 import Image,ImageDraw,ImageFont
+import pyggy
+
 
 def saveSiteStats(sender, **kwargs):
 	inst = kwargs['instance']
@@ -43,7 +47,6 @@ def buildColorBadgeForPlayer(player,image_base,fonts):
 	img.save(settings.MEDIA_ROOT+"/images/badges/badge_norm_%s_%s.png"%(player.site.id,player.id))
 
 
-
 def buildColorBadge(sender, **kwargs):
 	print 'badge start'
 	inst = kwargs['instance']
@@ -55,9 +58,16 @@ def buildColorBadge(sender, **kwargs):
 	for p in players:
 		buildColorBadgeForPlayer(p,img,fonts)
 
+
 post_save.connect(buildColorBadge,sender=Game)
 post_delete.connect(buildColorBadge,sender=Game)
 
+def buildBadges(sender,**kwargs):
+	user= kwargs['user']
+	for b in user.badge_set.all():
+		build_badge(b)
+profile_unlink.connect(buildBadges)
+profile_link.connect(buildBadges)
 
 def clearAll(sender, **kwargs):
 	inst = kwargs['instance']
