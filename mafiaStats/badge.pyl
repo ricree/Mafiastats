@@ -1,0 +1,44 @@
+code:
+	fields = {'l':'LOSSES','w':'WINS','n':'NAME','m':'MODERATED','t':'TOTAL'}
+	decorators = {'b':'BOLD','i':'ITALIC','n':'NORMAL'}
+
+	def fieldName(self, options,next,val= None):
+		self.PUSHSTATE(next)
+		if (not val):
+			val = self.value
+		return options[val]
+	def Fields():
+		return fields.keys()
+
+INITIAL:
+	"\n" : return "NEWLINE"
+	"\(" : 
+		self.PUSHSTATE(STR)
+		return "OPEN"
+	"%" : self.PUSHSTATE(FIELDNAME)
+#	"%[wnm][biu]?[[:digit:]]* : return 
+FIELDNAME:
+	"[wnlmt]" :
+		return  fieldName(self,fields,DECORATION)
+STR:
+	"[^\(\)]+":
+		self.PUSHSTATE(CLOSE)
+		return "STRING"
+CLOSE:
+	"\)":
+		self.PUSHSTATE(DECORATION)
+		return "CLOSE"
+DECORATION:
+	"[ib]" : 
+		return fieldName(self,decorators,SIZE)
+	"[^ib]" :
+		self.PUSHBACK(self.value)
+		return fieldName(self,decorators,SIZE,'n')
+SIZE:
+	"[[:digit:]]+" :
+		self.PUSHSTATE(INITIAL)
+		return "SIZE"
+	"[^[:digit:]]" : 
+		self.PUSHBACK(self.value)
+		self.PUSHSTATE(INITIAL)
+		return "DSIZE"
