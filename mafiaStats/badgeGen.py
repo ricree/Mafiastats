@@ -1,5 +1,6 @@
 import Image,ImageFont,ImageDraw
 import pyggy
+import os
 #from django.conf import settings
 if __name__ == "__main__":
 	class FakeSettings(object):
@@ -94,12 +95,17 @@ def sizeLine(line):
 	return (sum(width),max(height))
 
 def build_badge(badge):
+	#pyggy uses a hackish way of loading the generated lexer.
+	#and the .pyl and .pyg seem to have to be in the current directory
+	startDir = os.getcwd()
+	os.chdir(settings.SITE_ROOT)
 	l,ltab=  pyggy.getlexer("badge.pyl")
 	parser,ptab = pyggy.getparser("badge.pyg")
 	print badge.format
 	l.setinputstr(badge.format)
 	parser.setlexer(l)
 	tree = parser.parse()
+	os.chdir(startDir)
 	sstat = lambda stat:sumStat(badge.user,badge.sites.all(),stat)
 	fields = {'WINS':sstat('wins'),'LOSSES':sstat('losses'),'TOTAL':sstat('played'),'MODERATED':sstat('modded'),'NAME':badge.user.username}
 	lines = buildStack(tree,fields)
