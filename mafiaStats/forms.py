@@ -5,6 +5,7 @@ from widgets import NameList
 from models import Site,Category
 from django.contrib.admin.widgets import AdminDateWidget
 from django.utils.safestring import mark_safe
+import os
 import pyggy
 
 class AddGameForm(forms.Form):
