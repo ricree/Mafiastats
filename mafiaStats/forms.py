@@ -5,6 +5,7 @@ from widgets import NameList
 from models import Site,Category
 from django.contrib.admin.widgets import AdminDateWidget
 from django.utils.safestring import mark_safe
+from django.conf import settings
 import os
 import pyggy
 
