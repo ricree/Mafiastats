@@ -50,10 +50,13 @@ class BadgeForm(forms.Form):
 		value = value.replace(r'\n','\n')
 		if(value[-1]!="\n"):#grammar requires a newline at end
 			value = value+"\n"
+		startDir = os.getcwd()
+		os.chdir(settings.SITE_ROOT)
 		l,ltab = pyggy.getlexer("badge.pyl")
 		parser,ptab = pyggy.getparser("badge.pyg")
 		l.setinputstr(value)
 		parser.setlexer(l)
+		os.chdir(startDir)
 		try:
 			parser.parse()
 		except Exception:
