@@ -6,7 +6,10 @@ if __name__ == "__main__":
 	class FakeSettings(object):
 		FONT_DIRECTORY = "/usr/share/fonts/truetype/ttf-dejavu/"
 		MEDIA_ROOT = '/home/rareed/projects/Mafiastats/static'
+		SITE_ROOT = '/home/rareed/projects/Mafiastats'
 	settings = FakeSettings()
+	import sys
+	sys.path+=[settings.SITE_ROOT]
 else:
 	from django.conf import settings
 
@@ -50,7 +53,7 @@ def findSym(node,stack,sym):
 		return None
 	next = stack[0]
 	del stack[0]
-	return findSym(stack[0],stack,sym)
+	return findSym(next,stack,sym)
 
 def buildStack(node,fields):
 	if (node.sym == 'TOKEN'):
@@ -70,25 +73,31 @@ def buildStack(node,fields):
 	return retval
 
 def pushToken(node,fields):
-	field = node.possibilities[0].elements[0].possibilities[0].elements[0].sym[0]
-	dec = findSym(node,[],'DECORATION').possibilities[0].elements[0].sym[0]
-	size = findSym(node,[],'SIZET').possibilities[0].elements[0]
-	if size.sym[0] == 'SIZE':
+	field = findSym(node,[],'FIELD').possibilities[0].elements[0].sym[0]
+	dec = findSym(node,[],'DECORATION')
+	size = findSym(node,[],'SIZE')
+	if size:
 		size = size.sym[1]
 	else:
 		size= defaultSize
-	font = ImageFont.truetype(fontDirs[dec],int(size))
+	if dec:
+		font = ImageFont.truetype(fontDirs[dec.possibilities[0].elements[0].sym[0]],int(size))
+	else:
+		font = ImageFont.truetype(fontDirs['NORMAL'],int(size))
 	return [(str(fields[field]),font)]
 
 def pushString(node):
 	s = findSym(node,[],'STRING').sym[1]
-	dec = findSym(node,[],'DECORATION').possibilities[0].elements[0].sym[0]
-	size = findSym(node,[],'SIZET').possibilities[0].elements[0]
-	if size.sym[0] == 'SIZE':
+	dec = findSym(node,[],'DECORATION')
+	size = findSym(node,[],'SIZE')
+	if size:
 		size = size.sym[1]
 	else:
 		size= defaultSize
-	font = ImageFont.truetype(fontDirs[dec],int(size))
+	if dec:
+		font = ImageFont.truetype(fontDirs[dec.possibilities[0].elements[0].sym[0]],int(size))
+	else:
+		font = ImageFont.truetype(fontDirs['NORMAL'],int(size))
 	return [(s,font)]
 def sizeLine(line):
 	width,height = zip(*(font.getsize(text) for text,font in line))
@@ -99,9 +108,16 @@ def build_badge(badge):
 	#and the .pyl and .pyg seem to have to be in the current directory
 	startDir = os.getcwd()
 	os.chdir(settings.SITE_ROOT)
+	print os.getcwd()
 	l,ltab=  pyggy.getlexer("badge.pyl")
 	parser,ptab = pyggy.getparser("badge.pyg")
 	print badge.format
+	l.setinputstr(badge.format)
+	while True:
+		x = l.token()
+		if x is None:
+			break
+		print x,l.value
 	l.setinputstr(badge.format)
 	parser.setlexer(l)
 	tree = parser.parse()
@@ -124,8 +140,10 @@ def build_badge(badge):
 	for line,size in zip(lines,sizes):
 		cur_x = HBORDER
 		for text,font in line:
-			d.text((cur_x,cur_y),text,font=font,fill="white")
-			cur_x+=font.getsize(text)[0]
+			entry_size = font.getsize(text)
+			line_offset = size[1] - entry_size[1]
+			d.text((cur_x,cur_y+line_offset),text,font=font,fill="white")
+			cur_x+=entry_size[0]
 		cur_y+=size[1]+LINE_SPACE
 	print badge.url
 	img.save(settings.MEDIA_ROOT +"/"+ badge.url)
@@ -147,9 +165,13 @@ class UserHarness(object):
 	username = 'ricree'
 
 class BadgeHarness(object):
+	class FakeSites(object):
+		def all(self):
+			return [1,2]
 	user = UserHarness()
-	format = "( )%nb18\n(Mafia Stats )i14%w14( Wins in )14%t14( Games)14\n"
-	sites = [1,2]
+#	format = "( )%nb18\n(Mafia Stats )i14%w14( Wins in )14%t14( Games)14\n"
+	format = "Test\n(Mafia Stats: )12b%w Wins\n"
+	sites = FakeSites()
 	url = "/images/test.png"
 
 if __name__ == '__main__':

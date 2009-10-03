@@ -6,7 +6,7 @@ code:
 		self.PUSHSTATE(next)
 		if (not val):
 			val = self.value
-		return options[val]
+		return options[val.lower()]
 	def Fields():
 		return fields.keys()
 
@@ -15,10 +15,11 @@ INITIAL:
 	"\(" : 
 		self.PUSHSTATE(STR)
 		return "OPEN"
+	"[^%\(\n]+" : return "STRING"
 	"%" : self.PUSHSTATE(FIELDNAME)
 #	"%[wnm][biu]?[[:digit:]]* : return 
 FIELDNAME:
-	"[wnlmt]" :
+	"[wnlmtWNLMT]" :
 		return  fieldName(self,fields,DECORATION)
 STR:
 	"[^\(\)]+":
@@ -29,16 +30,11 @@ CLOSE:
 		self.PUSHSTATE(DECORATION)
 		return "CLOSE"
 DECORATION:
-	"[ib]" : 
-		return fieldName(self,decorators,SIZE)
-	"[^ib]" :
-		self.PUSHBACK(self.value)
-		return fieldName(self,decorators,SIZE,'n')
-SIZE:
-	"[[:digit:]]+" :
-		self.PUSHSTATE(INITIAL)
+	"[ibIB]" : 
+		return fieldName(self,decorators,DECORATION)
+	"[[:digit:]]+":
+		self.PUSHSTATE(DECORATION)
 		return "SIZE"
-	"[^[:digit:]]" : 
+	"[^ibIB[:digit:]]" :
 		self.PUSHBACK(self.value)
 		self.PUSHSTATE(INITIAL)
-		return "DSIZE"
