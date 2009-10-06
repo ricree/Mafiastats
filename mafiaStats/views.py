@@ -421,7 +421,8 @@ def link(request):
 			print "sending signal"
 			try:
 				profile_link.send(User,user=request.user,player=player)
-			except Exception:
+			except Exception as e:
+				logging.exception(e.message)
 				raise Http404
 			print "redirecting"
 			return HttpResponseRedirect(reverse('account_profile'))
@@ -487,7 +488,14 @@ def badge(request,pk=""):
 				badge.save()
 			badge.url = "images/badges/badge_custom_%s_%s.png"%(request.user.pk,badge.pk)
 			badge.save()	
-			build_badge(badge)
+			try:
+				build_badge(badge)
+			except Exception as e:
+				#logging.exception(e.message)
+				logging.debug(e.tok)
+				logging.error(e.tok)
+				logging.debug(e.str)
+				raise e
 			return HttpResponseRedirect(reverse("account_profile"))
 	else:
 		if pk:

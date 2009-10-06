@@ -1,7 +1,10 @@
 import Image,ImageFont,ImageDraw
 import pyggy
 import os
+import logging
 #from django.conf import settings
+
+
 if __name__ == "__main__":
 	class FakeSettings(object):
 		FONT_DIRECTORY = "/usr/share/fonts/truetype/ttf-dejavu/"
@@ -13,6 +16,8 @@ if __name__ == "__main__":
 else:
 	from django.conf import settings
 
+LOGGING_FILE = settings.SITE_ROOT + '/debug_log'
+logging.basicConfig(filename=LOGGING_FILE,level=logging.ERROR)
 LINE_SPACE=3
 HBORDER = 10
 fontBase = settings.FONT_DIRECTORY
@@ -185,10 +190,12 @@ def build_badge(badge):
 	startDir = os.getcwd()
 	os.chdir(settings.SITE_ROOT)
 	print os.getcwd()
+	r = settings.SITE_ROOT
 	l,ltab=  pyggy.getlexer("badge.pyl")
 	parser,ptab = pyggy.getparser("badge.pyg")
 	print badge.format
-	l.setinputstr(badge.format)
+	fmt = badge.format
+	l.setinputstr(fmt)
 	while True:
 		x = l.token()
 		if x is None:
