@@ -130,7 +130,7 @@ def pushToken(node,fields,defaults):
 	if size:
 		size = int(size.sym[1])
 	else:
-		size= defaults['size']
+		size= int(defaults['size'])
 	size += rel
 	if dec:
 		font = ImageFont.truetype(fontDirs[dec.possibilities[0].elements[0].sym[0]],int(size))
@@ -155,7 +155,7 @@ def pushString(node,defaults):
 	if size:
 		size = int(size.sym[1])
 	else:
-		size= defaults['size']
+		size= int(defaults['size'])
 	size += rel
 	if dec:
 		font = ImageFont.truetype(fontDirs[dec.possibilities[0].elements[0].sym[0]],int(size))

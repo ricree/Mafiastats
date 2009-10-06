@@ -42,7 +42,7 @@ class LinkForm(forms.Form):
 	site = forms.ChoiceField(choices=[(site.id,site.title) for site in Site.objects.all()])
 	player = forms.CharField(max_length=75,widget=AutoTextBox())
 class BadgeForm(forms.Form):
-	templates= {'original':"[%s%s%s]%s $n+2b\n(Mafia Stats: )b$w Wins in $t Games\n",'minimal':"[%s%s%s]%sMafia Record: $w-$l\n",'moderator':"[%s%s%s]%s$m Games Moderated\nWith $p Total Players\n"}
+	templates= {'original':"[%s%s%s]%s%s $n+2b\n(Mafia Stats: )b$w Wins in $t Games\n",'minimal':"[%s%s%s]%s%sMafia Record: $w-$l\n",'moderator':"[%s%s%s]%s%s$m Games Moderated\nWith $p Total Players\n"}
 	tempChoices = [(k,k) for k in templates]
 	title = forms.CharField(max_length=50)
 	config = forms.CharField(max_length=200,label="Format String",required=False)
@@ -68,11 +68,12 @@ class BadgeForm(forms.Form):
 		top  = self.cleaned_data['top_color']
 		bottom = self.cleaned_data['bottom_color']
 		text = self.cleaned_data['text_color']
+		size = self.cleaned_data['font_size']
 		print templateName
 		if(background == 'transparent'):
-			return (template%(background,"","",text))
+			return (template%(background,"","",size,text))
 		if(background == 'gradient'):
-			return (template%(background,top,bottom,text))
+			return (template%(background,top,bottom,size,text))
 	def clean(self):
 		if (('config' in self.cleaned_data) and (self.cleaned_data['config'])):
 			value = self.cleaned_data['config']
