@@ -439,7 +439,7 @@ def profile(request,pk=""):
 	else:
 		user = get_object_or_404(User, pk=pk)
 		ownPage=False
-	if user.players.all():
+	if user.players.count():
 		played = 0
 		won = 0
 		lost = 0
@@ -451,8 +451,8 @@ def profile(request,pk=""):
 			won+=player.wins()
 			lost+=player.losses()
 			modded+=player.modded()
-		firsts+=[(player.firstGame.start_date,player.firstGame)]
-		lasts +=[(player.lastGame.end_date,player.lastGame)]
+			firsts+=[(player.firstGame.start_date,player.firstGame)]
+			lasts +=[(player.lastGame.end_date,player.lastGame)]
 		first = min(firsts)[1]
 		last = max(lasts)[1]
 		stats = {'width':18,'columns':[
@@ -470,18 +470,20 @@ def profile(request,pk=""):
 @transaction.commit_on_success
 @login_required
 def badge(request,pk=""):
+	choices = [(p.id,p.name + ' - ' + p.site.title) for p in request.user.players.all()]
 	if (request.method == 'POST'):
 		form = BadgeForm(request.POST)
+		form.fields['players'].choices = choices
 		if(form.is_valid()):
-			sites = [get_object_or_404(Site,pk=int(s)) for s in form.cleaned_data['sites']]
+			players = [get_object_or_404(Player,pk=int(p)) for p in form.cleaned_data['players']]
 			if pk:
 				badge = get_object_or_404(Badge,pk=int(pk))
 			else:
 				config = form.cleaned_data['config'].replace(r'\n','\n')
 				badge = Badge(user=request.user,format=config,title=form.cleaned_data['title'])
 				badge.save()
-				for s in sites:	
-					badge.sites.add(s)
+				for p in players:
+					badge.players.add(p)
 				badge.save()
 			badge.url = "images/badges/badge_custom_%s_%s.png"%(request.user.pk,badge.pk)
 			badge.save()	
@@ -491,10 +493,14 @@ def badge(request,pk=""):
 		if pk:
 			badge = get_object_or_404(Badge,pk=pk)
 			config = badge.config.replace('\n','\\n')
-			formData = {'title':badge.title,'url':badge.url,'config':badge.format,'sites':[s.id for site in badge.sites]}
+			formData = {'title':badge.title,'url':badge.url,'config':badge.format,'players':[p.id for p in badge.players.all()]}
 			form = BadgeForm(formData)
 		else:
+			print "choices are: ",choices
+			#form  = BadgeForm({'players':players})
 			form  = BadgeForm()
+			form.fields['players'].choices = choices
+			print form.base_fields['players'].choices
 	return render_to_response("badge.html",{'form':form,'pk':pk},context_instance=RequestContext(request))
 
 @login_required

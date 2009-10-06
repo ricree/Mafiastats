@@ -1,9 +1,17 @@
+definitions:
+	COLOR "\#[[:digit:]a-fA-F]+"
+
+
 code:
 	fields = {'l':'LOSSES','w':'WINS','n':'NAME','m':'MODERATED','t':'TOTAL'}
 	decorators = {'b':'BOLD','i':'ITALIC','n':'NORMAL'}
 
-	def fieldName(self, options,next,val= None):
-		self.PUSHSTATE(next)
+	def stripBracket(val):
+		return val[1:-1]
+
+	def fieldName(self, options,next=None,val= None):
+		if next:
+			self.PUSHSTATE(next)
 		if (not val):
 			val = self.value
 		return options[val.lower()]
@@ -15,12 +23,26 @@ INITIAL:
 	"\(" : 
 		self.PUSHSTATE(STR)
 		return "OPEN"
-	"[^%\(\n]+" : return "STRING"
-	"%" : self.PUSHSTATE(FIELDNAME)
+	"\[" :
+		self.PUSHSTATE(HEADER)
+		return "OPENB"
+	"[^\$\(\n\[]+" : return "STRING"
+	"\$" : self.PUSHSTATE(FIELDNAME)
 #	"%[wnm][biu]?[[:digit:]]* : return 
 FIELDNAME:
 	"[wnlmtWNLMT]" :
 		return  fieldName(self,fields,DECORATION)
+HEADER:
+	"[[:alnum:][:blank:]\_]+" : 
+		self.PUSHSTATE(HEADERARGS)
+		return "BACKGROUND"
+
+HEADERARGS:
+	"{COLOR}" : return "COLOR"
+	"," : return "SEPARATOR"
+	"\]" :
+		self.PUSHSTATE(DECORATION)
+		return "CLOSEB"
 STR:
 	"[^\(\)]+":
 		self.PUSHSTATE(CLOSE)
@@ -31,10 +53,9 @@ CLOSE:
 		return "CLOSE"
 DECORATION:
 	"[ibIB]" : 
-		return fieldName(self,decorators,DECORATION)
-	"[[:digit:]]+":
-		self.PUSHSTATE(DECORATION)
-		return "SIZE"
-	"[^ibIB[:digit:]]" :
+		return fieldName(self,decorators)
+	"[[:digit:]]+": return "SIZE"
+	"{COLOR}": return "COLOR"
+	"[^ibIB[:digit:]#]" :
 		self.PUSHBACK(self.value)
 		self.PUSHSTATE(INITIAL)

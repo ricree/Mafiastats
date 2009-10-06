@@ -214,6 +214,6 @@ class Role(models.Model):
 class Badge(models.Model):
 	user = models.ForeignKey(User)
 	format=models.CharField(max_length=500)
-	sites = models.ManyToManyField(Site)
+	players = models.ManyToManyField(Player)
 	url = models.CharField(max_length=200,blank=True)
 	title = models.CharField(max_length=50)

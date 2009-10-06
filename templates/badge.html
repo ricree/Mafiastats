@@ -1,4 +1,32 @@
 {%extends "base.html"%}
+{%block sheets%}
+{{block.super}}
+<link rel="stylesheet" type="text/css" href="{{MEDIA_URL}}colorpicker/css/colorpicker.css"/>
+<!--<link rel="stylesheet" type="text/css" href="{{MEDIA_URL}}colorpicker/css/layout.css"/>-->
+{%endblock%}
+{%block bodyscripts%}
+{{block.super}}
+<script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/jquery.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/colorpicker.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/eye.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/utils.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/layout.js?ver=1.0.2"></script>
+
+{%endblock%}
+{%block extra_scripts%}
+{{block.super}}
+<script type="text/javascript">
+	$(document).ready(function(){
+		$(".ColorPicker").ColorPicker({onSubmit: function(hsb, hex, rgb, el) {
+		$(el).val("#"+hex);
+		$(el).ColorPickerHide();
+		},
+		onBeforeShow: function () {
+		$(this).ColorPickerSetColor(this.value);
+		}
+	})});
+</script>
+{%endblock%}
 {%block content%}
 <div class="span-22">
 <div class="span-17">

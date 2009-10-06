@@ -15,6 +15,9 @@ class ClassedTextInput(forms.TextInput):
 #		else:
 		attrs['class'] = self._init_class
 		super(forms.TextInput,self).__init__(attrs=attrs)
+class ColorBox(ClassedTextInput):
+	_init_class = 'ColorPicker'
+
 
 class AutoTextBox(ClassedTextInput):
 	_init_class = 'AutoSuggestBox'
