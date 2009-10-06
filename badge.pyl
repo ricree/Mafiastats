@@ -3,7 +3,7 @@ definitions:
 
 
 code:
-	fields = {'l':'LOSSES','w':'WINS','n':'NAME','m':'MODERATED','t':'TOTAL'}
+	fields = {'l':'LOSSES','w':'WINS','n':'NAME','m':'MODERATED','t':'TOTAL','p':"PMODERATED"}
 	decorators = {'b':'BOLD','i':'ITALIC','n':'NORMAL'}
 
 	def stripBracket(val):
@@ -30,7 +30,7 @@ INITIAL:
 	"\$" : self.PUSHSTATE(FIELDNAME)
 #	"%[wnm][biu]?[[:digit:]]* : return 
 FIELDNAME:
-	"[wnlmtWNLMT]" :
+	"[wnlmtpWNLMTP]" :
 		return  fieldName(self,fields,DECORATION)
 HEADER:
 	"[[:alnum:][:blank:]\_]+" : 
@@ -55,6 +55,7 @@ DECORATION:
 	"[ibIB]" : 
 		return fieldName(self,decorators)
 	"[[:digit:]]+": return "SIZE"
+	"\+[[:digit:]]+":return "RELSIZE"
 	"{COLOR}": return "COLOR"
 	"[^ibIB[:digit:]#]" :
 		self.PUSHBACK(self.value)

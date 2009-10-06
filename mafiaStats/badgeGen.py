@@ -17,7 +17,7 @@ LINE_SPACE=3
 HBORDER = 10
 fontBase = settings.FONT_DIRECTORY
 fontDirs = {'BOLD':fontBase+'DejaVuSans-Bold.ttf','ITALIC':fontBase + 'DejaVuSansCondensed-Oblique.ttf','NORMAL':fontBase + 'DejaVuSans.ttf'}
-baseDefaults ={'bg':'gradient', 'colors':['#010085','#1b5af6'],'text_color':'#FFFFFF','size':10,'weight':'NORMAL'}
+baseDefaults ={'background':'gradient', 'colors':['#010085','#1b5af6'],'text_color':'#FFFFFF','size':10,'weight':'NORMAL'}
 defaultSize = 10
 
 
@@ -113,14 +113,20 @@ def pushToken(node,fields,defaults):
 	dec = findSym(node,[],'DECORATION')
 	size = findSym(node,[],'SIZE')
 	color = findSym(node,[],'COLOR')
+	rel = findSym(node,[],"RELSIZE")
+	if rel:
+		rel = int(rel.sym[1])
+	else:
+		rel = 0
 	if color:
 		color = color.sym[1]
 	else:
 		color = defaults['text_color']
 	if size:
-		size = size.sym[1]
+		size = int(size.sym[1])
 	else:
 		size= defaults['size']
+	size += rel
 	if dec:
 		font = ImageFont.truetype(fontDirs[dec.possibilities[0].elements[0].sym[0]],int(size))
 	else:
@@ -132,14 +138,20 @@ def pushString(node,defaults):
 	dec = findSym(node,[],'DECORATION')
 	size = findSym(node,[],'SIZE')
 	color = findSym(node,[],'COLOR')
+	rel = findSym(node,[],'RELSIZE')
 	if color:
 		color = color.sym[1]
 	else:
 		color = defaults['text_color']
+	if rel:
+		rel = int(rel.sym[1])
+	else:
+		rel = 0
 	if size:
-		size = size.sym[1]
+		size = int(size.sym[1])
 	else:
 		size= defaults['size']
+	size += rel
 	if dec:
 		font = ImageFont.truetype(fontDirs[dec.possibilities[0].elements[0].sym[0]],int(size))
 	else:
@@ -187,7 +199,7 @@ def build_badge(badge):
 	tree = parser.parse()
 	os.chdir(startDir)
 	sstat = lambda stat:sumStat(badge.user,badge.players,stat)
-	fields = {'WINS':sstat('wins'),'LOSSES':sstat('losses'),'TOTAL':sstat('played'),'MODERATED':sstat('modded'),'NAME':badge.user.username}
+	fields = {'WINS':sstat('wins'),'LOSSES':sstat('losses'),'TOTAL':sstat('played'),'MODERATED':sstat('modded'),'NAME':badge.user.username,'PMODERATED':sstat('totalPlayersModded')}
 	badgeData = buildBadgeData(tree,fields)
 	lines = badgeData['lines']
 	print badgeData
@@ -197,7 +209,8 @@ def build_badge(badge):
 	height = LINE_SPACE + sum((LINE_SPACE + h for h in zsizes[1]))
 	base = Image.open(settings.MEDIA_ROOT + "/images/badgeBase.png").resize((width,height))
 	mask = Image.open(settings.MEDIA_ROOT + "/images/badgeMask.png").resize((width,height),Image.ANTIALIAS)
-	img = bgGens[badgeData['bg']]((width,height),badgeData['colors'])
+	print "Background: ", badgeData['background']
+	img = bgGens[badgeData['background']]((width,height),badgeData['colors'])
 #	img = Image.new("RGB",(width,height))
 #	img.putalpha(0)
 #	img.paste(base,(0,0,width,height),mask)

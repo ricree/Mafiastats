@@ -115,6 +115,9 @@ class Player(models.Model):
 	@cacheResult
 	def modded(self):
 		return self.moderated_set.count()
+	@cacheResult
+	def totalPlayersModded(self):
+		return sum((g.num_players() for g in self.moderated_set.all()))
 	def playedCalc(self):
 		return Team.objects.filter(players=self).count()
 	def freshScore(self):

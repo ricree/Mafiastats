@@ -42,14 +42,15 @@ class LinkForm(forms.Form):
 	site = forms.ChoiceField(choices=[(site.id,site.title) for site in Site.objects.all()])
 	player = forms.CharField(max_length=75,widget=AutoTextBox())
 class BadgeForm(forms.Form):
-	templates= {'original':"[%s,%s,%s]%s $nb13\nMafia Stats: $w Wins in $t Games\n",'minimal':"[%s]%sMafia Record: $w-$l\n"}
+	templates= {'original':"[%s%s%s]%s $n+2b\n(Mafia Stats: )b$w Wins in $t Games\n",'minimal':"[%s%s%s]%sMafia Record: $w-$l\n",'moderator':"[%s%s%s]%s$m Games Moderated\nWith $p Total Players\n"}
 	tempChoices = [(k,k) for k in templates]
 	title = forms.CharField(max_length=50)
 	config = forms.CharField(max_length=200,label="Format String",required=False)
 	players = forms.MultipleChoiceField(choices=[])
 	preset = forms.ChoiceField(choices= tempChoices,required=False,initial="original")
 	background = forms.ChoiceField(choices=[("transparent","transparent"),("gradient","gradient")],required=False,initial="gradient")
-	text_color = forms.CharField(max_length=10,required=False,initial="#000001", widget=ColorBox())
+	font_size = forms.ChoiceField(choices=[(i,i) for i in range(8,17)],initial=11)
+	text_color = forms.CharField(max_length=10,required=False,initial="#F5F5F5", widget=ColorBox())
 	top_color = forms.CharField(max_length=10,required=False,initial="#010085", widget=ColorBox())
 	bottom_color = forms.CharField(max_length=10,initial="#1b5af6", required=False,widget=ColorBox())
 	#def __init__(self,*args,**kwargs):
@@ -68,9 +69,9 @@ class BadgeForm(forms.Form):
 		bottom = self.cleaned_data['bottom_color']
 		text = self.cleaned_data['text_color']
 		print templateName
-		if(templateName == "minimal"):
-			return (template%(background,text))
-		if(templateName == "original"):
+		if(background == 'transparent'):
+			return (template%(background,"","",text))
+		if(background == 'gradient'):
 			return (template%(background,top,bottom,text))
 	def clean(self):
 		if (('config' in self.cleaned_data) and (self.cleaned_data['config'])):
@@ -85,6 +86,7 @@ class BadgeForm(forms.Form):
 		print "I got called"
 	def clean_config(self):
 		if (('config' in self.cleaned_data) and (self.cleaned_data['config'])):
+			value = self.cleaned_data['config']
 			print "value is: ",value, type(value)
 			value = value.replace(r'\n','\n')
 			if(value[-1]!="\n"):#grammar requires a newline at end
