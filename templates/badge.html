@@ -11,6 +11,11 @@
 <script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/eye.js"></script>
 <script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/utils.js"></script>
 <script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/layout.js?ver=1.0.2"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#tabs").tabs();
+	});
+</script>
 
 {%endblock%}
 {%block extra_scripts%}
@@ -24,11 +29,14 @@
 		onBeforeShow: function () {
 		$(this).ColorPickerSetColor(this.value);
 		}
-	})});
+	});});
 </script>
 {%endblock%}
 {%block content%}
-<div class="span-22">
+<form action="{%if pk%}{%url account_badge pk%}{%else%}{%url account_badge%}{%endif%}" method="POST">
+<div class="span-23">
+<div id="tabs">
+<div class="span-22" id="advanced">
 <div class="span-17">
 <p>This is a test for the new custom badges</p>
 <p>The UI for this page hasn't been decided yet, so for now badge format must be entered with the raw format string</p>
@@ -42,6 +50,7 @@ Fields such as wins, total games, etc, are specified by a percent sign and a sin
 <p><b>%ni10</b>-Will add the username in italic with a size 10 font</p>
 	<p><b>%nb13\n(Mafia Stats )b%w( Wins In )%t( Games)</b>-This is roughly equivalent to the current non-custom badges</p>
 </fieldset>
+{{form.config}}
 
 </div>
 	<div class="span-4">
@@ -53,12 +62,13 @@ Fields such as wins, total games, etc, are specified by a percent sign and a sin
 		<b>m</b>-Total games moderated<br/>
 	</div>
 </div>
-<div class="span-15">
-<fieldset>
-<form action="{%if pk%}{%url account_badge pk%}{%else%}{%url account_badge%}{%endif%}" method="POST">
-{{form.as_p}}
+<div class="span-22" id="template">
+{% for field in form%}
+	{%ifnotequal field.name "config"%}{{field.label_tag}}: {{field}}{%endifnotequal%}
+{%endfor%}
+</div>
+</div>
+</div>
 <input type="submit" value="Add Badge"/>
 </form>
-</fieldset>
-</div>
 {%endblock%}

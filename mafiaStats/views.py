@@ -170,12 +170,15 @@ def games(request, site_id):
 	else:
 		funcArgs={}
 	sortMethods = {'name':'title','moderator':'moderator','length':gamesByLength,'start':'start_date','end':'end_date','players':gamesByPlayers,'default':'end_date'}
+	dirs = {'up':'down','down':'up'}
+	dir = dirs[request.GET['direction']] if ('direction' in request.GET and request.GET['direction'] in dirs) else 'up'
+	meth = request.GET['method'] if 'method' in request.GET else sortMethods['default']
 	p = sortTable(request.GET,sortMethods,Game.objects.filter(**funcArgs))
 	paginator = Paginator(p,gamesPerPage)
 	page=getPage(request,paginator)
 	respTemplate = "gamesListing.html" if request.is_ajax() else "games.html"
 	sortMethods = sorted((key, (len(key)/3)+1) for key in sortMethods );
-	args = {'games':page.object_list,'page':page,'sortMethods':sortMethods}
+	args = {'games':page.object_list,'page':page,'sortMethods':sortMethods,'direction':dir,'pageArgs':{'direction':dir,'method':meth}}
 	args.update(funcArgs)
 	return render_to_response(respTemplate,args,context_instance=RequestContext(request))
 
@@ -193,6 +196,11 @@ def sortTable(GET,methods,query,defaultDir='down'):
 @cache_page(60*20)
 def scoreboard(request, site_id=None):
 	sortMethods={'score':'score','name':'name','wins':playersByWins,'losses':playersByLosses,'winPct':playersByWinPct,'modded':playersByModerated,'default':'score'}
+	nextDir = {'up':'down','down':'up'}
+	if (('direction' in request.GET) and (request.GET['direction'] in nextDir)):
+		direction = nextDir[request.GET['direction']]
+	else:
+		direction = 'up'
 	if((site_id is not None)and(site_id != '')):
 		site = get_object_or_404(Site, pk=site_id)
 		funcArgs={'site':site}
@@ -209,7 +217,11 @@ def scoreboard(request, site_id=None):
 		args = {'players':page.object_list,'page':page}
 		args.update(funcArgs)
 		return render_to_response('scoreBoardPresenter.html',args,context_instance=RequestContext(request))
-	args = {'players':page.object_list,'page':page}
+	if 'method' in request.GET:
+		meth = request.GET['method']
+	else:
+		meth = sortMethods['score']
+	args = {'players':page.object_list,'page':page,'direction':direction,'pageArgs':{'method':meth,'direction':direction}}
 	args.update(funcArgs)
 	print args
 	return render_to_response('scoreboard.html',args,context_instance=RequestContext(request))
