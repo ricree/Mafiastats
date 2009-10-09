@@ -76,6 +76,17 @@ pre_save.connect(clearAll,sender=Game)
 pre_delete.connect(clearAll,sender=Game)
 
 
+def siteUpdater(sender, **kwargs):
+	inst = kwargs['instance']
+	if sender is Game:
+		site = inst
+		site.sitestats.update()
+	else:
+		for site in Site.objects.all():
+			site.sitestats.update()
+
+post_save.connect(siteUpdater,sender=Game)
+post_delete.connect(siteUpdater,sender=Game)
 
 def imageBuilder(callback):
 	def returning_dec(fn):

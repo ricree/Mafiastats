@@ -1,4 +1,4 @@
-from Mafiastats.mafiaStats.models import Site, Game, Team, Category,Player
+from Mafiastats.mafiaStats.models import  Game, Team, Category,Player
 from django.db.models.query import QuerySet
 
 
