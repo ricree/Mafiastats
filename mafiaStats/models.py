@@ -30,6 +30,35 @@ def makeClearCache():
 				cache.delete(selfAttr.needsCleaning%(type(self).__name__,self.pk))
 	return clearCache
 
+class SiteStats(models.Model):
+	site = models.OneToOneField('Site')
+	newest_game = models.ForeignKey('Game',null=True,blank=True,related_name ="site_newest_set")
+	largest_game = models.ForeignKey('Game',null=True,blank=True,related_name="site_largest_set")
+	smallest_game = models.ForeignKey('Game',null=True,blank=True,related_name="site_smallest_set")
+	total_players = models.IntegerField(blank=True)
+	winningest = models.ManyToManyField('Player',null=True,blank=True,related_name="site_winningest_set")
+	losingest = models.ManyToManyField('Player',null=True,blank=True,related_name="site_losingest_set")
+	most_modded = models.ForeignKey('Player',null=True,blank=True,related_name="site_most_modded_set")
+	most_played = models.ForeignKey('Player',null=True,blank=True,related_name="site_most_played_set")
+	def update(self):
+		site = self.site
+		self.newest_game = Game.objects.filter(site=site).order_by('-end_date')[0]
+		games = [(g.num_players(),g) for g in Game.ojects.filter(site=site)]
+		self.largest_game = max(games)[1]
+		self.smallest_game = min(games)[1]
+		self.total_players = Player.objects.filter(site=site)
+		win_list= playersByWins(Player.objects.filter(site=site),True)[0:5]
+		loss_list = playersByLosses(Player.objects.filter(site=site),True)[0:5]
+		self.winningest.clear()
+		for p in win_list:
+			self.winningest.add(p)
+		for p in loss_list:
+			self.losingest.add(p)
+		self.most_modded = max((p.modded(),p) for p in Player.objects.filter(site=site))[1]
+		self.most_played = Plamyer.objects.filter(site=site).order_by('-played')[0]
+		self.save()
+		
+
 class Site(models.Model):
 	def __unicode__(self):
 		return self.title
