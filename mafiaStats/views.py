@@ -2,7 +2,7 @@
 import logging
 from django.http import HttpResponse, Http404,HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
-from models import Site, Game, Team, Category,Player,Role,Badge
+from models import Site, Game, Team, Category,Player,Role,Badge,SiteStats
 from forms import AddGameForm,TeamFormSet,TeamFormSetEdit,AddTeamForm,RoleFormSet,LinkForm,BadgeForm
 from signals import profile_link,profile_unlink
 from badgeGen import build_badge
@@ -57,17 +57,16 @@ def getPage(request,paginator,default=1,indexRange=2):
 
 def index(request):
 	site_list = Site.objects.all()[:5]
-	newest = Game.objects.order_by('-end_date')[0]
-	games = [ (g.num_players(),g) for g in  Game.objects.all()]
-	largest = max(games)[1]
-	smallest = min(games)[1]
+	stats = [site.sitestats for site in Site.objects.all()]
+	newest = max((stat.newest_game.end_date,stat.newest_game) for stat in stats)[1]#Game.objects.order_by('-end_date')[0]
+	largest = max((stat.largest_game.num_players(),stat.largest_game) for stat in stats)[1]
+	smallest = min((stat.largest_game.num_players(),stat.largest_game) for stat in stats)[1]
 	totalPlayed = Game.objects.count()
 	numPlayers = Player.objects.count()
-	totalPlayers = Player.objects.count()
-	win_list = playersByWins(Player.objects.all(),True)[0:5]
-	loss_list = playersByLosses(Player.objects.all(),True)[0:5]
-	mostMod = max( ( (p.modded(),p) for p in Player.objects.all()))[1]
-	mostPlayed = Player.objects.order_by('-played')[0]
+	win_list = [p for w,p in sorted(((p.wins(),p) for stat in stats for p in stat.winningest.all()),reverse=True)[0:5]]
+	loss_list = [p for l,p in sorted(((p.losses(),p) for stat in stats for p in stat.losingest.all()),reverse=True)[0:5]]
+	mostMod = max( ( (stat.most_modded.modded(),stat.most_modded) for stat in stats))[1]
+	mostPlayed = max( (stat.most_played.played,stat.most_played) for stat in stats)[1]
 	stats= {'win_list':win_list,'loss_list':loss_list,'sidebar':[('Newest Game',newest),('Largest Game',largest),('Smallest Game',smallest),('Games Played',totalPlayed),('Number of Players',numPlayers),('Most Prolific Mod',mostMod),('Most Games Played',mostPlayed)]}
 	return render_to_response('index.html',{'stats':stats,'site_list' : site_list},context_instance=RequestContext(request))
 def site(request,site_id):
