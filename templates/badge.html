@@ -63,6 +63,7 @@ Fields such as wins, total games, etc, are specified by a percent sign and a sin
 	</div>
 </div>
 <div class="span-22" id="template">
+<img id="normalTemplate" src="{{MEDIA_URL}}images/badges/Example_classic.png" alt="Classic Template"></img><br/>
 {% for field in form%}
 	{%ifnotequal field.name "config"%}{{field.label_tag}}: {{field}}{%endifnotequal%}
 {%endfor%}
