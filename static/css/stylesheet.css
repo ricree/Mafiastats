@@ -3,6 +3,10 @@ body{background-color: #506073;
 }
 h1{margin-bottom:5px;}
 
+/*used to hide by default when javascript is on and show when off*/
+.js .jsHidden{
+	display:none;}
+
 div#header{
 	-moz-border-radius-topleft:5px;
 	-webkit-border-radius-topleft:5px;

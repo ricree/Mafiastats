@@ -46,7 +46,7 @@ class BadgeForm(forms.Form):
 	tempChoices = [(k,k) for k in templates]
 	title = forms.CharField(max_length=50)
 	config = forms.CharField(max_length=200,label="Format String",required=False)
-	players = forms.MultipleChoiceField(choices=[])
+	players = forms.MultipleChoiceField(choices=[],label="Players to Track")
 	preset = forms.ChoiceField(choices= tempChoices,required=False,initial="original")
 	background = forms.ChoiceField(choices=[("transparent","transparent"),("gradient","gradient")],required=False,initial="gradient")
 	font_size = forms.ChoiceField(choices=[(i,i) for i in range(8,17)],initial=11)

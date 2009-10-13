@@ -18,6 +18,10 @@
 <title>{% block title %}{%endblock%} - Mafia Stats</title>
 </head>
 <body>
+{%block bodyscripts%}{%if bodyscripts %}{%for script in bodyscripts%}
+{{script|safe}} {%endfor%}  {%endif%}
+    {%endblock%}
+{%block extra_scripts%}{%endblock%}
 	<script type="text/javascript">
 		$(document).ready(function(){
 				$(".ui-state-default").mouseover(function(){
@@ -54,10 +58,6 @@
 	<a href='http://jquery.com/' title='jQuery JavaScript Library'><img src='http://jquery.com/files/buttons/jquery-icon.png' alt='jQuery JavaScript Library' title='jQuery JavaScript Library' style='border:none;'/></a>
 	</div>
 	</div>
-{%block bodyscripts%}{%if bodyscripts %}{%for script in bodyscripts%}
-{{script|safe}} {%endfor%}  {%endif%}
-    {%endblock%}
-{%block extra_scripts%}{%endblock%}
 <!--getsatisfaction widget-->
 <script type="text/javascript" charset="utf-8">
   var is_ssl = ("https:" == document.location.protocol);

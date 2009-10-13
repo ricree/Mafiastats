@@ -63,11 +63,20 @@ post_save.connect(buildColorBadge,sender=Game)
 post_delete.connect(buildColorBadge,sender=Game)
 
 def buildBadges(sender,**kwargs):
+	print "handler was called"
 	user= kwargs['user']
 	for b in user.badge_set.all():
 		build_badge(b)
 profile_unlink.connect(buildBadges)
 profile_link.connect(buildBadges)
+
+def buildBadgesForGame(sender,**kwargs):
+	game = kwargs['instance']
+	players = inst.players()
+	for badge in (b for p in players for b in  p.user.badge_set.all()):
+		build_badge(b)
+post_save.connect(buildBadgesForGame,sender=Game)
+post_delete.connect(buildBadgesForGame,sender=Game)
 
 def clearAll(sender, **kwargs):
 	inst = kwargs['instance']

@@ -7,20 +7,23 @@
 {%block bodyscripts%}
 {{block.super}}
 <script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/jquery.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/jquery-ui-1.7.2.custom.min.js"></script>
 <script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/colorpicker.js"></script>
 <script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/eye.js"></script>
 <script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/utils.js"></script>
 <script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/layout.js?ver=1.0.2"></script>
-<script type="text/javascript">
+<script type="text/javascript" src="{{MEDIA_URL}}js/jquery.imgSelector.js"></script>
+{%comment%}<script type="text/javascript">
 $(document).ready(function(){
 	$("#tabs").tabs();
 	});
 </script>
-
+{%endcomment%}
 {%endblock%}
 {%block extra_scripts%}
 {{block.super}}
 <script type="text/javascript">
+	$('html').addClass('js');
 	$(document).ready(function(){
 		$(".ColorPicker").ColorPicker({onSubmit: function(hsb, hex, rgb, el) {
 		$(el).val("#"+hex);
@@ -29,43 +32,59 @@ $(document).ready(function(){
 		onBeforeShow: function () {
 		$(this).ColorPickerSetColor(this.value);
 		}
-	});});
+	});
+		$("#normalTemplate").imageSelector("preset","original");
+		$("#minimalTemplate").imageSelector("preset","minimal");
+		$("#moderatorTemplate").imageSelector("preset","moderator");
+		$("#advancedToggle").click(function(){
+			$("#advanced").toggle("slide",{direction:"up"},300)});
+		$("#advancedHelpToggle").click(function(){
+			$("#advHelp").toggle("slide",{direction:"up"},800)});
+	});
 </script>
 {%endblock%}
 {%block content%}
 <form action="{%if pk%}{%url account_badge pk%}{%else%}{%url account_badge%}{%endif%}" method="POST">
 <div class="span-23">
 <div id="tabs">
-<div class="span-22" id="advanced">
-<div class="span-17">
-<p>This is a test for the new custom badges</p>
-<p>The UI for this page hasn't been decided yet, so for now badge format must be entered with the raw format string</p>
-<p>Text strings should be placed in parentheses.
-Fields such as wins, total games, etc, are specified by a percent sign and a single letter identifying which you want.</p>
-<p>After both strings and fields, there are two options you can add.  Text decoration (currently bold or italic) can be specified with b or i.  If no decoration is added, it will be displayed normally.  You can also specify a font size by entering the number.  If you don't, it will use 11 as a default</p>
-<p>If you want more than one line, add \n in the place you want the break to occur</p>
-<fieldset>
-<legend>Examples</legend>
-<p><b>(Some Text)b12</b>&nbsp;-Will add the string "Some Text" in bold with a size 12 font</p>
-<p><b>%ni10</b>-Will add the username in italic with a size 10 font</p>
-	<p><b>%nb13\n(Mafia Stats )b%w( Wins In )%t( Games)</b>-This is roughly equivalent to the current non-custom badges</p>
-</fieldset>
-{{form.config}}
-
-</div>
-	<div class="span-4">
-		Valid fields:<br/>
-		<b>n</b>-Name<br/>
-		<b>w</b>-Wins<br/>
-		<b>l</b>-Losses<br/>
-		<b>t</b>-Total games played<br/>
-		<b>m</b>-Total games moderated<br/>
-	</div>
+<a href="#" id="advancedToggle">Advanced Editing</a>
+<div class="span-22 jsHidden" id="advanced">
+	<a href="#" id="advancedHelpToggle" style="padding-left:10px;">Format String Help</a>
+	<div class="span-22 jsHidden" id="advHelp" >
+		<div class="span-17">
+		<p>This is a test for the new custom badges</p>
+		<p>The UI for this page hasn't been decided yet, so for now badge format must be entered with the raw format string</p>
+		<p>Text strings should be placed in parentheses.
+		Fields such as wins, total games, etc, are specified by a percent sign and a single letter identifying which you want.</p>
+		<p>After both strings and fields, there are two options you can add.  Text decoration (currently bold or italic) can be specified with b or i.  If no decoration is added, it will be displayed normally.  You can also specify a font size by entering the number.  If you don't, it will use 11 as a default</p>
+		<p>If you want more than one line, add \n in the place you want the break to occur</p>
+		<fieldset>
+		<legend>Examples</legend>
+		<p><b>(Some Text)b12</b>&nbsp;-Will add the string "Some Text" in bold with a size 12 font</p>
+		<p><b>%ni10</b>-Will add the username in italic with a size 10 font</p>
+			<p><b>%nb13\n(Mafia Stats )b%w( Wins In )%t( Games)</b>-This is roughly equivalent to the current non-custom badges</p>
+		</fieldset>
+		</div>
+			<div class="span-4">
+				Valid fields:<br/>
+				<b>n</b>-Name<br/>
+				<b>w</b>-Wins<br/>
+				<b>l</b>-Losses<br/>
+				<b>t</b>-Total games played<br/>
+				<b>m</b>-Total games moderated<br/>
+			</div>
+	</div><br/>
+	{{form.config.label_tag}}: {{form.config}}
 </div>
 <div class="span-22" id="template">
-<img id="normalTemplate" src="{{MEDIA_URL}}images/badges/Example_classic.png" alt="Classic Template"></img><br/>
+<fieldset>
+<legend>Choose a Template</legend>
+<div class="span-5" style="margin-left:10px;"><img id="normalTemplate" src="{{MEDIA_URL}}images/badges/Example_Classic.png" alt="Classic Template"></img><br/><b>Classic Template</b></div>
+<div class="span-4"><img id="minimalTemplate" src="{{MEDIA_URL}}images/badges/Example_Minimalist.png" alt="Minimal Template"></img><br/><b>Minimal Template</b></div>
+<div class="span-4"><img id="moderatorTemplate" src="{{MEDIA_URL}}images/badges/Example_Moderator.png" alt="Moderator Template"><img><br/><b>Moderator Template</b></div>
+</fieldset>
 {% for field in form%}
-	{%ifnotequal field.name "config"%}{{field.label_tag}}: {{field}}{%endifnotequal%}
+	{%ifnotequal field.name "config"%}<div class="span-10">{{field.label_tag}}: {{field}}</div>{%endifnotequal%}
 {%endfor%}
 </div>
 </div>
