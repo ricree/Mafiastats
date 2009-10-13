@@ -55,14 +55,16 @@ $(document).ready(function(){
 		<p>This is a test for the new custom badges</p>
 		<p>The UI for this page hasn't been decided yet, so for now badge format must be entered with the raw format string</p>
 		<p>Text strings should be placed in parentheses.
-		Fields such as wins, total games, etc, are specified by a percent sign and a single letter identifying which you want.</p>
-		<p>After both strings and fields, there are two options you can add.  Text decoration (currently bold or italic) can be specified with b or i.  If no decoration is added, it will be displayed normally.  You can also specify a font size by entering the number.  If you don't, it will use 11 as a default</p>
+		Fields such as wins, total games, etc, are specified by $ and a single letter identifying which you want.</p>
+		<p>After both strings and fields, there is an optional formatting string.  Text decoration (currently bold, italic, or normal) can be specified with b, i, or n . You can also specify a font size by entering the number.  Font color can be specified with # fllowed by the value in hex.</p>
+		<p>At the beginning of the format string, you can enter background and defaults in the form of "[background,bg_color_1,bg_color_2]formatting".  Currently, 'background' can be either gradient or transparent.  The formatting string is the same as with fields and strings, and will set the default format for all later text.</p>
 		<p>If you want more than one line, add \n in the place you want the break to occur</p>
 		<fieldset>
 		<legend>Examples</legend>
 		<p><b>(Some Text)b12</b>&nbsp;-Will add the string "Some Text" in bold with a size 12 font</p>
-		<p><b>%ni10</b>-Will add the username in italic with a size 10 font</p>
-			<p><b>%nb13\n(Mafia Stats )b%w( Wins In )%t( Games)</b>-This is roughly equivalent to the current non-custom badges</p>
+		<p><b>Some More Text</b>&nbsp;-Will add the string "Some More Text" with the default formatting</p>
+		<p><b>&ni10</b>-Will add the username in italic with a size 10 font</p>
+			<p><b>[gradient,#010085,#1b5af6]n11#FFFFFF&nb13\n(Mafia Stats )b&w( Wins In )&t( Games)</b>-This is roughly equivalent to the current non-custom badges</p>
 		</fieldset>
 		</div>
 			<div class="span-4">
@@ -72,6 +74,7 @@ $(document).ready(function(){
 				<b>l</b>-Losses<br/>
 				<b>t</b>-Total games played<br/>
 				<b>m</b>-Total games moderated<br/>
+				<b>p</b>-Number of players in moderated games<br/>
 			</div>
 	</div><br/>
 	{{form.config.label_tag}}: {{form.config}}
