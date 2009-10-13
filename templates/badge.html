@@ -79,9 +79,9 @@ $(document).ready(function(){
 <div class="span-22" id="template">
 <fieldset>
 <legend>Choose a Template</legend>
-<div class="span-5" style="margin-left:10px;"><img id="normalTemplate" src="{{MEDIA_URL}}images/badges/Example_Classic.png" alt="Classic Template"></img><br/><b>Classic Template</b></div>
-<div class="span-4"><img id="minimalTemplate" src="{{MEDIA_URL}}images/badges/Example_Minimalist.png" alt="Minimal Template"></img><br/><b>Minimal Template</b></div>
-<div class="span-4"><img id="moderatorTemplate" src="{{MEDIA_URL}}images/badges/Example_Moderator.png" alt="Moderator Template"><img><br/><b>Moderator Template</b></div>
+<div class="span-5" style="margin-left:10px;"><img  id="normalTemplate"src="{{MEDIA_URL}}images/badges/Example_Classic.png" alt="Classic Template"></img><br/><b>Classic Template</b></div>
+<div class="span-4"><img  id="minimalTemplate" src="{{MEDIA_URL}}images/badges/Example_Minimalist.png" alt="Minimal Template"></img><br/><b>Minimal Template</b></div>
+<div class="span-5"><img id="moderatorTemplate" src="{{MEDIA_URL}}images/badges/Example_Moderator.png" alt="Moderator Template"><img><br/><b>Moderator Template</b></div>
 </fieldset>
 {% for field in form%}
 	{%ifnotequal field.name "config"%}<div class="span-10">{{field.label_tag}}: {{field}}</div>{%endifnotequal%}

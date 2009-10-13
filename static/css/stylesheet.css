@@ -6,6 +6,19 @@ h1{margin-bottom:5px;}
 /*used to hide by default when javascript is on and show when off*/
 .js .jsHidden{
 	display:none;}
+.imageSelector-selected{
+	background-color:#FAFEAC;
+	border-color:#E5E6CF;
+	border-width:1px;
+	border-style:dotted;
+	padding:4px;
+	float:left;
+}
+.imageSelector-default{
+	padding:4px;
+	border-style:none;
+	border-width:1px;
+}
 
 div#header{
 	-moz-border-radius-topleft:5px;
