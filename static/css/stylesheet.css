@@ -7,6 +7,7 @@ h1{margin-bottom:5px;}
 .js .jsHidden{
 	display:none;}
 .imageSelector-selected{
+	cursor:pointer;
 	background-color:#FAFEAC;
 	border-color:#E5E6CF;
 	border-width:1px;
@@ -15,6 +16,7 @@ h1{margin-bottom:5px;}
 	float:left;
 }
 .imageSelector-default{
+	cursor:pointer;
 	padding:4px;
 	border-style:none;
 	border-width:1px;

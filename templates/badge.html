@@ -36,6 +36,8 @@ $(document).ready(function(){
 		$("#normalTemplate").imageSelector("preset","original");
 		$("#minimalTemplate").imageSelector("preset","minimal");
 		$("#moderatorTemplate").imageSelector("preset","moderator");
+		$("#gradientBackground").imageSelector("background","gradient");
+		$("#transparentBackground").imageSelector("background","transparent");
 		$("#advancedToggle").click(function(){
 			$("#advanced").toggle("slide",{direction:"up"},300)});
 		$("#advancedHelpToggle").click(function(){
@@ -86,9 +88,28 @@ $(document).ready(function(){
 <div class="span-4"><img  id="minimalTemplate" src="{{MEDIA_URL}}images/badges/Example_Minimalist.png" alt="Minimal Template"></img><br/><b>Minimal Template</b></div>
 <div class="span-5"><img id="moderatorTemplate" src="{{MEDIA_URL}}images/badges/Example_Moderator.png" alt="Moderator Template"><img><br/><b>Moderator Template</b></div>
 </fieldset>
+<div class="span-10">
+{{form.title.label_tag}}: {{form.title}}<br/>
+{{form.preset.label_tag}}: {{form.preset}}<br/>
+{{form.font_size.label_tag}}: {{form.font_size}}<br/>
+{{form.text_color.label_tag}}: {{form.text_color}}<br/>
+{{form.top_color.label_tag}}: {{form.top_color}}<br/>
+{{form.bottom_color.label_tag}}: {{form.bottom_color}}<br/>
+</div>
+<div class="span-10">
+<fieldset style="padding-left:4px;">
+<legend>Choose a Background</legend>
+<div class="span-6"><img id="gradientBackground" style="margin-left:4px;"src="{{MEDIA_URL}}images/badges/Example_Gradient.png" alt="Gradient Background"></img></div>
+<div class="span-6"><img style="margin-left:4px;" id="transparentBackground" src="{{MEDIA_URL}}images/badges/Example_Transparent.png" alt="Transparent Background" ></img></div>
+</fieldset>
+{{form.background.label_tag}}: {{form.background}}<br/>
+{{form.players.label_tag}}: {{form.players}}
+</div>
+{%comment%}
 {% for field in form%}
 	{%ifnotequal field.name "config"%}<div class="span-10">{{field.label_tag}}: {{field}}</div>{%endifnotequal%}
 {%endfor%}
+{%endcomment%}
 </div>
 </div>
 </div>

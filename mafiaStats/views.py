@@ -538,6 +538,8 @@ def unlink(request,pk):
 		return render_to_response("unlink.html",{'can_unlink':False,'message':'You cannot unlink this account'},context_instance=RequestContext(request))	
 	if (request.method=="POST"):
 		player.user = None
+		for badge in player.badge_set.all():
+			badge.players.remove(player)
 		player.save()
 		profile_unlink.send(User,user=request.user,player=player)
 		print "redirecting"
