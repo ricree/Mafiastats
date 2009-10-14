@@ -79,7 +79,7 @@ pre_delete.connect(clearAll,sender=Game)
 def siteUpdater(sender, **kwargs):
 	inst = kwargs['instance']
 	if sender is Game:
-		site = inst
+		site = inst.site
 		site.sitestats.update()
 	else:
 		for site in Site.objects.all():
