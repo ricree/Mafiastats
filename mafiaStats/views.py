@@ -388,7 +388,7 @@ def edit(request,game_id):
 		roleData = [{'title':role.title,'player':role.player.name,'text':role.text} for role in Role.objects.filter(game=game)]
 		form = AddGameForm(gameData)
 		teamForm = TeamFormSetEdit(initial=teamData, prefix="teamForm")
-		roleForm = RoleFormSet(prefix="roleForm")
+		roleForm = RoleFormSet(initial=roleForm,prefix="roleForm")
 	left_attrs = [("Team Name:","title"),('Team Type:','type'),('Won:','won')]
 	for tform in teamForm.forms:
 		tform.left_attrs = [(label,tform[property],property) for label,property in left_attrs]
