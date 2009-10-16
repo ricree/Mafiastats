@@ -70,7 +70,7 @@ $(document).ready(function(){
 				{%if roles%}
 				<div id="roles" class="span-17">
 					<div id="roleAccordian">
-						{%for role in roles%}
+						{%for role in roles.values%}
 						<h4><a href="#">{{role.title}} - {{role.player.name}}</a></h4>
 						<div>{{role.text|safe}}</div>
 						</a>

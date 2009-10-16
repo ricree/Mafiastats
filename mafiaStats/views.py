@@ -106,7 +106,7 @@ def game(request, game_id):
 	winners = teams.filter(won=True)
 	numWinners =teams.filter(won=True).count()
 	teams=[(team,team.players.all().order_by('name')) for team in teams]
-	roles=Role.objects.filter(game=game)
+	roles=dict(((role.player.name,role) for role in Role.objects.filter(game=game)))
 	can_edit = request.user.has_perm('mafiaStats.game')
 	return render_to_response('game.html', {'can_edit':can_edit,'game':game, 'teams':teams, 'num_players' : numPlayers, 'length':length, 'next':reverse('mafiastats_game',args=[int(game_id)]),'players':players,'winners':winners,'roles':roles},context_instance=RequestContext(request))
 
@@ -410,7 +410,7 @@ def edit(request,game_id):
 		roleData = [{'title':role.title,'player':role.player.name,'text':role.text} for role in Role.objects.filter(game=game)]
 		form = AddGameForm(gameData)
 		teamForm = TeamFormSetEdit(initial=teamData, prefix="teamForm")
-		roleForm = RoleFormSet(prefix="roleForm")
+		roleForm = RoleFormSet(initial=roleData,prefix="roleForm")
 	left_attrs = [("Team Name:","title"),('Team Type:','type'),('Won:','won')]
 	for tform in teamForm.forms:
 		tform.left_attrs = [(label,tform[property],property) for label,property in left_attrs]

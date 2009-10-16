@@ -72,8 +72,8 @@ profile_link.connect(buildBadges)
 
 def buildBadgesForGame(sender,**kwargs):
 	game = kwargs['instance']
-	players = inst.players()
-	for badge in (b for p in players for b in  p.user.badge_set.all()):
+	players = game.players()
+	for badge in (b for p in players if p.user for b in  p.user.badge_set.all()):
 		build_badge(b)
 post_save.connect(buildBadgesForGame,sender=Game)
 post_delete.connect(buildBadgesForGame,sender=Game)
@@ -98,7 +98,7 @@ pre_delete.connect(clearAll,sender=Game)
 def siteUpdater(sender, **kwargs):
 	inst = kwargs['instance']
 	if sender is Game:
-		site = inst
+		site = inst.site
 		site.sitestats.update()
 	else:
 		for site in Site.objects.all():
