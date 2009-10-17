@@ -13,3 +13,6 @@ Mafia Stats - {{site.title}} Site Statistics
 <a class="menuItem" href="{%if site%}{%url mafiastats_moderators site.id%}{%else%}{%url mafiastats_moderators ''%}{%endif%}">Moderators</a>
 {%if site%}<a class="menuItem" href="{%if site%}{%url mafiastats_add site.id%}{%else%}{%url mafiastats_add ''%}{%endif%}">Add Game</a>{%endif%}
 {%endblock%}
+{%block pageControls%}
+{%include "pagePrint.html"%}
+{%endblock%}

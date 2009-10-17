@@ -1,7 +1,8 @@
 # Create your views here.
 import logging
 from django.http import HttpResponse, Http404,HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import get_object_or_404#render_to_response, get_object_or_404
+from coffin.shortcuts import render_to_response
 from models import Site, Game, Team, Category,Player,Role,Badge,SiteStats
 from forms import AddGameForm,TeamFormSet,TeamFormSetEdit,AddTeamForm,RoleFormSet,LinkForm,BadgeForm
 from signals import profile_link,profile_unlink
@@ -93,7 +94,7 @@ def site(request,site_id):
 			newest = game.firstGame_set.all()[0]
 		count+=1
 	imgLink = getSiteImage(Site.objects.get(pk=site_id))
-	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage,'newest':newest,'catImg':imgLink},context_instance=RequestContext(request))
+	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage,'pageArgs':{},'newest':newest,'catImg':imgLink},context_instance=RequestContext(request))
 def game(request, game_id):
 	game = get_object_or_404(Game, pk=game_id)
 	teams = Team.objects.filter(game=game).order_by('-won')
