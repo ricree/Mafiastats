@@ -1,6 +1,6 @@
 {%extends "base.html"%}
 {% block title%}
-Mafia Stats - {{site.title}} Site Statistics
+{{site.title}} Site Statistics - {{super()}}
 {%endblock%}
 {%block header%}
 <h1>{%if (site is defined) and site%}{{site.title}}{%else%}Mafia Statistics{%endif%}</h1>
