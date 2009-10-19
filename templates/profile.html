@@ -30,7 +30,7 @@
 	</div>
 	{%for badge in profile_user.badge_set.all()%}
 		<div class="span-6 infoBox" style="text-align:center;padding:4px;padding-bottom:0px;padding-top:0px;">
-			<strong>{{badge.title}}</strong>&nbsp;&nbsp;<a href="{%url account_badge_delete badge.pk%}">(delete)</a><br/>
+			<strong>{{badge.title}}</strong>&nbsp;&nbsp;<a href="{%url account_badge_edit badge.pk%}">(edit)</a>&nbsp;<a href="{%url account_badge_delete badge.pk%}">(delete)</a><br/>
 			<img src="{{MEDIA_URL}}{{badge.url}}"></img>
 			<pre style="overflow:auto;background-color:#F7F5F5;">[url={{request.get_host()}}{%url account_profile profile_user.pk%}][img]{{request.get_host()}}{{MEDIA_URL}}{{badge.url}}[/img][/url]</pre>
 		</div>

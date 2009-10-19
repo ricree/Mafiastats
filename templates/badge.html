@@ -40,7 +40,7 @@
 </script>
 {%endblock%}
 {%block content%}
-<form action="{%if pk%}{%url account_badge pk%}{%else%}{%url account_badge%}{%endif%}" method="POST">
+<form action="{%if pk%}{%url account_badge_edit pk%}{%else%}{%url account_badge%}{%endif%}" method="POST">
 <div class="span-23">
 <div id="tabs">
 <a href="#" id="advancedToggle">Advanced Editing</a>
@@ -78,7 +78,7 @@
 <div class="span-22" id="template">
 <fieldset>
 <legend>Choose a Template</legend>
-<div class="span-5" style="margin-left:10px;"><img  id="normalTemplate"src="{{MEDIA_URL}}images/badges/Example_Classic.png" alt="Classic Template"></img><br/><b>Classic Template</b></div>
+<div class="span-5" style="margin-left:10px;"><img {%if form.preset.selected == "original"%}class="imageSelector-selected" {%endif%}id="normalTemplate"src="{{MEDIA_URL}}images/badges/Example_Classic.png" alt="Classic Template"></img><br/><b>Classic Template</b></div>
 <div class="span-4"><img  id="minimalTemplate" src="{{MEDIA_URL}}images/badges/Example_Minimalist.png" alt="Minimal Template"></img><br/><b>Minimal Template</b></div>
 <div class="span-5"><img id="moderatorTemplate" src="{{MEDIA_URL}}images/badges/Example_Moderator.png" alt="Moderator Template"><img><br/><b>Moderator Template</b></div>
 </fieldset>
