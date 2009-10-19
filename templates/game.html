@@ -4,11 +4,17 @@
 {{super()}}
 <script type="text/javascript">
 $(document).ready(function(){
+	var roleOrder = {{roleOrder|safe}};
 	$(".teamLink").click(function(){
 		$("#tabs").tabs('select',0);
 		});
 	$(".roleLink").click(function(){
-			$("#tabs").tabs('select','#roles');});
+			var name = $(this).attr("href").slice(1);
+			var num = parseInt(name);
+			var ac = roleOrder[name];
+			$("#tabs").tabs('select','#roles');
+			$("#roleAccordian").accordion('activate',roleOrder[name]);
+		});
 	});
 </script>
 {%endblock%}
@@ -63,7 +69,7 @@ $(document).ready(function(){
 						</div>
 						<div class="hlist">
 							{%for player in tplayers%}
-							<a href="{%url mafiastats_player player.id%}">{{player.name}}</a>{% if player.name in roles%}-<a href="#" class="roleLink">{{roles[player.name].title}}</a>{%endif%}
+							<a href="{%url mafiastats_player player.id%}">{{player.name}}</a>{% if player.name in roles%}-<a href="#{{roles[player.name].pk}}" class="roleLink">{{roles[player.name].title}}</a>{%endif%}
 							{%endfor%}
 						</div>
 					</div>
@@ -73,7 +79,7 @@ $(document).ready(function(){
 				<div id="roles" class="span-17">
 					<div id="roleAccordian">
 						{%for role in roles.values()%}
-						<h4><a href="#">{{role.title}} - {{role.player.name}}</a></h4>
+						<h4><a href="#{{role.pk}}">{{role.title}} - {{role.player.name}}</a></h4>
 						<div>{{role.text|safe}}</div>
 						</a>
 						{%endfor%}
