@@ -10,7 +10,7 @@
 {%if own_page%} <a class="menuItem" href="{%url mafiastats_link%}">Link Account</a>{%endif%}
 {%endblock%}
 {%block content%}
-{%if profile_user.players.count%}
+{%if profile_user.players.count()%}
 {%include "statsBox.html"%}
 <div class="span-12">
 	<span class="header">Linked Players</span>
