@@ -1,11 +1,11 @@
 {%extends "base.html"%}
 {%block sheets%}
-{{block.super}}
+{{super()}}
 <link rel="stylesheet" type="text/css" href="{{MEDIA_URL}}colorpicker/css/colorpicker.css"/>
 <!--<link rel="stylesheet" type="text/css" href="{{MEDIA_URL}}colorpicker/css/layout.css"/>-->
 {%endblock%}
 {%block bodyscripts%}
-{{block.super}}
+{{super()}}
 <script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/jquery.js"></script>
 <script type="text/javascript" src="{{MEDIA_URL}}js/jquery-ui-1.7.2.custom.min.js"></script>
 <script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/colorpicker.js"></script>
@@ -13,15 +13,9 @@
 <script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/utils.js"></script>
 <script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/layout.js?ver=1.0.2"></script>
 <script type="text/javascript" src="{{MEDIA_URL}}js/jquery.imgSelector.js"></script>
-{%comment%}<script type="text/javascript">
-$(document).ready(function(){
-	$("#tabs").tabs();
-	});
-</script>
-{%endcomment%}
 {%endblock%}
 {%block extra_scripts%}
-{{block.super}}
+{{super()}}
 <script type="text/javascript">
 	$('html').addClass('js');
 	$(document).ready(function(){
@@ -79,7 +73,7 @@ $(document).ready(function(){
 				<b>p</b>-Number of players in moderated games<br/>
 			</div>
 	</div><br/>
-	{{form.config.label_tag}}: {{form.config}}
+	{{form.config.label_tag()|safe}}: {{form.config|safe}}
 </div>
 <div class="span-22" id="template">
 <fieldset>
@@ -89,12 +83,12 @@ $(document).ready(function(){
 <div class="span-5"><img id="moderatorTemplate" src="{{MEDIA_URL}}images/badges/Example_Moderator.png" alt="Moderator Template"><img><br/><b>Moderator Template</b></div>
 </fieldset>
 <div class="span-10">
-{{form.title.label_tag}}: {{form.title}}<br/>
-{{form.preset.label_tag}}: {{form.preset}}<br/>
-{{form.font_size.label_tag}}: {{form.font_size}}<br/>
-{{form.text_color.label_tag}}: {{form.text_color}}<br/>
-{{form.top_color.label_tag}}: {{form.top_color}}<br/>
-{{form.bottom_color.label_tag}}: {{form.bottom_color}}<br/>
+{{form.title.label_tag()|safe}}: {{form.title|safe|safe}}<br/>
+{{form.preset.label_tag()|safe}}: {{form.preset|safe}}<br/>
+{{form.font_size.label_tag()|safe}}: {{form.font_size|safe}}<br/>
+{{form.text_color.label_tag()|safe}}: {{form.text_color|safe}}<br/>
+{{form.top_color.label_tag()|safe}}: {{form.top_color|safe}}<br/>
+{{form.bottom_color.label_tag()|safe}}: {{form.bottom_color|safe}}<br/>
 </div>
 <div class="span-10">
 <fieldset style="padding-left:4px;">
@@ -102,14 +96,9 @@ $(document).ready(function(){
 <div class="span-6"><img id="gradientBackground" style="margin-left:4px;"src="{{MEDIA_URL}}images/badges/Example_Gradient.png" alt="Gradient Background"></img></div>
 <div class="span-6"><img style="margin-left:4px;" id="transparentBackground" src="{{MEDIA_URL}}images/badges/Example_Transparent.png" alt="Transparent Background" ></img></div>
 </fieldset>
-{{form.background.label_tag}}: {{form.background}}<br/>
-{{form.players.label_tag}}: {{form.players}}
+{{form.background.label_tag()|safe}}: {{form.background|safe}}<br/>
+{{form.players.label_tag()|safe}}: {{form.players|safe}}
 </div>
-{%comment%}
-{% for field in form%}
-	{%ifnotequal field.name "config"%}<div class="span-10">{{field.label_tag}}: {{field}}</div>{%endifnotequal%}
-{%endfor%}
-{%endcomment%}
 </div>
 </div>
 </div>

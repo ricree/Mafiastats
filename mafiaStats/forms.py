@@ -8,6 +8,7 @@ from django.utils.safestring import mark_safe
 from django.conf import settings
 import os
 import pyggy
+import marshal
 
 class AddGameForm(forms.Form):
 	title = forms.CharField(max_length=50)
@@ -69,18 +70,18 @@ class BadgeForm(forms.Form):
 		bottom = self.cleaned_data['bottom_color']
 		text = self.cleaned_data['text_color']
 		size = self.cleaned_data['font_size']
-		print templateName
-		if(background == 'transparent'):
-			return (template%(background,"","",size,text))
-		if(background == 'gradient'):
-			return (template%(background,top,bottom,size,text))
+		params = {'template':templateName,'background':background,'color1':top,'color2':bottom,'text':text,'size':size}
+		return marshal.dumps(params).replace('"','\\"')
 	def clean(self):
 		if (('config' in self.cleaned_data) and (self.cleaned_data['config'])):
 			value = self.cleaned_data['config']
+			custom = True
 		else:
 			value = self.buildBadgeFromTemplate()
+			custom = False
 		print "value is: ", value
 		self.cleaned_data['config'] = value
+		self.custom_format = custom
 		return self.cleaned_data
 		
 	def clean_template(self):

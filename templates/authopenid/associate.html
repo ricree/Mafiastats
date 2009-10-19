@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_django.html" %}
 {% load i18n %}
 
 {% block content %}
@@ -7,7 +7,7 @@
 {% endif %}
 
 {% if form.errors %}
-    <div class="errors"><p>Openid url : {{ form.openid_url.errors|join:', ' }}</p></div>
+    <div class="errors"><p>Openid url : {{ form.openid_url.errors|join(', ' ) }}</p></div>
 {% endif %}
 
 <div class="login">

@@ -34,12 +34,12 @@ function addForm(btn, prefix,context){
 	$(row).find('.delete-row').click(function() {
 		deleteForm(this, prefix);
 	});
-	$(row).insertAfter($('.dynamic-form:last',context));
+	$(row).hide().insertAfter($('.dynamic-form:last',context)).show("slide",{direction:"up"},500);
 	$('#id_' + prefix + '-TOTAL_FORMS').val(formCount + 1);
 	return false;
 }
 function deleteForm(btn, prefix) {
-	$(btn).parents('.dynamic-form').remove();
+	$(btn).parents('.dynamic-form').hide("slide",{direction:"up"},500,function(){$(this).remove();});
 	var forms = $('.dynamic-form');
 	$('#id_' + prefix + '-TOTAL_FORMS').val(forms.length);
 	for (var i=0, formCount=forms.length; i<formCount; i++) {

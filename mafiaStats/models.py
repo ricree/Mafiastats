@@ -222,6 +222,7 @@ class Badge(models.Model):
 	players = models.ManyToManyField(Player)
 	url = models.CharField(max_length=200,blank=True)
 	title = models.CharField(max_length=50)
+	is_custom = models.BooleanField()
 
 class SiteStats(models.Model):
 	site = models.OneToOneField('Site')

@@ -1,6 +1,6 @@
 {%extends "base.html"%}
 {%block bodyscripts%}
-{{block.super}}
+{{super()}}
 <script type="text/javascript" src="{{MEDIA_URL}}js/jquery-ui-1.7.2.custom.min.js"></script>
 {%endblock%}
 {%block title%}{{profile_user.username}}{%endblock%}
@@ -15,7 +15,7 @@
 <div class="span-12">
 	<span class="header">Linked Players</span>
 	<ul>
-	{%for player in profile_user.players.all%}
+	{%for player in profile_user.players.all()%}
 	<li><a href = "{%url mafiastats_player player.id%}">{{player.name}}</a> - <a href="{%url mafiastats_site player.site.id%}">{{player.site.title}}</a>{%if own_page%}&nbsp;&nbsp;(<a href="{%url mafiastats_unlink player.id%}" id="unlink_{{player.id}}" class="unlinker">unlink</a>){%endif%}</li>
 	{%endfor%}
 	</ul>
@@ -28,11 +28,11 @@
 	<div class="span-5" style="margin-bottom:18px;"><h3 style="padding-bottom:0px;margin-bottom:4px;">Badges</h3>
 	<a href="/account/badge/">Create New Badge</a>
 	</div>
-	{%for badge in profile_user.badge_set.all%}
+	{%for badge in profile_user.badge_set.all()%}
 		<div class="span-6 infoBox" style="text-align:center;padding:4px;padding-bottom:0px;padding-top:0px;">
 			<strong>{{badge.title}}</strong>&nbsp;&nbsp;<a href="{%url account_badge_delete badge.pk%}">(delete)</a><br/>
 			<img src="{{MEDIA_URL}}{{badge.url}}"></img>
-			<pre style="overflow:auto;background-color:#F7F5F5;">[url={{request.get_host}}{%url account_profile profile_user.pk%}][img]{{request.get_host}}{{MEDIA_URL}}{{badge.url}}[/img][/url]</pre>
+			<pre style="overflow:auto;background-color:#F7F5F5;">[url={{request.get_host()}}{%url account_profile profile_user.pk%}][img]{{request.get_host()}}{{MEDIA_URL}}{{badge.url}}[/img][/url]</pre>
 		</div>
 	{%endfor%}
 </div>

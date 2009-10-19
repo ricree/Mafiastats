@@ -23,7 +23,11 @@ from sortMethods import *
 from mafiaStats.signalHandlers import getSiteImage
 from django.conf import settings
 import datetime
+from django.contrib.comments.templatetags.comments import get_comment_list
+from coffin import template
 
+register = template.Library()
+register.tag('get_comment_list',get_comment_list)
 
 
 LOGGING_FILE = settings.SITE_ROOT+'/debug_log'
@@ -69,7 +73,7 @@ def index(request):
 	mostMod = max( ( (stat.most_modded.modded(),stat.most_modded) for stat in stats))[1]
 	mostPlayed = max( (stat.most_played.played,stat.most_played) for stat in stats)[1]
 	stats= {'win_list':win_list,'loss_list':loss_list,'sidebar':[('Newest Game',newest),('Largest Game',largest),('Smallest Game',smallest),('Games Played',totalPlayed),('Number of Players',numPlayers),('Most Prolific Mod',mostMod),('Most Games Played',mostPlayed)]}
-	return render_to_response('index.html',{'stats':stats,'site_list' : site_list},context_instance=RequestContext(request))
+	return render_to_response('index.html',{'site':None,'stats':stats,'site_list' : site_list},context_instance=RequestContext(request))
 def site(request,site_id):
 	try:
 		p = Site.objects.get(pk=site_id)
@@ -164,16 +168,19 @@ def get_bounds(perPage,page,num):
 def games(request, site_id):
 	print "I was called"
 	gamesPerPage = 5
+	query = Game.objects
 	if(site_id !=''):
 		site = get_object_or_404(Site,id=site_id)
+		query = query.filter(site=site)
 		funcArgs= {'site':site}
 	else:
-		funcArgs={}
+		funcArgs={'site':None}
+		query = query.all()
 	sortMethods = {'name':'title','moderator':'moderator','length':gamesByLength,'start':'start_date','end':'end_date','players':gamesByPlayers,'default':'end_date'}
 	dirs = {'up':'down','down':'up'}
 	dir = dirs[request.GET['direction']] if ('direction' in request.GET and request.GET['direction'] in dirs) else 'up'
 	meth = request.GET['method'] if 'method' in request.GET else sortMethods['default']
-	p = sortTable(request.GET,sortMethods,Game.objects.filter(**funcArgs))
+	p = sortTable(request.GET,sortMethods,query)
 	paginator = Paginator(p,gamesPerPage)
 	page=getPage(request,paginator)
 	respTemplate = "gamesListing.html" if request.is_ajax() else "games.html"
@@ -201,13 +208,15 @@ def scoreboard(request, site_id=None):
 		direction = nextDir[request.GET['direction']]
 	else:
 		direction = 'up'
+	query = Player.objects
 	if((site_id is not None)and(site_id != '')):
 		site = get_object_or_404(Site, pk=site_id)
 		funcArgs={'site':site}
+		query = query.filter(played__gt=0,site=site)
 	else:
-		funcArgs = {}
-	print Player.objects.filter(played__gt=0,**funcArgs).count()
-	players = sortTable(request.GET,sortMethods,Player.objects.filter(played__gt=0,**funcArgs))
+		query = query.filter(played__gt=0)
+		funcArgs = {'site':None}
+	players = sortTable(request.GET,sortMethods,query)
 #	players = [(player,player.score()) for player in players if player.played()>0]
 #	players.sort(cmp=(lambda (x,xs),(y,ys): cmp(ys,xs)))
 #	players,scores = zip(*players)
@@ -228,19 +237,22 @@ def scoreboard(request, site_id=None):
 def moderators(request,site_id):
 	sortMethods={'name':'name','modded':playersByModerated,'largest':modsByLargestGame,'default':'name'}
 	modsPerPage=15
+	query = Game.objects
 	if(site_id != ''):
 		site = get_object_or_404(Site,id=site_id)
-		funcArgs = {'site':site_id}
+		funcArgs = {'site':site}
+		query= query.filter(site=site_id)
 	else:
-		funcArgs={}
-	moderators = list(set([game.moderator for game in Game.objects.filter(**funcArgs)]))
+		funcArgs={'site':None}
+		query = query.all()
+	moderators = list(set([game.moderator for game in query]))
 	moderators = sortTable(request.GET,sortMethods,moderators)
 	paginator=Paginator(moderators,modsPerPage,orphans=5)
 	page = getPage(request,paginator)
 	responseTemplate = "moderatorsListing.html" if request.is_ajax() else "moderators.html"
-	args = {'page':page,'moderators':page.object_list}
+	args = {'page':page,'pageArgs':{},'moderators':page.object_list}
 	args.update(funcArgs)
-	return render_to_response(responseTemplate,{'page':page,'moderators':page.object_list},context_instance=RequestContext(request))
+	return render_to_response(responseTemplate,args,context_instance=RequestContext(request))
 @transaction.commit_on_success
 def add(request, site_id=None):
 	if request.method=='POST':
@@ -301,7 +313,7 @@ def add(request, site_id=None):
 				print 'save done'
 				return HttpResponseRedirect(reverse('mafiastats_game',args=[game.id]))
 			except Exception as e:
-				logging.exception(e.message)
+				logging.exception(e.args[0])
 				raise e#let the default behavior handle the error, we just want to log it
 	else:
 		form =  AddGameForm()
@@ -434,7 +446,7 @@ def link(request):
 			try:
 				profile_link.send(User,user=request.user,player=player)
 			except Exception as e:
-				logging.exception(e.message)
+				logging.exception(e.args[0])
 				raise Http404
 			print "redirecting"
 			return HttpResponseRedirect(reverse('account_profile'))
@@ -493,7 +505,7 @@ def badge(request,pk=""):
 				badge = get_object_or_404(Badge,pk=int(pk))
 			else:
 				config = form.cleaned_data['config'].replace(r'\n','\n')
-				badge = Badge(user=request.user,format=config,title=form.cleaned_data['title'])
+				badge = Badge(user=request.user,is_custom = form.custom_format,format=config,title=form.cleaned_data['title'])
 				badge.save()
 				for p in players:
 					badge.players.add(p)

@@ -3,7 +3,7 @@
 Mafia Stats - {{site.title}} Site Statistics
 {%endblock%}
 {%block header%}
-<h1>{{site.title}}</h1>
+<h1>{%if (site is defined) and site%}{{site.title}}{%else%}Mafia Statistics{%endif%}</h1>
 {%endblock%}
 {%block menu%}
 <a class="menuItem" href="/">Site List</a> 

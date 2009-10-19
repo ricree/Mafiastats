@@ -23,6 +23,7 @@
 	<img src="{{MEDIA_URL}}images/badges/badge_norm_{{player.site.id}}_{{player.id}}.png"></img>
 	<br/>
 	Copy and past the following code to share you stats with the world:
-	<pre style="overflow:auto;">[url={{request.get_host}}{%url mafiastats_player player.id%}][img]{{request.get_host}}{{MEDIA_URL}}images/badges/badge_norm_{{player.site.id}}_{{player.id}}.png[/img][/url]</pre>
+	<pre style="overflow:auto;">[url={{request.get_host()}}{%url mafiastats_player player.id%}][img]{{request.get_host()}}{{MEDIA_URL}}images/badges/badge_norm_{{player.site.id}}_{{player.id}}.png[/img][/url]</pre>
+	{%if user.is_authenticated()%}{%if player.user == user%}Or go to <a href="{%url account_profile%}">your profile</a> and create a custom badge{%else%}Or go to <a href="{%url account_profile%}">your profile</a> and link this player to your account{%endif%}{%endif%}
 </div>
 {%endblock%}

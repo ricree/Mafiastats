@@ -1,7 +1,7 @@
 {%extends "base.html"%}
 {%load comments%}
 {%block extra_scripts%}
-{{block.master}}
+{{super()}}
 <script type="text/javascript">
 $(document).ready(function(){
 	$(".teamLink").click(function(){
@@ -29,7 +29,7 @@ $(document).ready(function(){
 				Players: {{game.num_players}}<br/>
 			</div>
 			<div class="span-8 last">
-					<b>Winning Team{{winers|pluralize}}:</b><br/>
+					<b>Winning Team{{winners|pluralize}}:</b><br/>
 				{% for team in winners %}
 				<a href="#{{team.id}}" class="teamLink">{{team.title}}</a><br/>
 				{%endfor%}
@@ -41,7 +41,6 @@ $(document).ready(function(){
 			{%if roles%}
 			<li><a href="#roles"><span>Roles</span></a></li>
 			{%endif%}
-			<li><a href="#comments"><span>Comments</span></a></li>
 		</ul>
 			<div id="teams" class="span-19">
 				<h2> Teams in this game:</h2>
@@ -78,25 +77,11 @@ $(document).ready(function(){
 					</div>
 				</div>
 				{%endif%}
-				<div id="comments" class="span-17">
-					{%get_comment_list for game as comments%}
-					{%for comment in comments%}
-					<div class="comment_wrapper ui-corner-top span-16">
-						{{comment.comment}}
-					<div class="comment_poster span-15">
-						{%if comment.user_url%}<a href="{{comment.user_url}}">{%endif%}{{comment.user_name}}{%if comment.user_url%}</a>{%endif%} at {{comment.submit_date|date:"g:i A T"}} on {{comment.submit_date|date:"D M j,Y"}}
-					</div>
-					</div>
-					{%empty%}
-						<h5>No one has commented on this game yet</h5><br/><br/>
-					{%endfor%}
-					{%render_comment_form for game%}
-				</div>
 			</div>
 		</div>
 		<div class="span-3 sidebar">
 			<h4>Survived</h4>
-			{%for player in game.livedToEnd.all%}
+			{%for player in game.livedToEnd.all()%}
 			<a href="{%url mafiastats_player player.id%}">{{player}}</a><br/>
 			{%endfor%}
 		</div>

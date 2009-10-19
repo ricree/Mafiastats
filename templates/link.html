@@ -10,7 +10,7 @@
 	});});
 </script>
 <form action="{%url mafiastats_link%}" method="POST">
-{{form.as_p}}
+{{form.as_p()|safe}}
 <input type="submit" value="Link"/>
 </form>
 {%endblock%}
