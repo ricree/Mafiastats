@@ -16,7 +16,7 @@
 	<br /><br />
 	<h2>{% trans "Associate your OpenID" %}</h2>
 	{% blocktrans %}
-	<p>If you're joining <strong>Sitename</strong>, associate your OpenID with a new account. If you're already a member, associate with your existing account.</p>
+	<p>If you're creating a new account at Mafiastats, associate your OpenID with a new account. If you're already a member, associate with your existing account.</p>
 	{% endblocktrans %}
 	</div>
 
@@ -25,20 +25,20 @@
 	{% if form1.errors %}
 	<p class="errors">{% trans "Please correct errors below:" %}<br />
 		{% if form1.username.errors %} 
-			<span class="error">{{ form1.username.errors|join(", " ) }}</span>
+			<span class="error">{{ form1.username.errors|join:", "  }}</span>
 		{% endif %}
 		{% if form1.email.errors %} 
-			<span class="error">{{ form1.email.errors|join(", " ) }}</span>
+			<span class="error">{{ form1.email.errors|join:", "  }}</span>
 		{% endif %}
 	</p>
 	{% endif %}
 	{% if form2.errors %}
 	<p class="errors">{% trans "Please correct errors below:" %}<br />
 		{% if form2.username.errors %} 
-			<span class="error">{{ form2.username.errors|join(", " ) }}</span>
+			<span class="error">{{ form2.username.errors|join:", "  }}</span>
 		{% endif %}
 		{% if form2.password.errors %} 
-			<span class="error">{{ form2.password.errors|join(", " ) }}</span>
+			<span class="error">{{ form2.password.errors|join:", "  }}</span>
 		{% endif %}
 	</p>
 	{% endif %}
