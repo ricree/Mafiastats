@@ -532,11 +532,11 @@ def badge(request,pk=""):
 			if badge.is_custom:
 				print badge.format
 				params = eval(badge.format)
-				formData = {'title':badge.title,'players':[(p.id,p.name + ' - ' + p.site.title) for p in badge.players.all()],'preset':params['template'],'background':params['background'],'top_color':params['color1'],'bottom_color':params['color2'],'text_color':params['text'],'font_size':params['size']}
+				formData = {'title':badge.title,'players':[p.id for p in badge.players.all()],'preset':params['template'],'background':params['background'],'top_color':params['color1'],'bottom_color':params['color2'],'text_color':params['text'],'font_size':params['size']}
 			else:
 				config = badge.format.replace('\n','\\n')
 				formData = {'title':badge.title,'config':config,'players':[(p.id,p.name + ' - ' + p.site.title) for p in badge.players.all()]}
-			form = BadgeForm(formData)
+			form = BadgeForm(initial=formData)
 		else:
 			print "choices are: ",choices
 			#form  = BadgeForm({'players':players})
