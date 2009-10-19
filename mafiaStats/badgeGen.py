@@ -2,8 +2,10 @@ import Image,ImageFont,ImageDraw
 import pyggy
 import os
 import logging
+import marshal
 #from django.conf import settings
 
+templates= {'original':"[%s%s%s]%s%s $n+2b\n(Mafia Stats: )b$w Wins in $t Games\n",'minimal':"[%s%s%s]%s%sMafia Record: $w-$l\n",'moderator':"[%s%s%s]%s%s$m Games Moderated\nWith $p Total Players\n"}
 
 if __name__ == "__main__":
 	class FakeSettings(object):
@@ -182,6 +184,15 @@ def buildTransparent(size,colors):
 	img.putalpha(0)
 	return img
 
+def buildFormatFromTemplate(badge):
+	params = eval(badge.format)
+	temp = templates[params['template']]
+	bg = params['background']
+	if bg == 'gradient':
+		retval = temp%(bg,params['color1'],params['color2'],params['size'],params['text'])
+	else:
+		retval = temp%(bg,"","",params['size'],params['text'])
+	return retval
 
 def build_badge(badge):
 	#pyggy uses a hackish way of loading the generated lexer.
@@ -193,15 +204,18 @@ def build_badge(badge):
 	r = settings.SITE_ROOT
 	l,ltab=  pyggy.getlexer("badge.pyl")
 	parser,ptab = pyggy.getparser("badge.pyg")
-	print badge.format
-	fmt = badge.format
+	if badge.is_custom:
+		fmt =  buildFormatFromTemplate(badge)
+	else:
+		fmt = badge.format
+	print fmt
 	l.setinputstr(fmt)
 	while True:
 		x = l.token()
 		if x is None:
 			break
 		print x,l.value
-	l.setinputstr(badge.format)
+	l.setinputstr(fmt)
 	parser.setlexer(l)
 	tree = parser.parse()
 	os.chdir(startDir)

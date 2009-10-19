@@ -7,6 +7,9 @@
 		selector.addClass("imageSelector-default");
 		selector.addClass(siblingClass);
 		selector.addClass("ui-corner-all");
+		if (choiceInput.val() == value){
+			selector.addClass("imageSelector-selected");
+		}
 		selector.click(function(){
 			$(".imageSelector-selected."+siblingClass).addClass("imageSelector-default").removeClass("imageSelector-selected");
 			selector.addClass("imageSelector-selected");

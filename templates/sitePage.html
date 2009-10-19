@@ -3,7 +3,7 @@
 Mafia Stats - {{site.title}} Site Statistics
 {%endblock%}
 {%block header%}
-<h1>{{site.title}}</h1>
+<h1>{%if (site is defined) and site%}{{site.title}}{%else%}Mafia Statistics{%endif%}</h1>
 {%endblock%}
 {%block menu%}
 <a class="menuItem" href="/">Site List</a> 
@@ -12,4 +12,7 @@ Mafia Stats - {{site.title}} Site Statistics
 <a class="menuItem" href="{%if site%}{%url mafiastats_games site.id%}{%else%}{%url mafiastats_games ''%}{%endif%}">{{site.shortName}} Games</a>
 <a class="menuItem" href="{%if site%}{%url mafiastats_moderators site.id%}{%else%}{%url mafiastats_moderators ''%}{%endif%}">Moderators</a>
 {%if site%}<a class="menuItem" href="{%if site%}{%url mafiastats_add site.id%}{%else%}{%url mafiastats_add ''%}{%endif%}">Add Game</a>{%endif%}
+{%endblock%}
+{%block pageControls%}
+{%include "pagePrint.html"%}
 {%endblock%}
