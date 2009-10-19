@@ -185,7 +185,7 @@ def buildTransparent(size,colors):
 	return img
 
 def buildFormatFromTemplate(badge):
-	params = marshal.loads(badge.format)
+	params = eval(badge.format)
 	temp = templates[params['template']]
 	bg = params['background']
 	if bg == 'gradient':
@@ -204,7 +204,7 @@ def build_badge(badge):
 	r = settings.SITE_ROOT
 	l,ltab=  pyggy.getlexer("badge.pyl")
 	parser,ptab = pyggy.getparser("badge.pyg")
-	if not badge.is_custom:
+	if badge.is_custom:
 		fmt =  buildFormatFromTemplate(badge)
 	else:
 		fmt = badge.format

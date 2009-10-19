@@ -25,6 +25,7 @@ from django.conf import settings
 import datetime
 from django.contrib.comments.templatetags.comments import get_comment_list
 from coffin import template
+import marshal
 
 register = template.Library()
 register.tag('get_comment_list',get_comment_list)
@@ -503,19 +504,23 @@ def badge(request,pk=""):
 			players = [get_object_or_404(Player,pk=int(p)) for p in form.cleaned_data['players']]
 			if pk:
 				badge = get_object_or_404(Badge,pk=int(pk))
+				badge.players.clear()
+				badge.title = form.cleaned_data['title']
+				badge.format = form.cleaned_data['config']
+				badge.is_custom = form.custom_format
 			else:
 				config = form.cleaned_data['config'].replace(r'\n','\n')
 				badge = Badge(user=request.user,is_custom = form.custom_format,format=config,title=form.cleaned_data['title'])
 				badge.save()
-				for p in players:
-					badge.players.add(p)
-				badge.save()
+			for p in players:
+				badge.players.add(p)
+			badge.save()
 			badge.url = "images/badges/badge_custom_%s_%s.png"%(request.user.pk,badge.pk)
 			badge.save()	
 			try:
 				build_badge(badge)
 			except Exception as e:
-				logging.exception(e.message)
+				logging.exception(e.args[0])
 				#logging.debug(e.tok)
 				#logging.error(e.tok)
 				#logging.debug(e.str)
@@ -524,15 +529,20 @@ def badge(request,pk=""):
 	else:
 		if pk:
 			badge = get_object_or_404(Badge,pk=pk)
-			config = badge.config.replace('\n','\\n')
-			formData = {'title':badge.title,'url':badge.url,'config':badge.format,'players':[p.id for p in badge.players.all()]}
+			if badge.is_custom:
+				print badge.format
+				params = eval(badge.format)
+				formData = {'title':badge.title,'players':[(p.id,p.name + ' - ' + p.site.title) for p in badge.players.all()],'preset':params['template'],'background':params['background'],'top_color':params['color1'],'bottom_color':params['color2'],'text_color':params['text'],'font_size':params['size']}
+			else:
+				config = badge.format.replace('\n','\\n')
+				formData = {'title':badge.title,'config':config,'players':[(p.id,p.name + ' - ' + p.site.title) for p in badge.players.all()]}
 			form = BadgeForm(formData)
 		else:
 			print "choices are: ",choices
 			#form  = BadgeForm({'players':players})
 			form  = BadgeForm()
-			form.fields['players'].choices = choices
-			print form.base_fields['players'].choices
+		form.fields['players'].choices = choices
+		print form.base_fields['players'].choices
 	return render_to_response("badge.html",{'form':form,'pk':pk},context_instance=RequestContext(request))
 
 @login_required

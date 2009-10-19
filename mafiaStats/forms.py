@@ -71,14 +71,14 @@ class BadgeForm(forms.Form):
 		text = self.cleaned_data['text_color']
 		size = self.cleaned_data['font_size']
 		params = {'template':templateName,'background':background,'color1':top,'color2':bottom,'text':text,'size':size}
-		return marshal.dumps(params).replace('"','\\"')
+		return str(params)
 	def clean(self):
 		if (('config' in self.cleaned_data) and (self.cleaned_data['config'])):
 			value = self.cleaned_data['config']
-			custom = True
+			custom = False
 		else:
 			value = self.buildBadgeFromTemplate()
-			custom = False
+			custom = True
 		print "value is: ", value
 		self.cleaned_data['config'] = value
 		self.custom_format = custom
