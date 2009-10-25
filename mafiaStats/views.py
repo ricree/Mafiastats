@@ -569,4 +569,29 @@ def unlink(request,pk):
 		print "redirecting"
 		return HttpResponseRedirect(reverse('account_profile'))
 	return render_to_response("unlink.html",{'can_unlink':True,'message':'This message should not show up','pk':pk},context_instance=RequestContext(request))
-	
+@login_required
+def badge_preview(request):
+	choices = [(p.id,p.name + ' - ' + p.site.title) for p in request.user.players.all()]
+	url = "images/badges/badge_temp_%s.png"%hash(request.META["REMOTE_ADDR"])
+	if (request.method =="POST"):
+		print request.POST
+		print len(request.POST)
+		form = BadgeForm(request.POST)
+		form.fields['players'].choices = choices
+		if (form.is_valid()):
+			class Temp(object):
+				pass
+			badge = Temp()
+			players = [get_object_or_404(Player,pk=int(p)) for p in form.cleaned_data['players']]
+			badge.players = Temp()
+			badge.players.all = lambda : players
+			badge.title = form.cleaned_data['title']
+			badge.format = form.cleaned_data['config']
+			badge.is_custom = form.custom_format
+			badge.url = url
+			badge.user = request.user
+			build_badge(badge)
+		else:
+			print form.errors
+	return HttpResponse(url+"?"+str(hash(datetime.datetime.now())))
+			

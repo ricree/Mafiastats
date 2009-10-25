@@ -45,12 +45,12 @@ class LinkForm(forms.Form):
 class BadgeForm(forms.Form):
 	templates= {'original':"[%s%s%s]%s%s $n+2b\n(Mafia Stats: )b$w Wins in $t Games\n",'minimal':"[%s%s%s]%s%sMafia Record: $w-$l\n",'moderator':"[%s%s%s]%s%s$m Games Moderated\nWith $p Total Players\n"}
 	tempChoices = [(k,k) for k in templates]
-	title = forms.CharField(max_length=50)
+	title = forms.CharField(max_length=50,initial="Custom Badge")
 	config = forms.CharField(max_length=200,label="Format String",required=False)
-	players = forms.MultipleChoiceField(choices=[],label="Players to Track")
+	players = forms.MultipleChoiceField(choices=[],label="Players to Track",required=False)
 	preset = forms.ChoiceField(choices= tempChoices,required=False,initial="original")
 	background = forms.ChoiceField(choices=[("transparent","transparent"),("gradient","gradient")],required=False,initial="gradient")
-	font_size = forms.ChoiceField(choices=[(i,i) for i in range(8,17)],initial=11)
+	font_size = forms.ChoiceField(choices=[(i,i) for i in range(8,25)],initial=11)
 	text_color = forms.CharField(max_length=10,required=False,initial="#F5F5F5", widget=ColorBox())
 	top_color = forms.CharField(max_length=10,required=False,initial="#010085", widget=ColorBox())
 	bottom_color = forms.CharField(max_length=10,initial="#1b5af6", required=False,widget=ColorBox())
@@ -64,6 +64,7 @@ class BadgeForm(forms.Form):
 		print self.cleaned_data
 		print BadgeForm.templates
 		templateName = self.cleaned_data['preset']
+		print "template is",templateName
 		template = BadgeForm.templates[templateName]
 		background = self.cleaned_data['background']
 		top  = self.cleaned_data['top_color']
@@ -84,8 +85,11 @@ class BadgeForm(forms.Form):
 		self.custom_format = custom
 		return self.cleaned_data
 		
-	def clean_template(self):
-		print "I got called"
+	def clean_players(self):
+		print self.fields['players'].choices
+		if ('players' not in self.cleaned_data) or (not self.cleaned_data['players']):
+			self.cleaned_data['players'] = [p[0] for p in self.fields['players'].choices]
+		return self.cleaned_data['players']
 	def clean_config(self):
 		if (('config' in self.cleaned_data) and (self.cleaned_data['config'])):
 			value = self.cleaned_data['config']

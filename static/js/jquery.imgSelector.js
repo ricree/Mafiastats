@@ -1,5 +1,5 @@
 (function($){
-	$.fn.imageSelector = function(name,value){
+	$.fn.imageSelector = function(name,value,callback){
 		return this.each(function(){
 		var selector =  $(this);
 		var choiceInput = $("[name="+name+"]");
@@ -14,6 +14,10 @@
 			$(".imageSelector-selected."+siblingClass).addClass("imageSelector-default").removeClass("imageSelector-selected");
 			selector.addClass("imageSelector-selected");
 			selector.removeClass("imageSelector-default");
-			choiceInput.val(value)});
+			choiceInput.val(value);
+			if(callback){
+				callback();
+			}
+			});
 	});
 	}})(jQuery);

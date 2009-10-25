@@ -13,29 +13,44 @@
 <script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/utils.js"></script>
 <script type="text/javascript" src="{{MEDIA_URL}}colorpicker/js/layout.js?ver=1.0.2"></script>
 <script type="text/javascript" src="{{MEDIA_URL}}js/jquery.imgSelector.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/formToDict.js"></script>
 {%endblock%}
 {%block extra_scripts%}
 {{super()}}
 <script type="text/javascript">
+	function loadPreview(){
+		var postVars = formToDict($("form"));
+		$.post("{%url account_badge_preview%}",postVars,function(data,textStatus){
+			$("#preview_img").attr("src","");
+			$("#preview_img").attr("src","{{MEDIA_URL}}"+data);
+		});
+	}
 	$('html').addClass('js');
 	$(document).ready(function(){
+		loadPreview();
 		$(".ColorPicker").ColorPicker({onSubmit: function(hsb, hex, rgb, el) {
-		$(el).val("#"+hex);
-		$(el).ColorPickerHide();
-		},
-		onBeforeShow: function () {
-		$(this).ColorPickerSetColor(this.value);
+			$(el).val("#"+hex);
+			$(el).ColorPickerHide();
+			loadPreview();
+			},
+			onBeforeShow: function () {
+			$(this).ColorPickerSetColor(this.value);
 		}
-	});
-		$("#normalTemplate").imageSelector("preset","original");
-		$("#minimalTemplate").imageSelector("preset","minimal");
-		$("#moderatorTemplate").imageSelector("preset","moderator");
-		$("#gradientBackground").imageSelector("background","gradient");
-		$("#transparentBackground").imageSelector("background","transparent");
+		});
+		var templates = ["original","minimal","moderator"];
+		var backgrounds = ["gradient","transparent"];
+		for (var i in templates){
+			$("#"+templates[i]+"Template").imageSelector("preset",templates[i],loadPreview);
+		}
+		for (var i in backgrounds){
+			$("#" + backgrounds[i] + "Background").imageSelector("background",backgrounds[i],loadPreview);
+		}
 		$("#advancedToggle").click(function(){
 			$("#advanced").toggle("slide",{direction:"up"},300)});
 		$("#advancedHelpToggle").click(function(){
 			$("#advHelp").toggle("slide",{direction:"up"},800)});
+		$(".ColorPicker").change(loadPreview);
+		$("select").change(loadPreview);
 	});
 </script>
 {%endblock%}
@@ -75,10 +90,17 @@
 			</div><br/>
 			{{form.config.label_tag()|safe}}: {{form.config|safe}}
 		</div>
+		<div class="span-18" id="preview">
+			<fieldset>
+			<legend>Preview</legend>
+			<img id="preview_img" src="">
+			</img>
+			</fieldset>
+		</div>
 		<div class="span-22" id="template">
 		<fieldset>
 		<legend>Choose a Template</legend>
-		<div class="span-5" style="margin-left:10px;"><img {%if form.preset.selected == "original"%}class="imageSelector-selected" {%endif%}id="normalTemplate"src="{{MEDIA_URL}}images/badges/Example_Classic.png" alt="Classic Template"></img><br/><b>Classic Template</b></div>
+		<div class="span-5" style="margin-left:10px;"><img {%if form.preset.selected == "original"%}class="imageSelector-selected" {%endif%}id="originalTemplate"src="{{MEDIA_URL}}images/badges/Example_Classic.png" alt="Classic Template"></img><br/><b>Classic Template</b></div>
 		<div class="span-4"><img  id="minimalTemplate" src="{{MEDIA_URL}}images/badges/Example_Minimalist.png" alt="Minimal Template"></img><br/><b>Minimal Template</b></div>
 		<div class="span-5"><img id="moderatorTemplate" src="{{MEDIA_URL}}images/badges/Example_Moderator.png" alt="Moderator Template"><img><br/><b>Moderator Template</b></div>
 		</fieldset>
