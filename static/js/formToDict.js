@@ -7,10 +7,20 @@ function formToDict(element){
 		postArgs[name] = val;
 	});
 	$("select",el).each(function(){
-		var selected = $("*:selected", this).val();
+		var selected = $("*:selected", this);
+		var val;
 		if (typeof(selected) != "undefined"){
-			var name = $(this).attr("name");
-			postArgs[name] = selected;
+			var mult = $(this).attr("multiple");
+			if($(this).attr("multiple")==true){
+				val = [];
+				selected.each(function(){
+					val.push($(this).val());
+				});
+			}else{
+				val = selected.val();
+			}
+				var name = $(this).attr("name");
+				postArgs[name] = val
 		}
 	});
 	return postArgs;

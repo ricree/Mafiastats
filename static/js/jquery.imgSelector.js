@@ -10,6 +10,12 @@
 		if (choiceInput.val() == value){
 			selector.addClass("imageSelector-selected");
 		}
+		choiceInput.change(function(){
+			if($(this).val() == value){
+				$(".imageSelector-selected."+siblingClass).addClass("imageSelector-default").removeClass("imageSelector-selected");
+				selector.addClass("imageSelector-selected").removeClass("imageSelector-default");
+			}
+		});
 		selector.click(function(){
 			$(".imageSelector-selected."+siblingClass).addClass("imageSelector-default").removeClass("imageSelector-selected");
 			selector.addClass("imageSelector-selected");
