@@ -1,9 +1,12 @@
 # Create your views here.
 import logging
 from django.http import HttpResponse, Http404,HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
-from models import Site, Game, Team, Category,Player,Role,SiteStats
-from forms import AddGameForm,TeamFormSet,TeamFormSetEdit,AddTeamForm,RoleFormSet
+from django.shortcuts import get_object_or_404#render_to_response, get_object_or_404
+from coffin.shortcuts import render_to_response
+from models import Site, Game, Team, Category,Player,Role,Badge,SiteStats
+from forms import AddGameForm,TeamFormSet,TeamFormSetEdit,AddTeamForm,RoleFormSet,LinkForm,BadgeForm
+from signals import profile_link,profile_unlink
+from badgeGen import build_badge
 from django.db import transaction
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -20,10 +23,18 @@ from sortMethods import *
 from mafiaStats.signalHandlers import getSiteImage
 from django.conf import settings
 import datetime
+from django.contrib.comments.templatetags.comments import get_comment_list
+from coffin import template
+import marshal
+
+register = template.Library()
+register.tag('get_comment_list',get_comment_list)
+
 
 LOGGING_FILE = settings.SITE_ROOT+'/debug_log'
 logging.basicConfig(filename=LOGGING_FILE,level=logging.ERROR)
 
+urlT = '<a href="%s">%s</a>'
 
 
 def getPage(request,paginator,default=1,indexRange=2):
@@ -63,7 +74,7 @@ def index(request):
 	mostMod = max( ( (stat.most_modded.modded(),stat.most_modded) for stat in stats))[1]
 	mostPlayed = max( (stat.most_played.played,stat.most_played) for stat in stats)[1]
 	stats= {'win_list':win_list,'loss_list':loss_list,'sidebar':[('Newest Game',newest),('Largest Game',largest),('Smallest Game',smallest),('Games Played',totalPlayed),('Number of Players',numPlayers),('Most Prolific Mod',mostMod),('Most Games Played',mostPlayed)]}
-	return render_to_response('index.html',{'stats':stats,'site_list' : site_list},context_instance=RequestContext(request))
+	return render_to_response('index.html',{'site':None,'stats':stats,'site_list' : site_list},context_instance=RequestContext(request))
 def site(request,site_id):
 	try:
 		p = Site.objects.get(pk=site_id)
@@ -88,7 +99,7 @@ def site(request,site_id):
 			newest = game.firstGame_set.all()[0]
 		count+=1
 	imgLink = getSiteImage(Site.objects.get(pk=site_id))
-	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage,'newest':newest,'catImg':imgLink},context_instance=RequestContext(request))
+	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage,'pageArgs':{},'newest':newest,'catImg':imgLink},context_instance=RequestContext(request))
 def game(request, game_id):
 	game = get_object_or_404(Game, pk=game_id)
 	teams = Team.objects.filter(game=game).order_by('-won')
@@ -101,9 +112,10 @@ def game(request, game_id):
 	winners = teams.filter(won=True)
 	numWinners =teams.filter(won=True).count()
 	teams=[(team,team.players.all().order_by('name')) for team in teams]
-	roles=Role.objects.filter(game=game)
+	roles=dict(((role.player.name,role) for role in Role.objects.filter(game=game)))
+	roleOrder = dict(((role[1].pk,index) for role,index in zip(roles.items(),range(len(roles)))))
 	can_edit = request.user.has_perm('mafiaStats.game')
-	return render_to_response('game.html', {'can_edit':can_edit,'game':game, 'teams':teams, 'num_players' : numPlayers, 'length':length, 'next':reverse('mafiastats_game',args=[int(game_id)]),'players':players,'winners':winners,'roles':roles},context_instance=RequestContext(request))
+	return render_to_response('game.html', {'can_edit':can_edit,'game':game, 'teams':teams, 'num_players' : numPlayers, 'roleOrder':roleOrder,'length':length, 'next':reverse('mafiastats_game',args=[int(game_id)]),'players':players,'winners':winners,'roles':roles},context_instance=RequestContext(request))
 
 def player(request,player_id):
 	player = get_object_or_404(Player, pk=player_id)
@@ -111,7 +123,11 @@ def player(request,player_id):
 	won = player.team_set.filter(won=True)
 	lost = player.team_set.filter(won=False)
 	moderated = player.moderated_set.all()
-	return render_to_response('player.html',{'player':player,'played':played,'moderated':moderated, 'won':won,'lost':lost},context_instance=RequestContext(request))
+	stats = {'width':20,'columns':[{'width':5,'contents'
+		:[('Games Played',played.count()),('Games Won',won.count()),('Games Lost',lost.count())]},
+	{'width':9,'contents':
+		[('Games Moderated',moderated.count()),('First Game',urlT%(reverse('mafiastats_game',args=[player.firstGame.id]),player.firstGame.title)),('Last Game',urlT%(reverse('mafiastats_game',args=[player.lastGame.id]),player.lastGame.title))]}]}
+	return render_to_response('player.html',{'stats':stats,'player':player,'played':played,'moderated':moderated, 'won':won,'lost':lost},context_instance=RequestContext(request))
 def playerPlayed(request,player_id):
 	player = get_object_or_404(Player, pk=player_id)
 	sortMethods = {'team':'title','game':teamsByGame,'length':teamsByLength,'won':'won','default':'title'}
@@ -154,18 +170,24 @@ def get_bounds(perPage,page,num):
 def games(request, site_id):
 	print "I was called"
 	gamesPerPage = 5
+	query = Game.objects
 	if(site_id !=''):
 		site = get_object_or_404(Site,id=site_id)
+		query = query.filter(site=site)
 		funcArgs= {'site':site}
 	else:
-		funcArgs={}
+		funcArgs={'site':None}
+		query = query.all()
 	sortMethods = {'name':'title','moderator':'moderator','length':gamesByLength,'start':'start_date','end':'end_date','players':gamesByPlayers,'default':'end_date'}
-	p = sortTable(request.GET,sortMethods,Game.objects.filter(**funcArgs))
+	dirs = {'up':'down','down':'up'}
+	dir = dirs[request.GET['direction']] if ('direction' in request.GET and request.GET['direction'] in dirs) else 'up'
+	meth = request.GET['method'] if 'method' in request.GET else sortMethods['default']
+	p = sortTable(request.GET,sortMethods,query)
 	paginator = Paginator(p,gamesPerPage)
 	page=getPage(request,paginator)
 	respTemplate = "gamesListing.html" if request.is_ajax() else "games.html"
 	sortMethods = sorted((key, (len(key)/3)+1) for key in sortMethods );
-	args = {'games':page.object_list,'page':page,'sortMethods':sortMethods}
+	args = {'games':page.object_list,'page':page,'sortMethods':sortMethods,'direction':dir,'pageArgs':{'direction':dir,'method':meth}}
 	args.update(funcArgs)
 	return render_to_response(respTemplate,args,context_instance=RequestContext(request))
 
@@ -183,13 +205,20 @@ def sortTable(GET,methods,query,defaultDir='down'):
 @cache_page(60*20)
 def scoreboard(request, site_id=None):
 	sortMethods={'score':'score','name':'name','wins':playersByWins,'losses':playersByLosses,'winPct':playersByWinPct,'modded':playersByModerated,'default':'score'}
+	nextDir = {'up':'down','down':'up'}
+	if (('direction' in request.GET) and (request.GET['direction'] in nextDir)):
+		direction = nextDir[request.GET['direction']]
+	else:
+		direction = 'up'
+	query = Player.objects
 	if((site_id is not None)and(site_id != '')):
 		site = get_object_or_404(Site, pk=site_id)
 		funcArgs={'site':site}
+		query = query.filter(played__gt=0,site=site)
 	else:
-		funcArgs = {}
-	print Player.objects.filter(played__gt=0,**funcArgs).count()
-	players = sortTable(request.GET,sortMethods,Player.objects.filter(played__gt=0,**funcArgs))
+		query = query.filter(played__gt=0)
+		funcArgs = {'site':None}
+	players = sortTable(request.GET,sortMethods,query)
 #	players = [(player,player.score()) for player in players if player.played()>0]
 #	players.sort(cmp=(lambda (x,xs),(y,ys): cmp(ys,xs)))
 #	players,scores = zip(*players)
@@ -199,26 +228,33 @@ def scoreboard(request, site_id=None):
 		args = {'players':page.object_list,'page':page}
 		args.update(funcArgs)
 		return render_to_response('scoreBoardPresenter.html',args,context_instance=RequestContext(request))
-	args = {'players':page.object_list,'page':page}
+	if 'method' in request.GET:
+		meth = request.GET['method']
+	else:
+		meth = sortMethods['score']
+	args = {'players':page.object_list,'page':page,'direction':direction,'pageArgs':{'method':meth,'direction':direction}}
 	args.update(funcArgs)
 	print args
 	return render_to_response('scoreboard.html',args,context_instance=RequestContext(request))
 def moderators(request,site_id):
 	sortMethods={'name':'name','modded':playersByModerated,'largest':modsByLargestGame,'default':'name'}
 	modsPerPage=15
+	query = Game.objects
 	if(site_id != ''):
 		site = get_object_or_404(Site,id=site_id)
-		funcArgs = {'site':site_id}
+		funcArgs = {'site':site}
+		query= query.filter(site=site_id)
 	else:
-		funcArgs={}
-	moderators = list(set([game.moderator for game in Game.objects.filter(**funcArgs)]))
+		funcArgs={'site':None}
+		query = query.all()
+	moderators = list(set([game.moderator for game in query]))
 	moderators = sortTable(request.GET,sortMethods,moderators)
 	paginator=Paginator(moderators,modsPerPage,orphans=5)
 	page = getPage(request,paginator)
 	responseTemplate = "moderatorsListing.html" if request.is_ajax() else "moderators.html"
-	args = {'page':page,'moderators':page.object_list}
+	args = {'page':page,'pageArgs':{},'moderators':page.object_list}
 	args.update(funcArgs)
-	return render_to_response(responseTemplate,{'page':page,'moderators':page.object_list},context_instance=RequestContext(request))
+	return render_to_response(responseTemplate,args,context_instance=RequestContext(request))
 @transaction.commit_on_success
 def add(request, site_id=None):
 	if request.method=='POST':
@@ -279,7 +315,7 @@ def add(request, site_id=None):
 				print 'save done'
 				return HttpResponseRedirect(reverse('mafiastats_game',args=[game.id]))
 			except Exception as e:
-				logging.exception(e.message)
+				logging.exception(e.args[0])
 				raise e#let the default behavior handle the error, we just want to log it
 	else:
 		form =  AddGameForm()
@@ -330,6 +366,7 @@ def register(request):
 
 #@permission_required('mafiaStats.game')
 @login_required
+@transaction.commit_on_success
 def edit(request,game_id):
 	game = get_object_or_404(Game,pk=game_id)
 	if(request.method=="POST"):
@@ -388,10 +425,173 @@ def edit(request,game_id):
 		roleData = [{'title':role.title,'player':role.player.name,'text':role.text} for role in Role.objects.filter(game=game)]
 		form = AddGameForm(gameData)
 		teamForm = TeamFormSetEdit(initial=teamData, prefix="teamForm")
-		roleForm = RoleFormSet(initial=roleForm,prefix="roleForm")
+		roleForm = RoleFormSet(initial=roleData,prefix="roleForm")
 	left_attrs = [("Team Name:","title"),('Team Type:','type'),('Won:','won')]
 	for tform in teamForm.forms:
 		tform.left_attrs = [(label,tform[property],property) for label,property in left_attrs]
 	sheets = (form.media+teamForm.media+roleForm.media).render_css()
 	bodyscripts=(form.media+teamForm.media +roleForm.media).render_js()
 	return render_to_response("addGame.html",{'game_form':form,'teamFormset':teamForm,'roleFormset':roleForm,'site':game.site,'sheets':sheets,'id':game.site.id,'bodyscripts':bodyscripts,'submit_link':reverse('mafiastats_edit',args=[int(game_id)])},context_instance=RequestContext(request))
+
+@transaction.commit_on_success
+@login_required
+def link(request):
+	form = LinkForm()
+	if (request.method == "POST"):
+		form = LinkForm(request.POST)
+		if (form.is_valid()):
+			site = get_object_or_404(Site,pk=int(form.cleaned_data['site']))
+			player = get_object_or_404(Player,name=form.cleaned_data['player'],site=site)
+			player.user = request.user
+			player.save()
+			print "sending signal"
+			try:
+				profile_link.send(User,user=request.user,player=player)
+			except Exception as e:
+				logging.exception(e.args[0])
+				raise Http404
+			print "redirecting"
+			return HttpResponseRedirect(reverse('account_profile'))
+	bodyscripts= form.media.render_js()
+	sheets = form.media.render_css()
+	defaultSite = form.fields['site'].choices[0][0]
+	return render_to_response("link.html",{'form':form,'default_site':defaultSite,'sheets':sheets,'bodyscripts':bodyscripts},context_instance=RequestContext(request))
+
+def profile(request,pk=""):
+	if((not request.user.is_authenticated()) and (pk =="")):
+		raise Http404
+	if ((request.user.is_authenticated() and (pk == request.user.pk)) or (pk =="")):
+		user = request.user
+		ownPage = True
+	else:
+		user = get_object_or_404(User, pk=pk)
+		ownPage=False
+	if user.players.count():
+		played = 0
+		won = 0
+		lost = 0
+		modded = 0
+		firsts = []
+		lasts = []
+		for player in user.players.all():
+			played+=player.played
+			won+=player.wins()
+			lost+=player.losses()
+			modded+=player.modded()
+			firsts+=[(player.firstGame.start_date,player.firstGame)]
+			lasts +=[(player.lastGame.end_date,player.lastGame)]
+		first = min(firsts)[1]
+		last = max(lasts)[1]
+		stats = {'width':18,'columns':[
+			{'width':4,'contents':
+				[('Games Played',played),('Games Won',won),('Games Lost',lost)]},
+			{'width':9,'contents':
+				[('Games Moderated',modded),('First Game',urlT%(reverse('mafiastats_game',args=[first.id]),first.title)),('Last Game',urlT%(reverse('mafiastats_game',args=[last.id]),last.title))]}
+			]}
+	else:
+		stats = {}
+	return render_to_response("profile.html",{'profile_user':user,'own_page':ownPage,'stats':stats},context_instance=RequestContext(request))
+
+
+
+@transaction.commit_on_success
+@login_required
+def badge(request,pk=""):
+	choices = [(p.id,p.name + ' - ' + p.site.title) for p in request.user.players.all()]
+	if (request.method == 'POST'):
+		form = BadgeForm(request.POST)
+		form.fields['players'].choices = choices
+		if(form.is_valid()):
+			players = [get_object_or_404(Player,pk=int(p)) for p in form.cleaned_data['players']]
+			if pk:
+				badge = get_object_or_404(Badge,pk=int(pk))
+				badge.players.clear()
+				badge.title = form.cleaned_data['title']
+				badge.format = form.cleaned_data['config']
+				badge.is_custom = form.custom_format
+			else:
+				config = form.cleaned_data['config'].replace(r'\n','\n')
+				badge = Badge(user=request.user,is_custom = form.custom_format,format=config,title=form.cleaned_data['title'])
+				badge.save()
+			for p in players:
+				badge.players.add(p)
+			badge.save()
+			badge.url = "images/badges/badge_custom_%s_%s.png"%(request.user.pk,badge.pk)
+			badge.save()	
+			try:
+				build_badge(badge)
+			except Exception as e:
+				logging.exception(e.args[0])
+				#logging.debug(e.tok)
+				#logging.error(e.tok)
+				#logging.debug(e.str)
+				raise e
+			return HttpResponseRedirect(reverse("account_profile"))
+	else:
+		if pk:
+			badge = get_object_or_404(Badge,pk=pk)
+			if badge.is_custom:
+				print badge.format
+				params = eval(badge.format)
+				formData = {'title':badge.title,'players':[p.id for p in badge.players.all()],'preset':params['template'],'background':params['background'],'top_color':params['color1'],'bottom_color':params['color2'],'text_color':params['text'],'font_size':params['size']}
+			else:
+				config = badge.format.replace('\n','\\n')
+				formData = {'title':badge.title,'config':config,'players':[(p.id,p.name + ' - ' + p.site.title) for p in badge.players.all()]}
+			form = BadgeForm(initial=formData)
+		else:
+			print "choices are: ",choices
+			#form  = BadgeForm({'players':players})
+			form  = BadgeForm()
+		form.fields['players'].choices = choices
+		print form.base_fields['players'].choices
+	return render_to_response("badge.html",{'form':form,'pk':pk},context_instance=RequestContext(request))
+
+@login_required
+def badge_delete(request,pk):
+	badge = get_object_or_404(Badge,pk=int(pk))
+	if(request.user.pk != badge.user.pk):
+		return render_to_response("badge_delete.html",{'can_delete':False,'message':'You cannot unlink this account'},context_instance=RequestContext(request))
+	if(request.method=="POST"):
+		badge.delete()
+		return HttpResponseRedirect(reverse("account_profile"))
+	return render_to_response("badge_delete.html",{'can_delete':True,'pk':pk},context_instance=RequestContext(request))
+@login_required
+def unlink(request,pk):
+	player = get_object_or_404(Player,pk=int(pk))
+	if(request.user.pk != player.user.pk):
+		return render_to_response("unlink.html",{'can_unlink':False,'message':'You cannot unlink this account'},context_instance=RequestContext(request))	
+	if (request.method=="POST"):
+		player.user = None
+		for badge in player.badge_set.all():
+			badge.players.remove(player)
+		player.save()
+		profile_unlink.send(User,user=request.user,player=player)
+		print "redirecting"
+		return HttpResponseRedirect(reverse('account_profile'))
+	return render_to_response("unlink.html",{'can_unlink':True,'message':'This message should not show up','pk':pk},context_instance=RequestContext(request))
+@login_required
+def badge_preview(request):
+	choices = [(p.id,p.name + ' - ' + p.site.title) for p in request.user.players.all()]
+	url = "images/badges/badge_temp_%s.png"%hash(request.META["REMOTE_ADDR"])
+	if (request.method =="POST"):
+		print request.POST
+		print len(request.POST)
+		form = BadgeForm(request.POST)
+		form.fields['players'].choices = choices
+		if (form.is_valid()):
+			class Temp(object):
+				pass
+			badge = Temp()
+			players = [get_object_or_404(Player,pk=int(p)) for p in form.cleaned_data['players']]
+			badge.players = Temp()
+			badge.players.all = lambda : players
+			badge.title = form.cleaned_data['title']
+			badge.format = form.cleaned_data['config']
+			badge.is_custom = form.custom_format
+			badge.url = url
+			badge.user = request.user
+			build_badge(badge)
+		else:
+			print form.errors
+	return HttpResponse(url+"?"+str(hash(datetime.datetime.now())))
+			

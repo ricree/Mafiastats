@@ -3,20 +3,20 @@
     <div class = "span-8">
         <b><a href="{%url mafiastats_game game.id%}">{{game.title}}</a></b><br/>
         Moderated By: <a href="{%url mafiastats_player game.moderator.id%}">{{game.moderator}}</a><br/>
-        Length: {{game.length.days}} days<br/>
-        Players: {{game.num_players}}<br/>
+        Length: {{game.length().days}} days<br/>
+        Players: {{game.num_players()}}<br/>
     </div>
     <div class="span-6">
 		{%if site%}
         <br/>
 		{%else%}
 		<a href="{%url mafiastats_game game.site.id%}">{{game.site.shortName}}</a>{%endif%}<br/>
-        Started: {{game.start_date|date:"F d Y"}}<br/>
-        Ended: {{game.end_date|date:"F d Y"}}</br/>
+        Started: {{game.start_date|date("F d Y")}}<br/>
+        Ended: {{game.end_date |date("F d Y") }}</br/>
     </div>
     <div class="span-8 last">
-        <b>Winning Team{{game.winningTeams|pluralize}}:</b><br/>
-        {% for team in game.winningTeams %}
+        <b>Winning Team{{game.winningTeams()|pluralize}}:</b><br/>
+        {% for team in game.winningTeams() %}
         <a href="{%url mafiastats_game game.id%}#{{team.id}}">{{team.title}}</a><br/>
         {%endfor%}
     </div>

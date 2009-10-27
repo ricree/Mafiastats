@@ -1,0 +1,9 @@
+{%extends "basePrim.html"%}
+{%block sheets%}{%if sheets%}{%for sheet in sheets%}
+{{sheet|safe}}{%endfor%}
+    {%endif%}{%endblock%}
+{%block bodyscripts%}{%if bodyscripts%}{%for script in bodyscripts%}
+{{script|safe}} {%endfor%}  {%endif%}
+{%endblock%}
+    {%block userBar%}{%if user.is_authenticated%}<b><a href="{%url account_profile%}">{{user.username}}</a></b>[<a href="/account/signout/">logout</a>]
+    {%else%}[<a href="/account/signin/">login</a>]{%endif%}{%endblock%}

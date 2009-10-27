@@ -1,8 +1,49 @@
 {%extends "base.html"%}
-{%block title%}{{user.username}} Profile{%endblock%}
-{%block header%}{{user.username}} Profile{%endblock%}
+{%block bodyscripts%}
+{{super()}}
+<script type="text/javascript" src="{{MEDIA_URL}}js/jquery-ui-1.7.2.custom.min.js"></script>
+{%endblock%}
+{%block title%}{{profile_user.username}} - {{super()}} {%endblock%}
+{%block header%}<h1>{{profile_user.username}}</h1>{%endblock%}
+{%block menu%}
+<a class="menuItem" href="/">Site List</a>
+{%if own_page%} <a class="menuItem" href="{%url mafiastats_link%}">Link Account</a>{%endif%}
+{%endblock%}
 {%block content%}
-<p>Mostly unused at the moment</p>
-<p>Eventually, users will be able to associate with names from mafia games and track stats, achievements, etc</p>
+{%if profile_user.players.count()%}
+{%include "statsBox.html"%}
+<div class="span-12">
+	<span class="header">Linked Players</span>
+	<ul>
+	{%for player in profile_user.players.all()%}
+	<li><a href = "{%url mafiastats_player player.id%}">{{player.name}}</a> - <a href="{%url mafiastats_site player.site.id%}">{{player.site.title}}</a>{%if own_page%}&nbsp;&nbsp;(<a href="{%url mafiastats_unlink player.id%}" id="unlink_{{player.id}}" class="unlinker">unlink</a>){%endif%}</li>
+	{%endfor%}
+	</ul>
+	{%if own_page%}
+	<a href="{%url mafiastats_link%}">Link to another player</a>
+	{%endif%}
+</div>
+{%if own_page%}
+<div class="span-8" style="text-align:center;">  
+	<div class="span-5" style="margin-bottom:18px;"><h3 style="padding-bottom:0px;margin-bottom:4px;">Badges</h3>
+	<a href="/account/badge/">Create New Badge</a>
+	</div>
+	{%for badge in profile_user.badge_set.all()%}
+		<div class="span-6 infoBox" style="text-align:center;padding:4px;padding-bottom:0px;padding-top:0px;">
+			<strong>{{badge.title}}</strong>&nbsp;&nbsp;<a href="{%url account_badge_edit badge.pk%}">(edit)</a>&nbsp;<a href="{%url account_badge_delete badge.pk%}">(delete)</a><br/>
+			<img src="{{MEDIA_URL}}{{badge.url}}"></img>
+			<pre style="overflow:auto;background-color:#F7F5F5;">[url={{request.get_host()}}{%url account_profile profile_user.pk%}][img]{{request.get_host()}}{{MEDIA_URL}}{{badge.url}}[/img][/url]</pre>
+		</div>
+	{%endfor%}
+</div>
+{%endif%}
+{%else%}
+{%if own_page%}
+You haven't linked your account to any players yet.<br/>
+Would you like to <a href="{%url mafiastats_link%}">do so now</a>?
+{%else%}
+This user has not linked their account to any players yet
+{%endif%}
+{%endif%}
 {%endblock%}
 

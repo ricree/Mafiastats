@@ -1,17 +1,7 @@
 {%extends "playerPage.html"%}
 {%block content%}
-<div class="span-20 infoBox">
-	<div class="span-8">
-		<b>Games Played:&nbsp</b>{{played|length}}<br/>
-		Games Won:{{won|length}}<br/>
-		Games Lost:{{lost|length}}<br/>
-	</div>
-	<div class="span-7">
-		<b>Games Moderated:&nbsp</b>{{moderated|length}}<br/>
-		{%if player.firstGame%}<b>First Game:&nbsp</b><a href="{%url mafiastats_game player.firstGame.id%}">{{player.firstGame.title}}</a><br/>{%endif%}
-		{%if player.lastGame%}<b>Last Game:&nbsp</b><a href="{%url mafiastats_game player.lastGame.id%}">{{player.lastGame.title}}</a><br/>{%endif%}
-	</div>
-</div>
+<h2>{%if player.user%}<a href="{%url account_profile player.user.pk%}">{{player.name}}</a>{%else%}{{player.name}}{%endif%}</h2>
+{%include "statsBox.html"%}
 <div class="span-12">
 	{%if moderated%}
 	<a name="moderated"></a>
@@ -33,6 +23,7 @@
 	<img src="{{MEDIA_URL}}images/badges/badge_norm_{{player.site.id}}_{{player.id}}.png"></img>
 	<br/>
 	Copy and past the following code to share you stats with the world:
-	<pre style="overflow:auto;">[url={{request.get_host}}{%url mafiastats_player player.id%}][img]{{request.get_host}}{{MEDIA_URL}}images/badges/badge_norm_{{player.site.id}}_{{player.id}}.png[/img][/url]</pre>
+	<pre style="overflow:auto;">[url={{request.get_host()}}{%url mafiastats_player player.id%}][img]{{request.get_host()}}{{MEDIA_URL}}images/badges/badge_norm_{{player.site.id}}_{{player.id}}.png[/img][/url]</pre>
+	{%if user.is_authenticated()%}{%if player.user == user%}Or go to <a href="{%url account_profile%}">your profile</a> and create a custom badge{%elif player.user == None%}Or go to <a href="{%url account_profile%}">your profile</a> and link this player to your account{%endif%}{%elif player.user == None%}Or <a href="{%url user_signin%}">log in</a> and create a custom badge{%endif%}
 </div>
 {%endblock%}

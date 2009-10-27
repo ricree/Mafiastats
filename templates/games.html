@@ -14,9 +14,9 @@
 	<div class="span-22">
 	<div class="span-2"><b>Sort By:</b></div>
 	{%for meth,width in sortMethods%}	
-		{%ifnotequal meth "default"%}
-		<div id="{{meth}}Label" class="colHeaderNormal span-{{width}}" style="text-align:center;border-style:solid;border-width:1px;margin-left:1px!important;margin-right:1px!important;padding-left:3px;padding-right:3px;margin-bottom:10px">{{meth}}</div>
-		{%endifnotequal%}
+		{%if meth != "default"%}
+		<div id="{{meth}}Label" class="colHeaderNormal span-{{width}}" style="text-align:center;margin-left:1px!important;margin-right:1px!important;padding-left:3px;padding-right:3px;margin-bottom:10px"><a href={%url mafiastats_games site.id%}?method={{meth}}&direction={%if direction is defined%}{{direction}}{%else%}up{%endif%}>{{meth}}</a></div>
+		{%endif%}
 	{%endfor%}
 	</div>
 	<div class="span-5">

@@ -1,0 +1,9 @@
+<div class="infoBox span-{%if stats.width%}{{stats.width}}{%else%}20{%endif%}">
+	{%for column in stats.columns%}
+	<div class="span-{%if column.width%}{{column.width}}{%else%}3{%endif%}">
+		{%for stat in column.contents%}
+		<b>{{stat[0]}}:</b>&nbsp;{{stat[1]|safe}}<br/>
+		{%endfor%}
+	</div>
+	{%endfor%}
+</div>

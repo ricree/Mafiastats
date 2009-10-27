@@ -1,12 +1,16 @@
-function setupSuggestBoxes()
+function getSiteId()
 {
-	var params;
 	if (typeof siteId === 'undefined')
 	{
-		params={};
-	}else{
-		params={'site':siteId};
-	}   
+		return null;
+	}else
+	{
+		return siteId;
+	}			
+}
+function setupSuggestBoxes()
+{
+	var params ={'site':getSiteId};
 	$(".AutoSuggestBox").jsonSuggest("/stat/player/name_lookup/",{wildCard:'*',maxResults:10,ajaxResults:true,useJQueryAjax:true,JQueryAjaxParam : "text",requestParams:params});
 }
 

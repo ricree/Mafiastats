@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+
+
+<html>
+<head>
+<link rel="stylesheet" href="{{MEDIA_URL}}css/blueprint/screen.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="{{MEDIA_URL}}css/blueprint/print.css" type="text/css" media="print">
+<link rel="stylesheet" href="{{MEDIA_URL}}css/theme/jquery-ui-1.7.2.custom.css" type="text/css">
+<link rel="icon" type="image/vnd.microsoft.icon" href="{{MEDIA_URL}}images/favicon.ico"/>
+<link rel="SHORTCUT ICON" type="image/vnd.microsoft.icon" href="{{MEDIA_URL}}images/favicon.ico"/>
+  <!--[if lt IE 8]><link rel="stylesheet" href="../../blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
+<!--<link rel="stylesheet" href="{{MEDIA_URL}}css/blueprint/plugins/fancy-type/screen.css" type="text/css" media="screen, projection">-->
+<link rel="stylesheet" href="{{MEDIA_URL}}css/stylesheet.css"/>
+{%block extra_sheets%}{%endblock%}
+{%block sheets%}{%if sheets%}{%for sheet in sheets%}
+{{sheet|safe}}{%endfor%}
+	{%endif%}{%endblock%}
+<script type="text/javascript" src="{{MEDIA_URL}}js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/jquery-ui-1.7.2.custom.min.js"></script>
+<title>{% block title %}{%endblock%}   Mafia Stats</title>
+</head>
+<body>
+{%block bodyscripts%}
+{%endblock%}
+{%block extra_scripts%}&nbsp;
+{%endblock%}
+	<script type="text/javascript">
+		$(document).ready(function(){
+				$(".ui-state-default").mouseover(function(){
+					$(this).addClass("ui-state-hover").removeClass("ui-state-default");
+		}).mouseleave(function(){
+				$(this).removeClass("ui-state-hover").not(".ui-state-active").addClass("ui-state-default");});
+			});
+	</script>
+	<div class="container">
+	<div class="span-26">
+	<div class="span-24" id="header">
+	{%block header %}{%endblock%}
+	</div>
+	<div class="span-24 ui-widget-header" id="menu">
+	<div class="span-20">
+	{% block menu%}&nbsp; {% endblock %}	
+	</div>
+	<div class="span-3">
+	{%block userBar%}
+	{%endblock%}
+	</div>
+	</div>
+	<br/>
+	<div class="span-24" id="pageContent">
+		{% block content %}{%endblock%}
+		<br/>
+		{%block pageControls%}
+		{%endblock%}
+	</div><br/>
+	<div id="techButtons" class="span-24">
+	<a href="http://matplotlib.sourceforge.net/"><img src="{{MEDIA_URL}}images/matPlotSmall.png" alt="matplotlib"></img></a>
+	<a href="http://www.djangoproject.com/"><img src="http://media.djangoproject.com/img/badges/djangosite80x15.gif" border="0" alt="A Django site." title="A Django site." /></a>
+	<a href='http://jquery.com/' title='jQuery JavaScript Library'><img src='http://jquery.com/files/buttons/jquery-icon.png' alt='jQuery JavaScript Library' title='jQuery JavaScript Library' style='border:none;'/></a>
+	</div>
+	</div>
+<!--getsatisfaction widget-->
+<script type="text/javascript" charset="utf-8">
+  var is_ssl = ("https:" == document.location.protocol);
+  var asset_host = is_ssl ? "https://s3.amazonaws.com/getsatisfaction.com/" : "http://s3.amazonaws.com/getsatisfaction.com/";
+  document.write(unescape("%3Cscript src='" + asset_host + "javascripts/feedback-v2.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+<script type="text/javascript" charset="utf-8">
+  var feedback_widget_options = {};
+
+  feedback_widget_options.display = "overlay";  
+  feedback_widget_options.company = "mafiastats";
+  feedback_widget_options.placement = "left";
+  feedback_widget_options.color = "#222";
+  feedback_widget_options.style = "idea";
+  
+  
+  var feedback_widget = new GSFN.feedback_widget(feedback_widget_options);
+</script>
+<!--google analytics code-->
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-9842273-2");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+</body>
+</html>

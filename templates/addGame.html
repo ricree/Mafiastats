@@ -46,13 +46,13 @@ $(document).ready(function(){
 <form action="{{submit_link}}" method="post">
 <div class="span-12">
 {% for field in game_form%}
-{%if not forloop.last%}
+{%if not loop.last%}
 <div class="span-12">
 <div class="span-4">
-	{{field.label_tag}}
+	{{field.label_tag()|safe}}
 </div>
 <div class="span-5">
-	{{field}}
+	{{field|safe}}
 </div>
 <div class="span-8">
 	{{field.errors}}
@@ -62,13 +62,12 @@ $(document).ready(function(){
 {%endfor%}
 </div>
 <div class="span-8">
-<label for="id_{{game_form.livedToEnd.name}}">Lived to End</label><br/>
-{{game_form.livedToEnd}}
+<label for="id_{{game_form.livedToEnd.name|safe}}">Lived to End</label><br/>
+{{game_form.livedToEnd|safe}}
 </div>
 <div class="span-12 last" style="margin-bottom:15px;">
 <br/>
 <input type="submit" value="Save Game" class="ui-corner-all ui-state-default" style="padding:2px;"/>
-{%comment%}<a href="javascript:void(0)" class="menuItem" id="populate_fake">Populate Players</a>{%endcomment%}
 </div><br/><br/>
 <div>
 <div id="tabs" class="span-22">
@@ -84,7 +83,7 @@ $(document).ready(function(){
 	</ul>
 	{%for form in teamFormset.forms %}
 		<div class="dynamic-form span-20 last">
-			{{form.team_id}}
+			{{form.team_id|safe}}
 			<div class="span-8">
 				{%for label,attr,at_name in form.left_attrs%}
 				<div class="span-6">
@@ -92,7 +91,7 @@ $(document).ready(function(){
 						<label for="{{form.prefix}}_{{at_name}}">{{label}}</label>
 					</div>
 					<div class="span-3">
-						{{attr}}
+						{{attr|safe}}
 					</div>
 					<div class="span-6">
 						{{attr.errors}}
@@ -102,7 +101,7 @@ $(document).ready(function(){
 			</div>
 			<div class="span-8">
 				<label for="{{form.prefix}}-players_text">Players</label>
-				{{form.players}}<br/>
+				{{form.players|safe}}<br/>
 				{{form.players.errors}}
 			</div>
 			<div class="span-1">
@@ -118,22 +117,22 @@ $(document).ready(function(){
 		<div class="dynamic-form span-16 last">
 		<div class="span-12">
 			<div class="span-4">
-			<label for="{{form.prefix}}-title">Role Name</label>
+			<label for="{{form.prefix|safe}}-title">Role Name</label>
 			</div>
 			<div class="span-6">
-			{{form.title}}
+			{{form.title|safe}}
 			</div>
 			<div class="span-4">
 			<label for="{{form.prefix}}-title">Player</label>
 			</div>
 			<div class="span-6">
-			{{form.player}}
+			{{form.player|safe}}
 			</div><br/>
 			<div class="span-10 last">
 			<label for="{{form.prefix}}-text">Role Description (basic BBCode allowed)</label>
 			</div><br/>
 			<div class="span-10 last">
-			{{form.text}}
+			{{form.text|safe}}
 			</div>
 		</div>
 		<div class="span-3">
@@ -148,8 +147,8 @@ $(document).ready(function(){
 </div>
 </div>
 <div>
-{{teamFormset.management_form}}
-{{roleFormset.management_form}}
+{{teamFormset.management_form|safe}}
+{{roleFormset.management_form|safe}}
 </div>
 </form>
 </div>

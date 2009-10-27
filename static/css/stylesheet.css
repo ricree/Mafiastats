@@ -1,7 +1,28 @@
 p {text-indent:0px} 
 body{background-color: #506073;
 }
-h1{margin-bottom:5px;}
+h1{
+	margin-bottom:5px;
+	}
+
+/*used to hide by default when javascript is on and show when off*/
+.js .jsHidden{
+	display:none;}
+.imageSelector-selected{
+	cursor:pointer;
+	background-color:#FAFEAC;
+	border-color:#E5E6CF;
+	border-width:1px;
+	border-style:dotted;
+	padding:4px;
+	float:left;
+}
+.imageSelector-default{
+	cursor:pointer;
+	padding:4px;
+	border-style:none;
+	border-width:1px;
+}
 
 div#header{
 	-moz-border-radius-topleft:5px;
@@ -146,4 +167,10 @@ div.sidebar{
 .lossText{
 	font-weight:bold;
 	color:red;
+}
+.header{
+	font-size:2.3em;
+	font-family:"Helvetica Neue",Arial,"Lucida Grande",sans-serif;
+	margin-right:20px;
+	font-weight:bold;
 }

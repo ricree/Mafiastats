@@ -1,5 +1,6 @@
 from django import forms
 from django.template.loader import render_to_string
+import pyggy
 
 class ClassedTextInput(forms.TextInput):
 	"""A widget that will add an additional class to the rendered html
@@ -14,6 +15,9 @@ class ClassedTextInput(forms.TextInput):
 #		else:
 		attrs['class'] = self._init_class
 		super(forms.TextInput,self).__init__(attrs=attrs)
+class ColorBox(ClassedTextInput):
+	_init_class = 'ColorPicker'
+
 
 class AutoTextBox(ClassedTextInput):
 	_init_class = 'AutoSuggestBox'
@@ -69,7 +73,21 @@ class NameEntryBox(forms.MultiWidget):
 		super(forms.TextInput,self).__init__(attrs=attrs)
 	class Media:
 		js=('/static/js/jquery-1.3.2.min.js',)
-	
+
+class BadgeConfig(forms.TextInput):
+	def clean(self,value):
+		value = value.replace(r'\n','\n')
+		l,ltab = pyggy.getlexer("badge.pyl")
+		parser,ptab = pyggy.getparser("badge.pyg")
+		l.setinputstr(value)
+		parser.setlexer(l)
+		try:
+			parser.parse()
+		except Exception:
+			raise forms.ValidationError("Must be a valid config string")
+		return value
+
+
 class NameList(forms.MultipleChoiceField):
 	def clean(self,value):
 		if len(value) <=0:

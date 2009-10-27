@@ -1,7 +1,9 @@
 from django.db.models.query import QuerySet
 from django.db import models
 from django.core.cache import cache
+from django.contrib.auth.models import User
 from postmarkup import render_bbcode
+
 
 # Create your models here.
 
@@ -84,6 +86,7 @@ class Player(models.Model):
 	score = models.FloatField()
 	played = models.IntegerField(default=0)
 	clearCache = makeClearCache()
+	user = models.ForeignKey(User,related_name="players",null=True,blank=True)
 
 	@cacheResult
 	def lived(self):
@@ -114,6 +117,9 @@ class Player(models.Model):
 	@cacheResult
 	def modded(self):
 		return self.moderated_set.count()
+	@cacheResult
+	def totalPlayersModded(self):
+		return sum((g.num_players() for g in self.moderated_set.all()))
 	def playedCalc(self):
 		return Team.objects.filter(players=self).count()
 	def freshScore(self):
@@ -210,6 +216,13 @@ class Role(models.Model):
 	def displayText(self):
 		return render_bbcode(self.text)
 
+class Badge(models.Model):
+	user = models.ForeignKey(User)
+	format=models.CharField(max_length=500)
+	players = models.ManyToManyField(Player)
+	url = models.CharField(max_length=200,blank=True)
+	title = models.CharField(max_length=50)
+	is_custom = models.BooleanField()
 
 class SiteStats(models.Model):
 	site = models.OneToOneField('Site')

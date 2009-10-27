@@ -38,7 +38,7 @@
 		<h5>Most Winning</h5>
 		<ol>
 		{%for player in stats.win_list%}
-		<li><a href="{%url mafiastats_player player.id%}">{{player.name}}</a> - <a href="{%url mafiastats_site player.site.id%}">{{player.site.shortName}}</a>: {{player.wins}}
+		<li><a href="{%url mafiastats_player player.id%}">{{player.name}}</a> - <a href="{%url mafiastats_site player.site.id%}">{{player.site.shortName}}</a>: {{player.wins()}}
 		{%endfor%}
 		</ol>
 	</div>
@@ -46,7 +46,7 @@
 		<h5>Most Losing</h5>
 		<ol>
 		{%for player in stats.loss_list%}
-		<li><a href="{%url mafiastats_player player.id%}">{{player.name}}</a> - <a href="{%url mafiastats_site player.site.id%}">{{player.site.shortName}}</a>: {{player.losses}}
+		<li><a href="{%url mafiastats_player player.id%}">{{player.name}}</a> - <a href="{%url mafiastats_site player.site.id%}">{{player.site.shortName}}</a>: {{player.losses()}}
 		{%endfor%}
 		</ol>
 	</div>

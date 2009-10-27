@@ -1,6 +1,6 @@
 var sortMethod;
 var sortDirection;
-var newDirection={'up':'down','down':'up'};
+var newDirection={'up':'down','down':'up','undefined':'up'};
 function ajaxDivSort_register(elements,destination){
 	for (var count in elements){
 		var meth=elements[count];
@@ -86,6 +86,7 @@ function ajaxDivSort_register(elements,destination){
 		{
 			sortBy(method);
 			setHighlight();
+			return false;
 		});
 	$(this).mouseover(function(){
 		$(this).filter('.ui-state-default').addClass('ui-state-hover').removeClass('ui-state-default');

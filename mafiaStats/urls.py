@@ -13,4 +13,6 @@ urlpatterns = patterns('',
  	url(r'^player/(?P<player_id>\d+)/moderated/$','mafiaStats.views.playerModerated',name='mafiastats_moderated'),
 	url(r'^player/name_lookup','mafiaStats.views.nameLookup',name='mafiastats_name_lookup'),
 	url(r'^game/(?P<game_id>\d+)/edit$','mafiaStats.views.edit',name='mafiastats_edit'),
+	url(r'^link/?','mafiaStats.views.link',name='mafiastats_link'),
+	url(r'^unlink/(?P<pk>\d+)/?$','mafiaStats.views.unlink',name='mafiastats_unlink'),
 	)

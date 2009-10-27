@@ -1,0 +1,62 @@
+definitions:
+	COLOR "\#[[:digit:]a-fA-F]+"
+
+
+code:
+	fields = {'l':'LOSSES','w':'WINS','n':'NAME','m':'MODERATED','t':'TOTAL','p':"PMODERATED"}
+	decorators = {'b':'BOLD','i':'ITALIC','n':'NORMAL'}
+
+	def stripBracket(val):
+		return val[1:-1]
+
+	def fieldName(self, options,next=None,val= None):
+		if next:
+			self.PUSHSTATE(next)
+		if (not val):
+			val = self.value
+		return options[val.lower()]
+	def Fields():
+		return fields.keys()
+
+INITIAL:
+	"\n" : return "NEWLINE"
+	"\(" : 
+		self.PUSHSTATE(STR)
+		return "OPEN"
+	"\[" :
+		self.PUSHSTATE(HEADER)
+		return "OPENB"
+	"[^\$\(\n\[]+" : return "STRING"
+	"\$" : self.PUSHSTATE(FIELDNAME)
+#	"%[wnm][biu]?[[:digit:]]* : return 
+FIELDNAME:
+	"[wnlmtpWNLMTP]" :
+		return  fieldName(self,fields,DECORATION)
+HEADER:
+	"[[:alnum:][:blank:]\_]+" : 
+		self.PUSHSTATE(HEADERARGS)
+		return "BACKGROUND"
+
+HEADERARGS:
+	"{COLOR}" : return "COLOR"
+	"," : return "SEPARATOR"
+	"\]" :
+		self.PUSHSTATE(DECORATION)
+		return "CLOSEB"
+STR:
+	"[^\(\)]+":
+		self.PUSHSTATE(CLOSE)
+		return "STRING"
+CLOSE:
+	"\)":
+		self.PUSHSTATE(DECORATION)
+		return "CLOSE"
+DECORATION:
+	"[ibIB]" : 
+		return fieldName(self,decorators)
+	"[[:digit:]]+": return "SIZE"
+	"\+[[:digit:]]+":return "RELSIZE"
+	"{COLOR}": return "COLOR"
+	"[^ibIB[:digit:]#]" :
+		self.PUSHBACK(self.value)
+		self.PUSHSTATE(INITIAL)

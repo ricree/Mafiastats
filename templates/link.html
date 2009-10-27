@@ -1,0 +1,16 @@
+{%extends "base.html"%}
+
+{%block title%}Link Account{%endblock%}
+
+{%block content%}
+<script type="text/javascript">
+	siteId={{default_site}};
+	$(document).ready(function(){$("#id_site").change(function(){
+		siteId=$("#id_site option:selected").val();
+	});});
+</script>
+<form action="{%url mafiastats_link%}" method="POST">
+{{form.as_p()|safe}}
+<input type="submit" value="Link"/>
+</form>
+{%endblock%}
