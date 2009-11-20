@@ -522,9 +522,6 @@ def badge(request,pk=""):
 				build_badge(badge)
 			except Exception as e:
 				logging.exception(e.args[0])
-				#logging.debug(e.tok)
-				#logging.error(e.tok)
-				#logging.debug(e.str)
 				raise e
 			return HttpResponseRedirect(reverse("account_profile"))
 	else:

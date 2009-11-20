@@ -1,7 +1,6 @@
 import Image,ImageFont,ImageDraw
 import pyggy
 import os
-import logging
 import marshal
 #from django.conf import settings
 
@@ -18,8 +17,6 @@ if __name__ == "__main__":
 else:
 	from django.conf import settings
 
-LOGGING_FILE = settings.SITE_ROOT + '/debug_log'
-logging.basicConfig(filename=LOGGING_FILE,level=logging.ERROR)
 LINE_SPACE=3
 HBORDER = 10
 fontBase = settings.FONT_DIRECTORY
