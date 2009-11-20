@@ -9,7 +9,10 @@ from signals import profile_link,profile_unlink
 from badgeGen import build_badge
 import Image,ImageDraw,ImageFont
 import pyggy
+import logging
 
+LOGGING_FILE = settings.SITE_ROOT+'/debug_log'
+logging.basicConfig(filename=LOGGING_FILE,level=logging.ERROR)
 
 def saveSiteStats(sender, **kwargs):
 	inst = kwargs['instance']
@@ -71,10 +74,13 @@ profile_unlink.connect(buildBadges)
 profile_link.connect(buildBadges)
 
 def buildBadgesForGame(sender,**kwargs):
-	game = kwargs['instance']
-	players = game.players()
-	for badge in (b for p in players if p.user for b in  p.user.badge_set.all()):
-		build_badge(b)
+	try:
+		game = kwargs['instance']
+		players = game.players()
+		for badge in (b for p in players if p.user for b in  p.user.badge_set.all()):
+			build_badge(badge)
+	except Exception as e:
+		loggging.exception(e.args[0])
 post_save.connect(buildBadgesForGame,sender=Game)
 post_delete.connect(buildBadgesForGame,sender=Game)
 
