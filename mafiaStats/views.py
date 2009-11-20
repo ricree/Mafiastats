@@ -66,7 +66,7 @@ def index(request):
 	stats = [site.sitestats for site in Site.objects.all()]
 	newest = max((stat.newest_game.end_date,stat.newest_game) for stat in stats)[1]#Game.objects.order_by('-end_date')[0]
 	largest = max((stat.largest_game.num_players(),stat.largest_game) for stat in stats)[1]
-	smallest = min((stat.largest_game.num_players(),stat.largest_game) for stat in stats)[1]
+	smallest = min((stat.smallest_game.num_players(),stat.smallest_game) for stat in stats)[1]
 	totalPlayed = Game.objects.count()
 	numPlayers = Player.objects.count()
 	win_list = [p for w,p in sorted(((p.wins(),p) for stat in stats for p in stat.winningest.all()),reverse=True)[0:5]]

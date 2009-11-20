@@ -17,12 +17,12 @@
 	</ul>
 </div>
 <div class="span-10">
-<div class="span-10 infoBox">
+<div class="span-12 infoBox">
 	{% for label,stat in stats.sidebar%}
 		<div class="span-4">
 			{{label}}
 		</div>
-		<div class="span-5">
+		<div class="span-7">
 		{%if stat.name%}
 			<a href="{%url mafiastats_player stat.id%}">{{stat.name}}</a>
 		{%else%}{%if stat.title%}
