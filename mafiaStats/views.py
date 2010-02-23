@@ -219,8 +219,10 @@ def scoreboard(request, site_id=None,type=None):
 		funcArgs = {'site':None}
 	if((type is not None) and (type != '')):
 		type = get_object_or_404(Category, pk=type)
-		funcArgs['type':type]
-	players = sortTable(request.GET,sortMethods,query)
+		funcArgs['type']=type
+		players = sortTable(request.GET,sortMethods,[x for x in query if x.playedCalc(type) >0])
+	else:
+		players = sortTable(request.GET,sortMethods,query)
 #	players = [(player,player.score()) for player in players if player.played()>0]
 #	players.sort(cmp=(lambda (x,xs),(y,ys): cmp(ys,xs)))
 #	players,scores = zip(*players)

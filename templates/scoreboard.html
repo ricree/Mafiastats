@@ -3,6 +3,7 @@
 <script type="text/javascript" src="{{MEDIA_URL}}js/jqueryAjaxDivSort.js"></script>
 {%endblock%}
 {%block content%}
+	Type is:  {{type}}
 	<script type="text/javascript">
 		$(document).ready(function(){
 			ajaxDivSort_register(["name","wins","losses","winPct","modded"],"#scoreContent");
