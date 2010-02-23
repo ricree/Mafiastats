@@ -61,10 +61,7 @@ class BadgeForm(forms.Form):
 	#	self.base_fields['players']  = forms.MultipleChoiceField(choices=choices)
 	#	super(forms.Form,self).__init__(self,*args,**kwargs)
 	def buildBadgeFromTemplate(self):
-		print self.cleaned_data
-		print BadgeForm.templates
 		templateName = self.cleaned_data['preset']
-		print "template is",templateName
 		template = BadgeForm.templates[templateName]
 		background = self.cleaned_data['background']
 		top  = self.cleaned_data['top_color']
@@ -80,20 +77,17 @@ class BadgeForm(forms.Form):
 		else:
 			value = self.buildBadgeFromTemplate()
 			custom = True
-		print "value is: ", value
 		self.cleaned_data['config'] = value
 		self.custom_format = custom
 		return self.cleaned_data
 		
 	def clean_players(self):
-		print self.fields['players'].choices
 		if ('players' not in self.cleaned_data) or (not self.cleaned_data['players']):
 			self.cleaned_data['players'] = [p[0] for p in self.fields['players'].choices]
 		return self.cleaned_data['players']
 	def clean_config(self):
 		if (('config' in self.cleaned_data) and (self.cleaned_data['config'])):
 			value = self.cleaned_data['config']
-			print "value is: ",value, type(value)
 			value = value.replace(r'\n','\n')
 			if(value[-1]!="\n"):#grammar requires a newline at end
 				value = value+"\n"

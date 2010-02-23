@@ -1,3 +1,4 @@
+from functools import update_wrapper
 from django.db.models.query import QuerySet
 from django.db import models
 from django.core.cache import cache
@@ -87,21 +88,37 @@ class Player(models.Model):
 	played = models.IntegerField(default=0)
 	clearCache = makeClearCache()
 	user = models.ForeignKey(User,related_name="players",null=True,blank=True)
-
+	def typedCount(fn):
+		def retval(*args,**kwargs):
+			if 'type' in kwargs:
+				type = kwargs['type']
+				del kwargs['type']
+			else:
+				type = None
+			result = fn(*args,**kwargs)
+			if type:
+				return result.filter(category=type).count()
+			else:
+				return result.count()
+		update_wrapper(retval,fn)
+		return retval	
 	@cacheResult
+	@typedCount
 	def lived(self):
-		return self.game_set.count()
+		return self.game_set
 	@cacheResult
+	@typedCount
 	def wins(self):
 		#cName = '%s_%s_wins'%(self.site.id,self.name)
 		#wins = cache.get(cName)
 		#if(wins):
 		#	return wins
 		#else:
-		return Team.objects.filter(players=self,won=True).count()
+		return Team.objects.filter(players=self,won=True)
 	@cacheResult
+	@typedCount
 	def losses(self):
-		return Team.objects.filter(players=self,won=False).count()
+		return Team.objects.filter(players=self,won=False)
 	@cacheResult
 	def winPct(self):
 		if(self.played>0):

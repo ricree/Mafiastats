@@ -77,7 +77,6 @@ def findSym(node,stack,sym,all=None):
 def replaceIf(dict,key,val,index):
 	if val:
 		if type(val) is list:
-			print val
 			dict[key]= [(v.sym[index] if type(v.sym) is tuple else v.sym) for v in val]
 		elif type(val.sym) is tuple:
 			dict[key]=val.sym[index]
@@ -200,7 +199,6 @@ def build_badge(badge):
 	bgGens = {'gradient':buildGradient,'transparent':buildTransparent}
 	startDir = os.getcwd()
 	os.chdir(settings.SITE_ROOT)
-	print os.getcwd()
 	r = settings.SITE_ROOT
 	l,ltab=  pyggy.getlexer("badge.pyl")
 	parser,ptab = pyggy.getparser("badge.pyg")
@@ -208,7 +206,6 @@ def build_badge(badge):
 		fmt =  buildFormatFromTemplate(badge)
 	else:
 		fmt = badge.format
-	print fmt
 	l.setinputstr(fmt)
 	while True:
 		x = l.token()
@@ -223,14 +220,12 @@ def build_badge(badge):
 	fields = {'WINS':sstat('wins'),'LOSSES':sstat('losses'),'TOTAL':sstat('played'),'MODERATED':sstat('modded'),'NAME':badge.user.username,'PMODERATED':sstat('totalPlayersModded')}
 	badgeData = buildBadgeData(tree,fields)
 	lines = badgeData['lines']
-	print badgeData
 	sizes = [sizeLine(line) for line in lines]
 	zsizes = zip(*sizes)
 	width = 2*HBORDER + max(zsizes[0])
 	height = LINE_SPACE + sum((LINE_SPACE + h for h in zsizes[1]))
 	base = Image.open(settings.MEDIA_ROOT + "/images/badgeBase.png").resize((width,height))
 	mask = Image.open(settings.MEDIA_ROOT + "/images/badgeMask.png").resize((width,height),Image.ANTIALIAS)
-	print "Background: ", badgeData['background']
 	img = bgGens[badgeData['background']]((width,height),badgeData['colors'])
 #	img = Image.new("RGB",(width,height))
 #	img.putalpha(0)
@@ -245,7 +240,6 @@ def build_badge(badge):
 			d.text((cur_x,cur_y+line_offset),text,font=font,fill=color)
 			cur_x+=entry_size[0]
 		cur_y+=size[1]+LINE_SPACE
-	print badge.url
 	img.save(settings.MEDIA_ROOT +"/"+ badge.url)
 class PlayerHarness(object):
 	def __init__(self,site,name):

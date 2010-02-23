@@ -1,4 +1,4 @@
-from mafiaStats.models import Site,Game,Team,Category
+from mafiaStats.models import Site,Game,Team,Category,SiteStats
 from django.db.models.signals import post_save, post_delete,pre_save,pre_delete
 from django.conf import settings
 from django.core.cache import cache
@@ -80,7 +80,7 @@ def buildBadgesForGame(sender,**kwargs):
 		for badge in (b for p in players if p.user for b in  p.user.badge_set.all()):
 			build_badge(badge)
 	except Exception as e:
-		loggging.exception(e.args[0])
+		logging.exception(e.args[0])
 post_save.connect(buildBadgesForGame,sender=Game)
 post_delete.connect(buildBadgesForGame,sender=Game)
 
@@ -105,7 +105,14 @@ def siteUpdater(sender, **kwargs):
 	inst = kwargs['instance']
 	if sender is Game:
 		site = inst.site
-		site.sitestats.update()
+		stats = None
+		try:
+			stats = site.sitestats
+		except:
+			site.sitestats = SiteStats(site=site)
+			site.sitestats.save()
+			stats = site.sitestats
+		stats.update()
 	else:
 		for site in Site.objects.all():
 			site.sitestats.update()
