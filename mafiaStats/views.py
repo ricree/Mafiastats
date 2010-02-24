@@ -236,7 +236,7 @@ def scoreboard(request, site_id=None,type=None):
 		args = {'players':page.object_list,'page':page,'direction':direction,'pageArgs':{'method':meth,'direction':direction}}
 		args.update(funcArgs)
 		return render_to_response('scoreBoardPresenter.html',args,context_instance=RequestContext(request))
-	args = {'players':page.object_list,'page':page,'direction':direction,'pageArgs':{'method':meth,'direction':direction}}
+	args = {'players':page.object_list,'categories':Category.objects.all(),'page':page,'direction':direction,'pageArgs':{'method':meth,'direction':direction}}
 	args.update(funcArgs)
 	return render_to_response('scoreboard.html',args,context_instance=RequestContext(request))
 def moderators(request,site_id):

@@ -3,12 +3,12 @@
 <script type="text/javascript" src="{{MEDIA_URL}}js/jqueryAjaxDivSort.js"></script>
 {%endblock%}
 {%block content%}
-	Type is:  {{type}}
 	<script type="text/javascript">
 		$(document).ready(function(){
 			ajaxDivSort_register(["name","wins","losses","winPct","modded"],"#scoreContent");
 		});
 	</script>
+	<div class="span-20">
 	<div style="margin-bottom:10px;">
 		<div id="nameLabel" class="span-4 colHeaderNormal" style="text-align:center">
 			<b><a href="{%url mafiastats_scoreboard site.id%}?page={{page.number}}&method=name{%if direction%}&direction={{direction}}{%else%}&direction=up{%endif%}">Name</a></b>
@@ -26,5 +26,20 @@
 			<b><a href="{%url mafiastats_scoreboard site.id%}?page={{page.number}}&method=modded{%if direction%}&direction={{direction}}{%else%}&direction=up{%endif%}">Moderated</a></b>
 		</div>
 	</div>
-	<div id="scoreContent">{%include "scoreBoardPresenter.html"%}</div>
+	<div id="scoreContent" class="span-20"><br/>{%include "scoreBoardPresenter.html"%}</div>
+	</div>
+	<div id="typeSelector" style="margin-top:0px" class="span-3 infoBox">
+		<h3 style="text-align:center"> <b>Filter By</b></h3>
+		{% for cat in categories%}
+			<div id="{{cat.title.replace(" ","_")}}_label" style="margin-top:15px;text-align:center;" class="colHeaderNormal" >
+				<b><a href="{%if cat == type%}{%url mafiastats_scoreboard site.id%}{%else%}{%url mafiastats_scoreboard_typed site.id,cat.id%}{%endif%}?page={{page.number}}&method={{pageArgs['method']}}&direction={{pageArgs['direction']}}">{{cat.title}}</a></b>
+			</div>
+		{%endfor%}
+	</div>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			{%for cat in categories%}
+			$("#{{cat.title.replace(" ","_")}}_label").addClass("ui-state-{%if cat == type%}active{%else%}default{%endif%}");
+			{%endfor%}});
+	</script>
 {%endblock%}
