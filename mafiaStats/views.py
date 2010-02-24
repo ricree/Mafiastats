@@ -99,11 +99,16 @@ def site(request,site_id):
 			newest = game.firstGame_set.all()[0]
 		count+=1
 	imgLink = getSiteImage(Site.objects.get(pk=site_id))
-	cat_nums,cat_names,cat_hrefs = zip(*sorted([(cat.avgWinPct(p.id),"%% "+str(cat.title),str(reverse('mafiastats_scoreboard_typed',args=[p.id,cat.id]))) for cat in Category.objects.all()],reverse=True))
+	cat_nums,cat_legends,cat_hrefs = zip(*sorted([(cat.avgWinPct(p.id),"%% "+str(cat.title),str(reverse('mafiastats_scoreboard_typed',args=[p.id,cat.id]))) for cat in Category.objects.all()],reverse=True))
 	cat_nums = list(cat_nums)
-	cat_names = list(cat_names)
+	cat_legends = list(cat_legends)
 	cat_hrefs = list(cat_hrefs)
-	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage,'pageArgs':{},'newest':newest,'cat_nums': cat_nums,'cat_names':cat_names,'cat_hrefs':cat_hrefs,'catImg':imgLink},context_instance=RequestContext(request))
+	cat_wins,cat_names = zip(*sorted([ (cat.pctWins(p.id),str(cat.title)) for cat in Category.objects.all()],reverse=True))
+	cat_wins = list(cat_wins)
+	cat_names = list(cat_names)
+	cat_losses = [100 - x for x in cat_wins]
+	cat_blanks = ['']*len(cat_names)
+	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage,'pageArgs':{},'newest':newest,'cat_nums': cat_nums,'cat_legends':cat_legends,'cat_names':cat_names,'cat_blanks':cat_blanks,'cat_hrefs':cat_hrefs,'cat_bar_pcts':[cat_wins,cat_losses],'catImg':imgLink},context_instance=RequestContext(request))
 def game(request, game_id):
 	game = get_object_or_404(Game, pk=game_id)
 	teams = Team.objects.filter(game=game).order_by('-won')
@@ -194,7 +199,7 @@ def games(request, site_id):
 	args.update(funcArgs)
 	return render_to_response(respTemplate,args,context_instance=RequestContext(request))
 
-def sortTable(GET,methods,query,defaultDir='down'):
+def sortTable(GET,methods,query,defaultDir='down',category=None):
 	reversals = {'up':False,'down':True}
 	methodStr = GET['method'] if 'method' in GET else 'default'
 	methodDir = GET['direction'] if 'direction' in GET else defaultDir
@@ -203,10 +208,10 @@ def sortTable(GET,methods,query,defaultDir='down'):
 	else:
 		methodStr = 'default'
 		methodDir = defaultDir
-	return sortQuery(query,methods[methodStr],reversals[methodDir])
+	return sortQuery(query,methods[methodStr],reversals[methodDir],category)
 
 @cache_page(60*20)
-def scoreboard(request, site_id=None,type=None):
+def scoreboard(request, site_id=None,category=None):
 	sortMethods={'score':'score','name':'name','wins':playersByWins,'losses':playersByLosses,'winPct':playersByWinPct,'modded':playersByModerated,'default':'score'}
 	nextDir = {'up':'down','down':'up'}
 	if (('direction' in request.GET) and (request.GET['direction'] in nextDir)):
@@ -221,10 +226,10 @@ def scoreboard(request, site_id=None,type=None):
 	else:
 		query = query.filter(played__gt=0)
 		funcArgs = {'site':None}
-	if((type is not None) and (type != '')):
-		type = get_object_or_404(Category, pk=type)
-		funcArgs['type']=type
-		players = sortTable(request.GET,sortMethods,[x for x in query if x.playedCalc(type) >0])
+	if((category is not None) and (category != '')):
+		category = get_object_or_404(Category, pk=category)
+		funcArgs['type']=category
+		players = sortTable(request.GET,sortMethods,[x for x in query if x.playedCalc(category) >0],category=category)
 	else:
 		players = sortTable(request.GET,sortMethods,query)
 #	players = [(player,player.score()) for player in players if player.played()>0]

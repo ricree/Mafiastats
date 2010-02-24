@@ -4,6 +4,7 @@
 <script type="text/javascript" src="{{MEDIA_URL}}js/raphael-min.js"> </script>
 <script type="text/javascript" src="{{MEDIA_URL}}js/g.raphael-min.js"> </script>
 <script type="text/javascript" src="{{MEDIA_URL}}js/g.pie-min.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/g.bar.js"></script>
 {%endblock%}
 {%block content %}
 <h3><a href="{{site.url}}">{{site.description}}</a></h3>
@@ -22,8 +23,9 @@ Winningest Player:&nbsp;<a href="{%url mafiastats_player stats.winningest.id%}">
 </div>
 <br/>
 {%endif%}
-<div class="span-8">
+<div class="span-6">
 {%if page %}
+<h3><b>Recent Games</b></h3>
 <ul>
 	{%for game in page.object_list%}
 	<li><b><a href="{%url mafiastats_game game.pk%}">{{game.title}}</a></b></li>		{%endfor%}
@@ -33,17 +35,18 @@ This site does not have any games yet
 {%endif%}
 </div>
 {%if page%}
-<div id="category_chart" class="span-10">
-	&nbsp;
+<div id="category_chart" class="span-7">
 	<!--<img src="{{MEDIA_URL}}{{catImg}}" alt="Category Comparison" style="padding:2px;;" />-->
+</div>
+<div id="category_win_rate" class="span-5" style="margin-top:30px;">
 </div>
 <script type="text/javascript">
 	$(document).ready(function(){
-		var width = 600;
-		var height = 400;
+		var width = 270;
+		var height = 450;
 		var rCanvas = Raphael("category_chart", width,height);
 		rCanvas.g.text(width/2,50,"Win Rates for {{site.shortName}}").attr({"font-size":30,"font-weight":800});
-		var chart = rCanvas.g.piechart(width/2,height/2,125,{{cat_nums|safe}},{legend: {{cat_names|safe}}, legendpos: "west",href:{{cat_hrefs|safe}},scale:1.1});
+		var chart = rCanvas.g.piechart(width/2,height/2+25,90,{{cat_nums|safe}},{legend: {{cat_legends|safe}}, legendpos: "south",href:{{cat_hrefs|safe}},scale:1.1});
 		chart.hover(function () {
 			this.sector.stop();
 			this.sector.scale(1.1,1.1,this.cx,this.cy);
@@ -75,6 +78,17 @@ This site does not have any games yet
 			}
 		});
 	});
+</script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var width = 400;
+	var height = 500;
+	var r = Raphael("category_win_rate",width,height);
+	r.g.text(width/2,18,"Win Rate per Category").attr({"font-family":"sans","font-size":25,"font-weight":800});
+	var chart = r.g.barchart(10,80,width-20,height-200,{{cat_bar_pcts}},{stacked:true,type:"soft",gutter:"30%"});
+	chart.label([{{cat_names |safe}},{{cat_names |safe}}]);
+	//chart.label([[{%for x in cat_names%}"{{x}}"{%if not loop.last%}, {%endif%}{%endfor%}]]);
+});
 </script>
 {%endif%}
 {%endblock%}

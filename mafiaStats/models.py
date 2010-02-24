@@ -63,6 +63,18 @@ class Category(models.Model):
 			return (wins*100)/total
 		else:
 			 return "N/A"
+	def pctWins(self,site=None):
+		winQuery = Team.objects.filter(category=self,won=True)
+		totalQuery = Team.objects.filter(category=self)
+		if site:
+			winQuery = winQuery.filter(site=site)
+			totalQuery = totalQuery.filter(site=site)
+		wins = winQuery.count()
+		total = totalQuery.count()
+		if (total>0):
+			return (wins*100)/total
+		else:
+			return 0
 	def games_won(self, site):
 		return Team.objects.filter(site=site, category = self, won=True).count()
 	def games_lost(self, site):
