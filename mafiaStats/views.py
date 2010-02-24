@@ -99,7 +99,11 @@ def site(request,site_id):
 			newest = game.firstGame_set.all()[0]
 		count+=1
 	imgLink = getSiteImage(Site.objects.get(pk=site_id))
-	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage,'pageArgs':{},'newest':newest,'catImg':imgLink},context_instance=RequestContext(request))
+	cat_nums,cat_names,cat_hrefs = zip(*sorted([(cat.avgWinPct(p.id),"%% "+str(cat.title),str(reverse('mafiastats_scoreboard_typed',args=[p.id,cat.id]))) for cat in Category.objects.all()],reverse=True))
+	cat_nums = list(cat_nums)
+	cat_names = list(cat_names)
+	cat_hrefs = list(cat_hrefs)
+	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage,'pageArgs':{},'newest':newest,'cat_nums': cat_nums,'cat_names':cat_names,'cat_hrefs':cat_hrefs,'catImg':imgLink},context_instance=RequestContext(request))
 def game(request, game_id):
 	game = get_object_or_404(Game, pk=game_id)
 	teams = Team.objects.filter(game=game).order_by('-won')

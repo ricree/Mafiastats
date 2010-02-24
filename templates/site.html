@@ -1,4 +1,10 @@
 {% extends "sitePage.html"%}
+{%block extra_scripts%}
+{{super()}}
+<script type="text/javascript" src="{{MEDIA_URL}}js/raphael-min.js"> </script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/g.raphael-min.js"> </script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/g.pie-min.js"></script>
+{%endblock%}
 {%block content %}
 <h3><a href="{{site.url}}">{{site.description}}</a></h3>
 {%if stats%}
@@ -27,8 +33,48 @@ This site does not have any games yet
 {%endif%}
 </div>
 {%if page%}
-<div class="span-10">
-	<img src="{{MEDIA_URL}}{{catImg}}" alt="Category Comparison" style="padding:2px;;" />
+<div id="category_chart" class="span-10">
+	&nbsp;
+	<!--<img src="{{MEDIA_URL}}{{catImg}}" alt="Category Comparison" style="padding:2px;;" />-->
 </div>
+<script type="text/javascript">
+	$(document).ready(function(){
+		var width = 600;
+		var height = 400;
+		var rCanvas = Raphael("category_chart", width,height);
+		rCanvas.g.text(width/2,50,"Win Rates for {{site.shortName}}").attr({"font-size":30,"font-weight":800});
+		var chart = rCanvas.g.piechart(width/2,height/2,125,{{cat_nums|safe}},{legend: {{cat_names|safe}}, legendpos: "west",href:{{cat_hrefs|safe}},scale:1.1});
+		chart.hover(function () {
+			this.sector.stop();
+			this.sector.scale(1.1,1.1,this.cx,this.cy);
+			var dirs = {true:{true:3,false:1},false:{true:0,false:2}}
+			var xd = this.mx - this.cx
+			var yd = this.my - this.cy
+			var alignment = Math.abs(xd)>Math.abs(yd)
+			var dir = dirs[alignment][alignment ? xd>0 : yd>0]
+			var fx = this.cx + xd*2.5;
+			var fy = this.cy + yd*2.2;
+			var flag_text = "click to see\nscoreboard for ";
+			if (this.label) {
+				this.label[0].stop();
+				this.label[1].scale(1.5);
+				this.label[1].attr({"font-weight":800});
+				flag_text += this.label[1].attrs['text'].split(' ').slice(1);
+			}else{
+				flag_text += "category";
+			}
+			this.flag = rCanvas.g.popup(fx,fy,flag_text,dir);
+			this.flag.animate({opacity:.85},0);
+		}, function () {
+			this.sector.animate({scale: [1,1,this.cx,this.cy]},500,"bounce");
+			this.flag.animate({opacity:0},50);
+			//this.flag.animate({opacity:0},300,function(){this.remove();});
+			if (this.label) {
+				this.label[0].animate({scale: 1}, 500, "bounce");
+				this.label[1].attr({"font-weight":400});
+			}
+		});
+	});
+</script>
 {%endif%}
 {%endblock%}

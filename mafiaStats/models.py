@@ -51,9 +51,14 @@ class Category(models.Model):
 		verbose_name = 'Category'
 		verbose_name_plural = 'Categories'
 	@cacheResult
-	def avgWinPct(self):
-		wins = Team.objects.filter(category=self,won=True).count()
-		total = Team.objects.filter
+	def avgWinPct(self,site=None):
+		winQuery = Team.objects.filter(category=self,won=True)
+		teamQuery = Team.objects.filter(won=True)
+		if site:
+			winQuery = winQuery.filter(site=site)
+			teamQuery = teamQuery.filter(site=site)
+		wins = winQuery.count()
+		total = teamQuery.count()
 		if (total>0):
 			return (wins*100)/total
 		else:
