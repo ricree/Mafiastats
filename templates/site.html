@@ -50,11 +50,17 @@ This site does not have any games yet
 		chart.hover(function () {
 			this.sector.stop();
 			this.sector.scale(1.1,1.1,this.cx,this.cy);
-			var dirs = {true:{true:3,false:1},false:{true:0,false:2}}
-			var xd = this.mx - this.cx
-			var yd = this.my - this.cy
-			var alignment = Math.abs(xd)>Math.abs(yd)
-			var dir = dirs[alignment][alignment ? xd>0 : yd>0]
+			var dirs = {};
+			dirs[true] = {};
+			dirs[true][true] = 3;
+			dirs[true][false] = 1;//{true:{true:3,false:1},false:{true:0,false:2}};
+			dirs[false] = {};
+			dirs[false][true] = 0;
+			dirs[false][false] = 2;
+			var xd = this.mx - this.cx;
+			var yd = this.my - this.cy;
+			var alignment = Math.abs(xd)>Math.abs(yd);
+			var dir = dirs[alignment][alignment ? xd>0 : yd>0];
 			var fx = this.cx + xd*2.5;
 			var fy = this.cy + yd*2.2;
 			var flag_text = "click to see\nscoreboard for ";
