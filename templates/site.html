@@ -43,10 +43,10 @@ This site does not have any games yet
 <script type="text/javascript">
 	$(document).ready(function(){
 		var width = 270;
-		var height = 450;
+		var height = 470;
 		var rCanvas = Raphael("category_chart", width,height);
 		rCanvas.g.text(width/2,50,"Win Rates for {{site.shortName}}").attr({"font-size":30,"font-weight":800});
-		var chart = rCanvas.g.piechart(width/2,height/2+25,90,{{cat_nums|safe}},{legend: {{cat_legends|safe}}, legendpos: "south",href:{{cat_hrefs|safe}},scale:1.1});
+		var chart = rCanvas.g.piechart(width/2,height/2,90,{{cat_nums|safe}},{legend: {{cat_legends|safe}}, legendpos: "south",href:{{cat_hrefs|safe}},scale:1.1});
 		chart.hover(function () {
 			this.sector.stop();
 			this.sector.scale(1.1,1.1,this.cx,this.cy);
@@ -91,8 +91,20 @@ $(document).ready(function(){
 	var height = 500;
 	var r = Raphael("category_win_rate",width,height);
 	r.g.text(width/2,18,"Win Rate per Category").attr({"font-family":"sans","font-size":25,"font-weight":800});
-	var chart = r.g.barchart(10,80,width-20,height-200,{{cat_bar_pcts}},{stacked:true,type:"soft",gutter:"30%"});
+	var chart = r.g.barchart(10,80,width-20,height-200,{{cat_bar_pcts}},{stacked:true,type:"soft",colors:["#2F69DF","#C0C0E0"],gutter:"30%"});
 	chart.label([{{cat_names |safe}},{{cat_names |safe}}]);
+	chart.hover(function(){
+		var flag_text = this.value.toString()+"%";
+		if(this.bar.attrs.fill == "#2F69DF"){
+			flag_text+=" wins";
+		}else{
+			flag_text+=" losses";
+		}
+		this.flag = r.g.popup(this.bar.x,this.bar.y,flag_text,2).insertBefore(this);
+		},
+		function(){
+			this.flag.animate({opacity:0},50,function(){this.remove();});
+		});
 	//chart.label([[{%for x in cat_names%}"{{x}}"{%if not loop.last%}, {%endif%}{%endfor%}]]);
 });
 </script>
