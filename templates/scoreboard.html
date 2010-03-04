@@ -1,14 +1,26 @@
 {%extends "sitePage.html"%}
+{%block sheets%}
+{{super()}}
+<link rel="stylesheet" href="{{MEDIA_URL}}js/JSONSuggestBox/jsonSuggest.css" type="text/css"></link>
+{%endblock%}
 {%block extra_scripts%}
 <script type="text/javascript" src="{{MEDIA_URL}}js/jqueryAjaxDivSort.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/JSONSuggestBox/json2.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/JSONSuggestBox/jquery.jsonSuggest-dev.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/widget/suggest.js"></script>
 {%endblock%}
 {%block content%}
 	<script type="text/javascript">
 		$(document).ready(function(){
+			siteId = {{site.id}}
+			setupSuggestBoxes();
+			//$("#lookupForm").submit(function(){
+			//	return false;});
 			ajaxDivSort_register(["name","wins","losses","winPct","modded"],"#scoreContent");
 		});
 	</script>
-	<div style="margin-bottom:10px;">
+	<div class="span-20">
+	<div style="margin-bottom:10px;" class="span-22">
 		<div id="nameLabel" class="span-4 colHeaderNormal" style="text-align:center">
 			<b><a href="{%url mafiastats_scoreboard site.id%}?page={{page.number}}&method=name{%if direction%}&direction={{direction}}{%else%}&direction=up{%endif%}">Name</a></b>
 		</div>
@@ -24,6 +36,28 @@
 		<div id="moddedLabel" class="span-4 colHeaderNormal" style="text-align:center">
 			<b><a href="{%url mafiastats_scoreboard site.id%}?page={{page.number}}&method=modded{%if direction%}&direction={{direction}}{%else%}&direction=up{%endif%}">Moderated</a></b>
 		</div>
+		<div class="span-3">
+			<b>Find Player</b>
+			<form id="lookupForm" method="GET" action="{%url mafiastats_player_lookup%}"><input style="position:relative;top:-25px;margin-left:100px;"type="submit" value="find"></input>	<input style="position:relative;top:-25px;"name="name" id="id_name" class="AutoSuggestBox"></input>{% if site%}<input type="hidden" name="site" value="{{site.id}}"></input>{%endif%}
+			</form>
+		</div>
 	</div>
-	<div id="scoreContent">{%include "scoreBoardPresenter.html"%}</div>
+	<div id="scoreContent" style="position:relative;top:-50px;"class="span-20">{%include "scoreBoardPresenter.html"%}</div>
+	</div>
+	<div class="span-3">
+		<div id="typeSelector" style="margin-top:60px" class="span-3 infoBox">
+			<h3 style="text-align:center"> <b>Filter By</b></h3>
+			{% for cat in categories%}
+				<div id="{{cat.title.replace(" ","_")}}_label" style="margin-top:15px;text-align:center;" class="colHeaderNormal" >
+					<b><a href="{%if cat == type%}{%url mafiastats_scoreboard site.id%}{%else%}{%url mafiastats_scoreboard_typed site.id,cat.id%}{%endif%}?page={{page.number}}&method={{pageArgs['method']}}&direction={{pageArgs['direction']}}">{{cat.title}}</a></b>
+				</div>
+			{%endfor%}
+		</div>
+	</div>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			{%for cat in categories%}
+			$("#{{cat.title.replace(" ","_")}}_label").addClass("ui-state-{%if cat == type%}active{%else%}default{%endif%}");
+			{%endfor%}});
+	</script>
 {%endblock%}

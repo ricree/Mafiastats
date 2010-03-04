@@ -1,4 +1,11 @@
 {% extends "sitePage.html"%}
+{%block extra_scripts%}
+{{super()}}
+<script type="text/javascript" src="{{MEDIA_URL}}js/raphael-min.js"> </script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/g.raphael-min.js"> </script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/g.pie-min.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/g.bar.js"></script>
+{%endblock%}
 {%block content %}
 <h3><a href="{{site.url}}">{{site.description}}</a></h3>
 {%if stats%}
@@ -16,8 +23,9 @@ Winningest Player:&nbsp;<a href="{%url mafiastats_player stats.winningest.id%}">
 </div>
 <br/>
 {%endif%}
-<div class="span-8">
+<div class="span-7">
 {%if page %}
+<h3><b>Recent Games</b></h3>
 <ul>
 	{%for game in page.object_list%}
 	<li><b><a href="{%url mafiastats_game game.pk%}">{{game.title}}</a></b></li>		{%endfor%}
@@ -27,8 +35,79 @@ This site does not have any games yet
 {%endif%}
 </div>
 {%if page%}
-<div class="span-10">
-	<img src="{{MEDIA_URL}}{{catImg}}" alt="Category Comparison" style="padding:2px;;" />
+<div id="category_chart" class="span-7">
+	<!--<img src="{{MEDIA_URL}}{{catImg}}" alt="Category Comparison" style="padding:2px;;" />-->
 </div>
+<div id="category_win_rate" class="span-4" style="margin-top:30px;">
+</div>
+<script type="text/javascript">
+	$(document).ready(function(){
+		var width = 270;
+		var height = 470;
+		var rCanvas = Raphael("category_chart", width,height);
+		rCanvas.g.text(width/2,50,"Win Rates for {{site.shortName}}").attr({"font-size":30,"font-weight":800});
+		var chart = rCanvas.g.piechart(width/2,height/2-40,90,{{cat_nums|safe}},{legend: {{cat_legends|safe}}, legendpos: "south",href:{{cat_hrefs|safe}},scale:1.1});
+		chart.hover(function () {
+			this.sector.stop();
+			this.sector.scale(1.1,1.1,this.cx,this.cy);
+			var dirs = {};
+			dirs[true] = {};
+			dirs[true][true] = 3;
+			dirs[true][false] = 1;//{true:{true:3,false:1},false:{true:0,false:2}};
+			dirs[false] = {};
+			dirs[false][true] = 0;
+			dirs[false][false] = 2;
+			var xd = this.mx - this.cx;
+			var yd = this.my - this.cy;
+			var alignment = Math.abs(xd)>Math.abs(yd);
+			var dir = dirs[alignment][alignment ? xd>0 : yd>0];
+			var fx = this.cx + xd*2.5;
+			var fy = this.cy + yd*2.2;
+			var flag_text = "click to see\nscoreboard for ";
+			if (this.label) {
+				this.label[0].stop();
+				this.label[1].scale(1.5);
+				this.label[1].attr({"font-weight":800});
+				flag_text += this.label[1].attrs['text'].split(' ').slice(1);
+			}else{
+				flag_text += "category";
+			}
+			this.flag = rCanvas.g.popup(fx,fy,flag_text,dir);
+			this.flag.animate({opacity:.85},0);
+		}, function () {
+			this.sector.animate({scale: [1,1,this.cx,this.cy]},500,"bounce");
+			this.flag.animate({opacity:0},50);
+			//this.flag.animate({opacity:0},300,function(){this.remove();});
+			if (this.label) {
+				this.label[0].animate({scale: 1}, 500, "bounce");
+				this.label[1].attr({"font-weight":400});
+			}
+		});
+	});
+</script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var width = 380;
+	var height = 435;
+	var r = Raphael("category_win_rate",width,height);
+	r.g.text(width/2,18,"Win Rate per Category").attr({"font-family":"sans","font-size":25,"font-weight":800});
+	var chart = r.g.barchart(10,80,width-20,height-200,{{cat_bar_pcts}},{stacked:true,type:"soft",colors:["#2F69DF","#C0C0E0"],gutter:"30%"});
+	chart.label([{{cat_names |safe}},{{cat_names |safe}}]);
+	chart.hover(function(){
+		var flag_text = this.value.toString()+"%";
+		if(this.bar.attrs.fill == "#2F69DF"){
+			flag_text+=" wins";
+		}else{
+			flag_text+=" losses";
+		}
+		this.flag = r.g.popup(this.bar.x,this.bar.y,flag_text,2).insertBefore(this);
+		},
+		function(){
+			this.flag.remove();
+			//this.flag.animate({opacity:0},50,function(){this.remove();});
+		});
+	//chart.label([[{%for x in cat_names%}"{{x}}"{%if not loop.last%}, {%endif%}{%endfor%}]]);
+});
+</script>
 {%endif%}
 {%endblock%}

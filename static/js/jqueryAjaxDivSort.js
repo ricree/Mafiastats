@@ -71,13 +71,13 @@ function ajaxDivSort_register(elements,destination){
 	if(typeof(sortMethod) == "undefined")
 	{
 		sortMethod = params.method;
-		setHighlight();
-		setPages();
 	}
 	if(typeof(sortDirection) == "undefined")
 	{
 		sortDirection = params.direction;
 	}
+	setHighlight();
+	setPages();
 	if (!$(this).hasClass(".ui-state-default")){
 		$(this).addClass("ui-state-default");
 	}

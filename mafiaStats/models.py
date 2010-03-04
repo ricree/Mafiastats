@@ -1,3 +1,4 @@
+from functools import update_wrapper
 from django.db.models.query import QuerySet
 from django.db import models
 from django.core.cache import cache
@@ -11,6 +12,7 @@ def cacheResult(fn):
 	def functionCache(*args,**kwargs):
 		self = args[0]
 		cName = '%s_%s_%s'%(type(self).__name__,self.id,fn.func_name)
+		cName = ''.join([cName]+[str(hash(x)) for x in args[1:]] + [str(hash(x)+hash(kwargs[x])) for x in kwargs])
 		result = cache.get(cName)
 		if(result is not None):#as opposed to something else evaluating to False
 			return result
@@ -49,13 +51,30 @@ class Category(models.Model):
 		verbose_name = 'Category'
 		verbose_name_plural = 'Categories'
 	@cacheResult
-	def avgWinPct(self):
-		wins = Team.objects.filter(category=self,won=True).count()
-		total = Team.objects.filter
+	def avgWinPct(self,site=None):
+		winQuery = Team.objects.filter(category=self,won=True)
+		teamQuery = Team.objects.filter(won=True)
+		if site:
+			winQuery = winQuery.filter(site=site)
+			teamQuery = teamQuery.filter(site=site)
+		wins = winQuery.count()
+		total = teamQuery.count()
 		if (total>0):
 			return (wins*100)/total
 		else:
 			 return "N/A"
+	def pctWins(self,site=None):
+		winQuery = Team.objects.filter(category=self,won=True)
+		totalQuery = Team.objects.filter(category=self)
+		if site:
+			winQuery = winQuery.filter(site=site)
+			totalQuery = totalQuery.filter(site=site)
+		wins = winQuery.count()
+		total = totalQuery.count()
+		if (total>0):
+			return (wins*100)/total
+		else:
+			return 0
 	def games_won(self, site):
 		return Team.objects.filter(site=site, category = self, won=True).count()
 	def games_lost(self, site):
@@ -74,7 +93,11 @@ class Category(models.Model):
 		selfLost = float(self.games_lost(site))
 		score = (-1.0 + selfLost/totalLosses) * .5 *((selfWins + selfLost) / (totalWins + totalLosses))
 		return score
-
+def typeQuery(query,type=None):
+	if type:
+		return query.filter(category=type)
+	else:
+		return query
 
 class Player(models.Model):
 	def __unicode__(self):
@@ -87,25 +110,42 @@ class Player(models.Model):
 	played = models.IntegerField(default=0)
 	clearCache = makeClearCache()
 	user = models.ForeignKey(User,related_name="players",null=True,blank=True)
-
+	def typedCount(fn):
+		def retval(*args,**kwargs):
+			if 'type' in kwargs:
+				type = kwargs['type']
+				del kwargs['type']
+			elif len(args)>1:
+				type = args[1]
+				args = args[:1]
+			else:
+				type=None
+			result = fn(*args,**kwargs)
+			return typeQuery(result,type).count()
+		update_wrapper(retval,fn)
+		return retval	
 	@cacheResult
+	@typedCount
 	def lived(self):
-		return self.game_set.count()
+		return self.game_set
 	@cacheResult
+	@typedCount
 	def wins(self):
 		#cName = '%s_%s_wins'%(self.site.id,self.name)
 		#wins = cache.get(cName)
 		#if(wins):
 		#	return wins
 		#else:
-		return Team.objects.filter(players=self,won=True).count()
+		return Team.objects.filter(players=self,won=True)
 	@cacheResult
+	@typedCount
 	def losses(self):
-		return Team.objects.filter(players=self,won=False).count()
+		return Team.objects.filter(players=self,won=False)
 	@cacheResult
-	def winPct(self):
-		if(self.played>0):
-			return (100*Team.objects.filter(players=self,won=True).count())/self.played
+	def winPct(self,type=None):
+		played = typeQuery(Team.objects.filter(players=self),type).count()
+		if(played>0):
+			return (100*typeQuery(Team.objects.filter(players=self,won=True),type).count())/played
 		else:
 			return 0
 	@cacheResult
@@ -115,13 +155,16 @@ class Player(models.Model):
 	def largestModdedCount(self):
 		return len(self.largestModded().players())
 	@cacheResult
+	@typedCount
 	def modded(self):
-		return self.moderated_set.count()
+		return self.moderated_set
 	@cacheResult
 	def totalPlayersModded(self):
 		return sum((g.num_players() for g in self.moderated_set.all()))
+	@cacheResult
+	@typedCount
 	def playedCalc(self):
-		return Team.objects.filter(players=self).count()
+		return Team.objects.filter(players=self)
 	def freshScore(self):
 		wins = float(self.wins())
 		total = float(wins + self.losses())

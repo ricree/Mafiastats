@@ -99,7 +99,16 @@ def site(request,site_id):
 			newest = game.firstGame_set.all()[0]
 		count+=1
 	imgLink = getSiteImage(Site.objects.get(pk=site_id))
-	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage,'pageArgs':{},'newest':newest,'catImg':imgLink},context_instance=RequestContext(request))
+	cat_nums,cat_legends,cat_hrefs = zip(*sorted([(cat.avgWinPct(p.id),"%% "+str(cat.title),str(reverse('mafiastats_scoreboard_typed',args=[p.id,cat.id]))) for cat in Category.objects.all()],reverse=True))
+	cat_nums = list(cat_nums)
+	cat_legends = list(cat_legends)
+	cat_hrefs = list(cat_hrefs)
+	cat_wins,cat_names = zip(*sorted([ (cat.pctWins(p.id),str(cat.title)) for cat in Category.objects.all()],reverse=True))
+	cat_wins = list(cat_wins)
+	cat_names = list(cat_names)
+	cat_losses = [100 - x for x in cat_wins]
+	cat_blanks = ['']*len(cat_names)
+	return render_to_response('site.html', {'stats':stats,'site' : p, 'page' : gamesPage,'pageArgs':{},'newest':newest,'cat_nums': cat_nums,'cat_legends':cat_legends,'cat_names':cat_names,'cat_blanks':cat_blanks,'cat_hrefs':cat_hrefs,'cat_bar_pcts':[cat_wins,cat_losses],'catImg':imgLink},context_instance=RequestContext(request))
 def game(request, game_id):
 	game = get_object_or_404(Game, pk=game_id)
 	teams = Team.objects.filter(game=game).order_by('-won')
@@ -116,6 +125,40 @@ def game(request, game_id):
 	roleOrder = dict(((role[1].pk,index) for role,index in zip(roles.items(),range(len(roles)))))
 	can_edit = request.user.has_perm('mafiaStats.game')
 	return render_to_response('game.html', {'can_edit':can_edit,'game':game, 'teams':teams, 'num_players' : numPlayers, 'roleOrder':roleOrder,'length':length, 'next':reverse('mafiastats_game',args=[int(game_id)]),'players':players,'winners':winners,'roles':roles},context_instance=RequestContext(request))
+def game_lookup(request):
+	if 'game' in request.GET:
+		name = request.GET['game']
+	else:
+		raise Http404, "Game not fount"
+	if 'site' in request.GET and request.GET['site']:
+		search_args = {'title':name, 'site':int(request.GET['site'])}
+	else:
+		search_args = {'title':name}
+	try:
+		pl = Game.objects.filter(**search_args)[0]
+	except:
+		raise Http404, "player not found"
+	return HttpResponseRedirect(reverse("mafiastats_game", args=[pl.id]))
+
+def player_lookup(request):
+	if 'name' in request.GET:
+		name = request.GET['name']
+	else:
+		raise Http404, "Name not found"
+	if 'site' in request.GET and request.GET['site']:
+		search_args = {'name':name,'site':int(request.GET['site'])}
+	else:
+		search_args = {'name':name}
+	try:
+		pl = Player.objects.filter(**search_args)[0]
+	except:
+		raise Http404, "player not found"
+	if request.is_ajax():
+		return HttpResponse(reverse("mafiastats_player",args=[pl.id]))
+	else:
+		return HttpResponseRedirect(reverse("mafiastats_player",args=[pl.id]))
+		
+		
 
 def player(request,player_id):
 	player = get_object_or_404(Player, pk=player_id)
@@ -168,7 +211,6 @@ def get_bounds(perPage,page,num):
 	return perPage*page
 @cache_page(60*20)
 def games(request, site_id):
-	print "I was called"
 	gamesPerPage = 5
 	query = Game.objects
 	if(site_id !=''):
@@ -191,7 +233,7 @@ def games(request, site_id):
 	args.update(funcArgs)
 	return render_to_response(respTemplate,args,context_instance=RequestContext(request))
 
-def sortTable(GET,methods,query,defaultDir='down'):
+def sortTable(GET,methods,query,defaultDir='down',category=None):
 	reversals = {'up':False,'down':True}
 	methodStr = GET['method'] if 'method' in GET else 'default'
 	methodDir = GET['direction'] if 'direction' in GET else defaultDir
@@ -200,10 +242,10 @@ def sortTable(GET,methods,query,defaultDir='down'):
 	else:
 		methodStr = 'default'
 		methodDir = defaultDir
-	return sortQuery(query,methods[methodStr],reversals[methodDir])
+	return sortQuery(query,methods[methodStr],reversals[methodDir],category)
 
 @cache_page(60*20)
-def scoreboard(request, site_id=None):
+def scoreboard(request, site_id=None,category=None):
 	sortMethods={'score':'score','name':'name','wins':playersByWins,'losses':playersByLosses,'winPct':playersByWinPct,'modded':playersByModerated,'default':'score'}
 	nextDir = {'up':'down','down':'up'}
 	if (('direction' in request.GET) and (request.GET['direction'] in nextDir)):
@@ -218,23 +260,27 @@ def scoreboard(request, site_id=None):
 	else:
 		query = query.filter(played__gt=0)
 		funcArgs = {'site':None}
-	players = sortTable(request.GET,sortMethods,query)
+	if((category is not None) and (category != '')):
+		category = get_object_or_404(Category, pk=category)
+		funcArgs['type']=category
+		players = sortTable(request.GET,sortMethods,[x for x in query if x.playedCalc(category) >0],category=category)
+	else:
+		players = sortTable(request.GET,sortMethods,query)
 #	players = [(player,player.score()) for player in players if player.played()>0]
 #	players.sort(cmp=(lambda (x,xs),(y,ys): cmp(ys,xs)))
 #	players,scores = zip(*players)
 	paginator=Paginator(players,25)
 	page=getPage(request,paginator)
-	if(request.is_ajax()):
-		args = {'players':page.object_list,'page':page}
-		args.update(funcArgs)
-		return render_to_response('scoreBoardPresenter.html',args,context_instance=RequestContext(request))
 	if 'method' in request.GET:
 		meth = request.GET['method']
 	else:
 		meth = sortMethods['score']
-	args = {'players':page.object_list,'page':page,'direction':direction,'pageArgs':{'method':meth,'direction':direction}}
+	if(request.is_ajax()):
+		args = {'players':page.object_list,'page':page,'direction':direction,'pageArgs':{'method':meth,'direction':direction}}
+		args.update(funcArgs)
+		return render_to_response('scoreBoardPresenter.html',args,context_instance=RequestContext(request))
+	args = {'players':page.object_list,'categories':Category.objects.all(),'page':page,'direction':direction,'pageArgs':{'method':meth,'direction':direction}}
 	args.update(funcArgs)
-	print args
 	return render_to_response('scoreboard.html',args,context_instance=RequestContext(request))
 def moderators(request,site_id):
 	sortMethods={'name':'name','modded':playersByModerated,'largest':modsByLargestGame,'default':'name'}
@@ -264,6 +310,9 @@ def add(request, site_id=None):
 		if(form.is_valid() and teamFormset.is_valid() and roleFormset.is_valid()):
 			try:
 			#return HttpResponse(formset.forms[0].cleaned_data['players'])
+				print "adding game to site", site_id
+				print "Sites are", Site.objects.all()
+				print "Players are",Player.objects.all()
 				site = Site.objects.get(pk=site_id)
 				name = teamFormset.forms[0].cleaned_data['players']
 				moderator,created = Player.objects.get_or_create(name=form.cleaned_data['moderator'],site=site)
@@ -285,14 +334,12 @@ def add(request, site_id=None):
 						title = tForm.cleaned_data['title']
 					else:
 						title = tForm.cleaned_data['type'].title()
-					print tForm.cleaned_data['type']
 					category = Category.objects.get(title=tForm.cleaned_data['type'])
 	#				category = tForm.cleaned_data['type']
 					won = tForm.cleaned_data['won']
 					players = [Player.objects.get_or_create(name=p,site=site,defaults={'firstGame':game,'lastGame':game})[0] for p in tForm.cleaned_data['players']]
 					for p in players:
 						p.save()
-					print "team %s: won: %s"%(title,won)
 					team = Team(title=title,category=category,site=site,won=won,game=game)
 					team.save()
 					for p in players:
@@ -302,7 +349,6 @@ def add(request, site_id=None):
 					team.save()
 					game.team_set.add(team)
 				for rForm in roleFormset.forms:
-					print "RFORM: ", rForm.cleaned_data,', ', len(roleFormset.forms)
 					if(rForm.has_changed()):
 						title = rForm.cleaned_data['title']
 						pName = rForm.cleaned_data['player']
@@ -310,13 +356,11 @@ def add(request, site_id=None):
 						player,created = Player.objects.get_or_create(name=pName,site=site,defaults={'firstGame':game,'lastGame':game})
 						role,created = Role.objects.get_or_create(title=title,game=game,player=player,text=text)
 						role.save()
-				print 'starting save'
 				game.save()
-				print 'save done'
 				return HttpResponseRedirect(reverse('mafiastats_game',args=[game.id]))
 			except Exception as e:
 				logging.exception(e.args[0])
-				raise e#let the default behavior handle the error, we just want to log it
+				raise#let the default behavior handle the error, we just want to log it
 	else:
 		form =  AddGameForm()
 		teamFormset = TeamFormSet(prefix='teamForm')	
@@ -337,6 +381,21 @@ def add(request, site_id=None):
 	for tform in teamFormset.forms:
 		tform.left_attrs = [(label,tform[property],property) for label,property in left_attrs]
 	return render_to_response('addGame.html',{'game_form':form,'roleFormset':roleFormset,'teamFormset': teamFormset,'bodyscripts':bodyscripts,'sheets':sheets,'site':site,'id':site_id,'submit_link':reverse('mafiastats_add',args=[site_id])},context_instance=RequestContext(request))
+
+def game_name_lookup(request):
+	if 'text' not in request.GET:
+		return HttpResponse("[]")
+	if ('site' in request.GET) and (request.GET['site']):
+		filter_query = {'title__istartswith':request.GET['text'],'site':int(request.GET['site'])}
+	else:
+		filter_query = {'title__istartswith':request.GET['text']}
+	games = Game.objects.filter(**filter_query)
+	response = [{'id':game.id,'text':game.title} for game in games]
+	print response
+	response = json.dumps(response)
+	print response
+	return HttpResponse(response)
+
 def nameLookup(request):
 	if 'text' not in request.GET:
 		return HttpResponse("[]")
@@ -376,7 +435,6 @@ def edit(request,game_id):
 		if(form.is_valid() and teamForm.is_valid() and roleForm.is_valid()):
 			game = Game.objects.get(pk=form.cleaned_data['game_id'])
 			game.title = form.cleaned_data['title']
-			print 'title is: ',form.cleaned_data['title']
 			game.url = form.cleaned_data['url']
 			game.gameType = form.cleaned_data['type']
 			moderator,created = Player.objects.get_or_create(name=form.cleaned_data['moderator'],site=game.site,defaults={'firstGame':game,'lastGame':game,'score':0,'played':0})
@@ -444,13 +502,11 @@ def link(request):
 			player = get_object_or_404(Player,name=form.cleaned_data['player'],site=site)
 			player.user = request.user
 			player.save()
-			print "sending signal"
 			try:
 				profile_link.send(User,user=request.user,player=player)
 			except Exception as e:
 				logging.exception(e.args[0])
 				raise Http404
-			print "redirecting"
 			return HttpResponseRedirect(reverse('account_profile'))
 	bodyscripts= form.media.render_js()
 	sheets = form.media.render_css()
@@ -528,7 +584,6 @@ def badge(request,pk=""):
 		if pk:
 			badge = get_object_or_404(Badge,pk=pk)
 			if badge.is_custom:
-				print badge.format
 				params = eval(badge.format)
 				formData = {'title':badge.title,'players':[p.id for p in badge.players.all()],'preset':params['template'],'background':params['background'],'top_color':params['color1'],'bottom_color':params['color2'],'text_color':params['text'],'font_size':params['size']}
 			else:
@@ -536,11 +591,9 @@ def badge(request,pk=""):
 				formData = {'title':badge.title,'config':config,'players':[(p.id,p.name + ' - ' + p.site.title) for p in badge.players.all()]}
 			form = BadgeForm(initial=formData)
 		else:
-			print "choices are: ",choices
 			#form  = BadgeForm({'players':players})
 			form  = BadgeForm()
 		form.fields['players'].choices = choices
-		print form.base_fields['players'].choices
 	return render_to_response("badge.html",{'form':form,'pk':pk},context_instance=RequestContext(request))
 
 @login_required
@@ -563,7 +616,6 @@ def unlink(request,pk):
 			badge.players.remove(player)
 		player.save()
 		profile_unlink.send(User,user=request.user,player=player)
-		print "redirecting"
 		return HttpResponseRedirect(reverse('account_profile'))
 	return render_to_response("unlink.html",{'can_unlink':True,'message':'This message should not show up','pk':pk},context_instance=RequestContext(request))
 @login_required
@@ -571,8 +623,6 @@ def badge_preview(request):
 	choices = [(p.id,p.name + ' - ' + p.site.title) for p in request.user.players.all()]
 	url = "images/badges/badge_temp_%s.png"%hash(request.META["REMOTE_ADDR"])
 	if (request.method =="POST"):
-		print request.POST
-		print len(request.POST)
 		form = BadgeForm(request.POST)
 		form.fields['players'].choices = choices
 		if (form.is_valid()):
