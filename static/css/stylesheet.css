@@ -81,6 +81,18 @@ div.even{
 div.odd{
 	text-align:center;
 }
+span.even{
+	/*background-color:#F0F0FF;*/
+	padding-left:10px;
+	padding-right:10px;
+}
+span.odd{
+	/*background-color:#F9F9FF;*/
+	padding-left:10px;
+	padding-right:10px;
+}
+
+
 .menuItem{
 	margin-left:5px;
 	margin-right:5px;
@@ -130,7 +142,7 @@ div.sidebar{
 	color:red;
 }
 .hlist{
-	word-spacing:10px;
+	word-spacing:0px;
 }
 #techButtons{
 	text-align:center;

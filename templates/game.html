@@ -69,7 +69,7 @@ $(document).ready(function(){
 						</div>
 						<div class="hlist">
 							{%for player in tplayers%}
-							<a href="{%url mafiastats_player player.id%}">{{player.name}}</a>{% if player.name in roles%}-<a href="#{{roles[player.name].pk}}" class="roleLink">{{roles[player.name].title}}</a>{%endif%}
+							<span class="{{loop.cycle('odd','even')}}"><a href="{%url mafiastats_player player.id%}">{{player.name}}</a>{% if player.name in roles%}-<a href="#{{roles[player.name].pk}}" class="roleLink">{{roles[player.name].title}}</a>{%endif%}</span>
 							{%endfor%}
 						</div>
 					</div>
