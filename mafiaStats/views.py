@@ -125,6 +125,20 @@ def game(request, game_id):
 	roleOrder = dict(((role[1].pk,index) for role,index in zip(roles.items(),range(len(roles)))))
 	can_edit = request.user.has_perm('mafiaStats.game')
 	return render_to_response('game.html', {'can_edit':can_edit,'game':game, 'teams':teams, 'num_players' : numPlayers, 'roleOrder':roleOrder,'length':length, 'next':reverse('mafiastats_game',args=[int(game_id)]),'players':players,'winners':winners,'roles':roles},context_instance=RequestContext(request))
+def game_lookup(request):
+	if 'game' in request.GET:
+		name = request.GET['game']
+	else:
+		raise Http404, "Game not fount"
+	if 'site' in request.GET and request.GET['site']:
+		search_args = {'title':name, 'site':int(request.GET['site'])}
+	else:
+		search_args = {'title':name}
+	try:
+		pl = Game.objects.filter(**search_args)[0]
+	except:
+		raise Http404, "player not found"
+	return HttpResponseRedirect(reverse("mafiastats_game", args=[pl.id]))
 
 def player_lookup(request):
 	if 'name' in request.GET:
@@ -136,11 +150,11 @@ def player_lookup(request):
 	else:
 		search_args = {'name':name}
 	try:
-		pl = Player.objects.get(**search_args)
+		pl = Player.objects.filter(**search_args)[0]
 	except:
 		raise Http404, "player not found"
 	if request.is_ajax():
-		return HttpResponse(str(request.is_ajax) + reverse("mafiastats_player",args=[pl.id]))
+		return HttpResponse(reverse("mafiastats_player",args=[pl.id]))
 	else:
 		return HttpResponseRedirect(reverse("mafiastats_player",args=[pl.id]))
 		
