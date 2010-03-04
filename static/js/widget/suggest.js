@@ -12,6 +12,7 @@ function setupSuggestBoxes()
 {
 	var params ={'site':getSiteId};
 	$(".AutoSuggestBox").jsonSuggest("/stat/player/name_lookup/",{wildCard:'*',maxResults:10,ajaxResults:true,useJQueryAjax:true,JQueryAjaxParam : "text",requestParams:params});
+	$(".AutoSuggestBox-game").jsonSuggest("/stat/game/name_lookup/",{wildCard:'*',maxResults:10,ajaxResults:true,useJQueryAjax:true,JQueryAjaxParam : "text",requestParams:params});
 }
 
 

@@ -126,6 +126,26 @@ def game(request, game_id):
 	can_edit = request.user.has_perm('mafiaStats.game')
 	return render_to_response('game.html', {'can_edit':can_edit,'game':game, 'teams':teams, 'num_players' : numPlayers, 'roleOrder':roleOrder,'length':length, 'next':reverse('mafiastats_game',args=[int(game_id)]),'players':players,'winners':winners,'roles':roles},context_instance=RequestContext(request))
 
+def player_lookup(request):
+	if 'name' in request.GET:
+		name = request.GET['name']
+	else:
+		raise Http404, "Name not found"
+	if 'site' in request.GET and request.GET['site']:
+		search_args = {'name':name,'site':int(request.GET['site'])}
+	else:
+		search_args = {'name':name}
+	try:
+		pl = Player.objects.get(**search_args)
+	except:
+		raise Http404, "player not found"
+	if request.is_ajax():
+		return HttpResponse(str(request.is_ajax) + reverse("mafiastats_player",args=[pl.id]))
+	else:
+		return HttpResponseRedirect(reverse("mafiastats_player",args=[pl.id]))
+		
+		
+
 def player(request,player_id):
 	player = get_object_or_404(Player, pk=player_id)
 	played = player.team_set.all()
@@ -347,6 +367,21 @@ def add(request, site_id=None):
 	for tform in teamFormset.forms:
 		tform.left_attrs = [(label,tform[property],property) for label,property in left_attrs]
 	return render_to_response('addGame.html',{'game_form':form,'roleFormset':roleFormset,'teamFormset': teamFormset,'bodyscripts':bodyscripts,'sheets':sheets,'site':site,'id':site_id,'submit_link':reverse('mafiastats_add',args=[site_id])},context_instance=RequestContext(request))
+
+def game_name_lookup(request):
+	if 'text' not in request.GET:
+		return HttpResponse("[]")
+	if ('site' in request.GET) and (request.GET['site']):
+		filter_query = {'title__istartswith':request.GET['text'],'site':int(request.GET['site'])}
+	else:
+		filter_query = {'title__istartswith':request.GET['text']}
+	games = Game.objects.filter(**filter_query)
+	response = [{'id':game.id,'text':game.title} for game in games]
+	print response
+	response = json.dumps(response)
+	print response
+	return HttpResponse(response)
+
 def nameLookup(request):
 	if 'text' not in request.GET:
 		return HttpResponse("[]")
