@@ -95,11 +95,21 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.auth',
+	'coffin',
     'registration',
     'django_authopenid',
     'django.contrib.comments',
     'debug_toolbar',
-    'Mafiastats.mafiaStats'
+    'Mafiastats.mafiaStats',
+	'celery'
 )
 
+JINJA2_FILTERS = ('Mafiastats.mafiaStats.extensions.bbcode',)
+
 ACCOUNT_ACTIVATION_DAYS=7
+
+BROKER_HOST = "localhost"
+BROKER_PORT = 5672
+BROKER_USER = "mafiastats"
+BROKER_PASSWORD = "rar000074"
+BROKER_VHOST = "mafhost"
