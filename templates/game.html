@@ -80,7 +80,7 @@ $(document).ready(function(){
 					<div id="roleAccordian">
 						{%for role in roles.values()%}
 						<h4><a href="#{{role.pk}}">{{role.title}} - {{role.player.name}}</a></h4>
-						<div>{{role.text|safe}}</div>
+						<div>{{role.text|bbcode|safe}}</div>
 						</a>
 						{%endfor%}
 					</div>
