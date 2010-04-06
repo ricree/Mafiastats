@@ -6,7 +6,7 @@ from coffin.shortcuts import render_to_response
 from models import Site, Game, Team, Category,Player,Role,Badge,SiteStats
 from forms import AddGameForm,TeamFormSet,TeamFormSetEdit,AddTeamForm,RoleFormSet,LinkForm,BadgeForm
 from signals import profile_link,profile_unlink
-from badgeGen import build_badge
+from tasks import build_badge
 from django.db import transaction
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -17,7 +17,9 @@ from django.core.paginator import Paginator, InvalidPage,EmptyPage
 from django.core.urlresolvers import reverse
 from itertools import chain
 from django.views.decorators.cache import cache_page
+from collections import defaultdict
 import json
+import extensions
 from postmarkup import render_bbcode
 from sortMethods import *
 from mafiaStats.signalHandlers import getSiteImage
@@ -26,15 +28,33 @@ import datetime
 from django.contrib.comments.templatetags.comments import get_comment_list
 from coffin import template
 import marshal
+from multiprocessing import Process, Queue
 
-register = template.Library()
-register.tag('get_comment_list',get_comment_list)
-
+count = 0
+#register = template.Library()
+#register.tag('get_comment_list',get_comment_list)
 
 LOGGING_FILE = settings.SITE_ROOT+'/debug_log'
 logging.basicConfig(filename=LOGGING_FILE,level=logging.ERROR)
 
 urlT = '<a href="%s">%s</a>'
+
+def andJoin(l):
+	llength = len(l)
+	if llength == 0:
+		return ""
+	if llength == 1:
+		return l[0]
+	if llength == 2:
+		return ' and '.join(l)
+	start = ', '.join(l[:-1])
+	return ', and '.join([start,l[-1]])
+
+def foo(q):
+	q.put("hello")
+	q.get()
+queue = Queue()
+p = Process(target=foo,args=(queue,))
 
 
 def getPage(request,paginator,default=1,indexRange=2):
@@ -198,8 +218,24 @@ def playerPlayed(request,player_id):
 	stats={'survivalPercentage':survivalPercentage}
 	return render_to_response('played.html',{'stats':stats,'sortMethods':sortMethods,'page':page,'player':player,'teams':page.object_list,'categories':cats},context_instance=RequestContext(request))
 def playerModerated(request,player_id):
+	includedFactions = defaultdict(lambda:0)
+	wonFactions = defaultdict(lambda:0)
 	player = get_object_or_404(Player,pk=player_id)
-	return render_to_response('modded.html',{'player':player},context_instance=RequestContext(request))
+	games = Game.objects.filter(moderator=player)
+	for game in games:
+		factions = defaultdict(lambda:False)
+		won = defaultdict(lambda:False)
+		for team in game.team_set.all():
+			if team.won:
+				if not won[team.category]:
+					wonFactions[team.category]+=1
+					won[team.category] = True
+			if not factions[team.category]:
+				includedFactions[team.category] +=1
+				factions[team.category] = True
+	games = [(game,andJoin([t.title for t in game.team_set.filter(won=True)])) for game in games]
+	cats = [(cat, wonFactions[cat], includedFactions[cat]) for cat in includedFactions]
+	return render_to_response('modded.html',{'player':player,'games':games,'cats':cats},context_instance=RequestContext(request))
 	return HttpResponse("Not yet implemented")
 def get_bounds(perPage,page,num):
 	if (page <1):
@@ -575,7 +611,7 @@ def badge(request,pk=""):
 			badge.url = "images/badges/badge_custom_%s_%s.png"%(request.user.pk,badge.pk)
 			badge.save()	
 			try:
-				build_badge(badge)
+				build_badge.delay(badge)
 			except Exception as e:
 				logging.exception(e.args[0])
 				raise e
@@ -637,7 +673,7 @@ def badge_preview(request):
 			badge.is_custom = form.custom_format
 			badge.url = url
 			badge.user = request.user
-			build_badge(badge)
+			build_badge.delay(badge)
 		else:
 			print form.errors
 	return HttpResponse(url+"?"+str(hash(datetime.datetime.now())))

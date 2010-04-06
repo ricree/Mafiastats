@@ -1,4 +1,25 @@
 {%extends "playerPage.html"%}
 {%block content%}
-Not Yet Implemented
+{#<h2>{%if player.user%}<a href="{%url account_profile player.user.pk%}">{{player.name}}</a>{%else%}{{player.name}}{%endif%}</h2>#}
+<h2>Games Moderated by {{player.name|title}}</h2>
+<div class="span-13">
+{%for game,winners in games%}
+	<p style="padding-left:10px;margin-bottom:5px;margin-top:5px;text-indent:-10px;"> <a  href="{%url mafiastats_game game.id%}">{{game.title}} - Won by {{winners}}</a></p>
+{%endfor%}
+</div>
+<div class="span-8">
+	<div class="infoBox" style="float:right;">
+		<div style="font-weight:bold;text-align:center">Sides Used</div>
+		<div class="span-2" style="font-weight:bold;">Type</div> <div style="font-weight:bold;"class="span-2">Won/Total</div><br/>
+		<div class="span-3">
+		{%for cat,w,n in cats%}
+			{{cat.title}}<br/>
+		{%endfor%}
+		</div>
+		<div class="span-1">
+		{%for cat,w,n in cats%}
+			{{w}}/{{n}}<br/>
+		{%endfor%}
+	</div>
+</div>
 {%endblock%}

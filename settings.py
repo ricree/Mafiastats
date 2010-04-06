@@ -104,7 +104,6 @@ INSTALLED_APPS = (
 	'celery'
 )
 
-#JINJA2_FILTERS = ('Mafiastats.mafiaStats.extensions.bbcode',)
 
 ACCOUNT_ACTIVATION_DAYS=7
 
