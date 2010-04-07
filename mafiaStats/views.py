@@ -195,7 +195,7 @@ def player(request,player_id):
 def getPlayerGraph(player,depth,caller):
 	return {'id':'p'+str(player.id), 'name':player.name,'data':{},'children':([getTeamGraph(t,depth-1,player) for t in player.team_set.all() if t!=caller] if depth else [])}
 def getTeamGraph(team,depth,caller):
-	return {'id':'t'+str(team.id), 'name':team.title,'data':{},'children':([getPlayerGraph(p,depth-1,team) for p in team.players.all() if p != caller] if depth else [])}
+	return {'id':'t'+str(team.id), 'name':"<center>%s<br/>%s</center>"%(team.game.title,team.title),'data':{},'children':([getPlayerGraph(p,depth-1,team) for p in team.players.all() if p != caller] if depth else [])}
 @cache_page(60*15)
 def teamGraph(request,team_id):
 	team = get_object_or_404(Team,pk=team_id)
