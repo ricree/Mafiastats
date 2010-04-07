@@ -204,10 +204,37 @@ def teamGraph(request,team_id):
 	#	adjacencies = [{'nodeTo':'t'+str(team.id),'data':{'weight':3}}]
 	#	nodes.append({'id':'p' + str(player.id),'name':player.name,'data':{"$dim":15.0},'adjacencies':adjacencies})
 	return HttpResponse(json.dumps(nodes))
+def buildTeamGraph(team,playerset,teamset):
+	if team.id in teamset:
+		return
+	teamset.add(team.id)
+	adj = [{'nodeTo':'p'+str(player.id), 'data':{}} for player in team.players.all()]
+	node = {'id':'t'+str(team.id),'name':"<center>%s<br/>%s</center>"%(team.game.title,team.title),'data':{},'adjacencies':adj}
+	yield node
+	for player in team.players.all():
+		for n in buildPlayerGraph(player,playerset,teamset):
+			yield n
+	
+	
+def buildPlayerGraph(player,playerset,teamset):
+	if player.id in playerset:
+		return
+	playerset.add(player.id)
+	adj = [{'nodeTo':'t'+str(team.id), 'data':{}} for team in player.team_set.all()]
+	node={'id':'p'+str(player.id),'name':player.name,'data':{},'adjacencies':adj}
+	yield node
+	for team in player.team_set.all():
+		for n in buildTeamGraph(team,playerset,teamset):
+			yield n
+	
 @cache_page(60*15)
 def playerGraph(request, player_id):
 	player = get_object_or_404(Player,id=player_id)
-	nodes = getPlayerGraph(player,4,None)
+	playerset = set()
+	teamset = set()
+	nodes = list(buildPlayerGraph(player,playerset,teamset))
+	nodes = {'data':nodes,'initial':0}
+	#nodes = getPlayerGraph(player,4,None)
 	#for team in player.team_set.all():
 		#adjacencies = [{'nodeTo':'p'+str(player.id),'data':{'weight':3}} for w in team.players.all()]
 	#	adjacencies = [{'nodeTo':'p'+str(player.id),'data':{'weight':3}}]

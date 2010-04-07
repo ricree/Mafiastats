@@ -1,6 +1,8 @@
 function loadGraph(dataSrc, selector){
-	$.getJSON(dataSrc,function(data){
+	$.getJSON(dataSrc,function(dataset){
 
+		var data = dataset.data
+		var initial  = dataset.initial
 		var infovis = $(selector);
 		var w = infovis.innerWidth();
 		var h = infovis.innerHeight();
@@ -60,7 +62,7 @@ function loadGraph(dataSrc, selector){
 				 style.left = (left - w / 2) + 'px';  
 			 }
 		});
-		ht.loadJSON(data);
+		ht.loadJSON(data,initial);
 		var center = ht.root;
 		ht.refresh();
 	});
