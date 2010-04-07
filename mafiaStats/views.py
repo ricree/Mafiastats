@@ -195,14 +195,18 @@ def playerPlayed(request,player_id):
 	player = get_object_or_404(Player, pk=player_id)
 	sortMethods = {'team':'title','game':teamsByGame,'length':teamsByLength,'won':'won','default':'title'}
 	if (not request.is_ajax()):
-		def getCats():
-			for cat in Category.objects.all():
-				teams = [t for t in player.team_set.all() if t.category==cat]
-				total = len(teams)
-				wins = len([t for t in teams if t.won])
-				losses = total-wins
-				yield (cat.title,wins,losses,total)
-		cats = list(getCats())
+		totalCat = defaultdict(lambda:0)
+		wonCat = defaultdict(lambda:0)
+		total = 0
+		won = 0
+		for team in player.team_set.all():
+			totalCat[team.category]+=1
+			total+=1
+			if team.won:
+				won+=1
+				wonCat[team.category]+=1
+		cats = [(cat.title,wonCat[cat],totalCat[cat]-wonCat[cat],totalCat[cat]) for cat in totalCat]
+		cats.append( ("Total",won,total-won,total))
 	else:
 		cats=[]
 	if(player.played >0):
