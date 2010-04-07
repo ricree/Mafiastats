@@ -1,10 +1,13 @@
 {%extends "playerPage.html"%}
 {%block extra_scripts%}
 <script type="text/javascript" src="{{MEDIA_URL}}js/jqueryAjaxDivSort.js"></script>
+<script type="text/javascript" src="/static/js/Jit/jit-yc.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/playGraph.js"></script>
 {%endblock%}
 {%block content%}
 <script type="text/javascript">
 	$(document).ready(function(){
+		loadGraph("{%url mafiastats_player_graph player.id%}", "#infovis");
 		{%for key,width in sortMethods%}
 			$("#{{key}}Label").ajaxDivSort("{{key}}","#listing");
 		{%endfor%}
@@ -37,7 +40,7 @@
 	</div>
 </div>
 <div class="span-20">
-<div class="span-9">
+<div class="span-12">
 <div id="sortButtons">
 	<div class="span-22">
 	<div class="span-2"><b>Sort By:</b></div>
@@ -53,6 +56,12 @@
 </div>
 <div id="listing">
 {%include "playerGamesListing.html"%}
+</div>
+</div>
+<div class="span-7" style="background-color:black;">
+<div id="infovis" style="min-height:400px;min-width:400px;background-color:black;">
+&nbsp;
+</div>
 </div>
 </div>
 {%endblock%}

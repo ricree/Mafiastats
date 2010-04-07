@@ -35,6 +35,7 @@ $(document).ready(function(){
 				<b>{%if game.url%}<a style="position:relative;" href="{{game.url}}" target="_blank">{%endif%}{{game.title}}{%if game.url%}<span style="position:absolute;top:50%;right:0%;margin-top:-8px;margin-right:-18px;" class="icon-button ui-icon ui-icon-extlink"></span></a>{%endif%}</b><br/>
 				Moderated By: <a href="{%url mafiastats_player game.moderator.id%}">{{game.moderator}}</a><br/>
 				Length: {{length.days}} days<br/>
+				From {{game.start_date|date("M d Y")}} to {{game.end_date|date("M d Y")}}<br/>
 				Players: {{game.num_players()}}<br/>
 			</div>
 			<div class="span-8 last">

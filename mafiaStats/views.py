@@ -160,6 +160,7 @@ def game_lookup(request):
 		raise Http404, "player not found"
 	return HttpResponseRedirect(reverse("mafiastats_game", args=[pl.id]))
 
+
 def player_lookup(request):
 	if 'name' in request.GET:
 		name = request.GET['name']
@@ -191,6 +192,28 @@ def player(request,player_id):
 	{'width':9,'contents':
 		[('Games Moderated',moderated.count()),('First Game',urlT%(reverse('mafiastats_game',args=[player.firstGame.id]),player.firstGame.title)),('Last Game',urlT%(reverse('mafiastats_game',args=[player.lastGame.id]),player.lastGame.title))]}]}
 	return render_to_response('player.html',{'stats':stats,'player':player,'played':played,'moderated':moderated, 'won':won,'lost':lost},context_instance=RequestContext(request))
+def getPlayerGraph(player,depth,caller):
+	return {'id':'p'+str(player.id), 'name':player.name,'data':{},'children':([getTeamGraph(t,depth-1,player) for t in player.team_set.all() if t!=caller] if depth else [])}
+def getTeamGraph(team,depth,caller):
+	return {'id':'t'+str(team.id), 'name':team.title,'data':{},'children':([getPlayerGraph(p,depth-1,team) for p in team.players.all() if p != caller] if depth else [])}
+@cache_page(60*15)
+def teamGraph(request,team_id):
+	team = get_object_or_404(Team,pk=team_id)
+	nodes = getTeamGraph(team,4,None)
+	#for player in team.players.all():
+	#	adjacencies = [{'nodeTo':'t'+str(team.id),'data':{'weight':3}}]
+	#	nodes.append({'id':'p' + str(player.id),'name':player.name,'data':{"$dim":15.0},'adjacencies':adjacencies})
+	return HttpResponse(json.dumps(nodes))
+@cache_page(60*15)
+def playerGraph(request, player_id):
+	player = get_object_or_404(Player,id=player_id)
+	nodes = getPlayerGraph(player,4,None)
+	#for team in player.team_set.all():
+		#adjacencies = [{'nodeTo':'p'+str(player.id),'data':{'weight':3}} for w in team.players.all()]
+	#	adjacencies = [{'nodeTo':'p'+str(player.id),'data':{'weight':3}}]
+	#	nodes.append({'id':'t' + str(team.id),'name':team.title,'data':{"$dim":11.0},'adjacencies':adjacencies})
+	return HttpResponse(json.dumps(nodes))
+	
 def playerPlayed(request,player_id):
 	player = get_object_or_404(Player, pk=player_id)
 	sortMethods = {'team':'title','game':teamsByGame,'length':teamsByLength,'won':'won','default':'title'}
