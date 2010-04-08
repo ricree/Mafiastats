@@ -209,7 +209,7 @@ def buildTeamGraph(team,playerset,teamset):
 		return
 	teamset.add(team.id)
 	adj = [{'nodeTo':'p'+str(player.id), 'data':{}} for player in team.players.all()]
-	node = {'id':'t'+str(team.id),'name':"<center>%s<br/>%s</center>"%(team.game.title,team.title),'data':{},'adjacencies':adj}
+	node = {'id':'t'+str(team.id),'name':team.title,'data':{},'adjacencies':adj}
 	yield node
 	for player in team.players.all():
 		for n in buildPlayerGraph(player,playerset,teamset):

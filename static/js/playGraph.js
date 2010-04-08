@@ -12,6 +12,7 @@ function loadGraph(dataSrc, selector){
 			'width':w,
 			'height':h});
 		var ht = new RGraph(canvas, {
+			levelDistance:150.0,
 			Node:{color:"#f00000"},
 			Edge:{overridable:true,color:"#008080"},
 			onBeforePlotLine: function(adj){
@@ -22,7 +23,11 @@ function loadGraph(dataSrc, selector){
 				if ((adj.nodeFrom.id == center) || (adj.nodeTo.id == center))
 				{
 					adj.data.$lineWidth = 1.6
-				}else if ((distx>(w/2)) || (disty>(h/2))|| ((pos1.x*pos2.x < 0) && (pos1.y*pos2.y<0))){
+					//adj.nodeTo.drawn = true;
+					//adj.nodeFrom.drawn = true;
+				}
+				//else {adj.nodeTo.drawn = false;}
+				else if ((distx>(w/2)) || (disty>(h/2))|| ((pos1.x*pos2.x < 0) && (pos1.y*pos2.y<0))){
 					adj.data.$lineWidth = 0.01;
 				}
 				else{
@@ -33,11 +38,21 @@ function loadGraph(dataSrc, selector){
 				domElement.innerHTML  = node.name;
 				domElement.style.cursor = "pointer";
 				domElement.onclick = function(){
-					var type = node.id[0];
-					var id = node.id.slice(1);
-					var url = "/stat/" + ((type=="p")?"player/":"team/") + id + "/graph/";
-					ht.onClick(node.id,{hideLabels:false});
+					//var type = node.id[0];
+					//var id = node.id.slice(1);
+					//var url = "/stat/" + ((type=="p")?"player/":"team/") + id + "/graph/";
+					var adjnodes = node.adjacencies;
+					var nnodes = 0;
+					for (var k in adjnodes){
+						adjnodes[k].nodeTo.drawn = true;
+						for (var l in adjnodes[k].nodeTo.adjacencies){
+							adjnodes[k].nodeTo.adjacencies[l].nodeTo.drawn = true;
+						}
+						nnodes++;
+					}
+					ht.levelDistance = 50 + 75*Math.log(nnodes);
 					center = node.id;
+					ht.onClick(node.id,{hideLabels:false});
 				};
 			},
 			onPlaceLabel: function(domElement, node){  
@@ -50,11 +65,13 @@ function loadGraph(dataSrc, selector){
 					 style.color = "#ccc";  
 				   
 				 } else if(node._depth == 2){  
-					 style.fontSize = "0.7em";  
-					 style.color = "#494949";  
+					style.display = 'none';
+					 //style.fontSize = "0.7em";  
+					 //style.color = "#494949";  
 				   
 				 } else {  
 					 style.display = 'none';  
+					node.drawn = false;
 				 }  
 		   
 				 var left = parseInt(style.left);  
