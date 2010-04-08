@@ -8,6 +8,7 @@ function loadGraph(dataSrc, selector){
 		var h = infovis.innerHeight();
 		var centerx = w/2;
 		var centery = h/2;
+		var logBase = Math.log(10);
 		var canvas = new Canvas('mycanvas', {'injectInto':'infovis',
 			'width':w,
 			'height':h});
@@ -50,7 +51,7 @@ function loadGraph(dataSrc, selector){
 						}
 						nnodes++;
 					}
-					ht.levelDistance = 50 + 75*Math.log(nnodes);
+					ht.levelDistance = 50 + (75*Math.log(nnodes) / logBase);
 					center = node.id;
 					ht.onClick(node.id,{hideLabels:false});
 				};
