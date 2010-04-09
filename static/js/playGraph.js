@@ -1,9 +1,10 @@
-function loadGraph(dataSrc, selector){
+function loadGraph(dataSrc, selector,infoSelector){
 	$.getJSON(dataSrc,function(dataset){
 
-		var data = dataset.data
-		var initial  = dataset.initial
+		var data = dataset.data;
+		var initial  = dataset.initial;
 		var infovis = $(selector);
+		var infobox = $(infoSelector);
 		var w = infovis.innerWidth();
 		var h = infovis.innerHeight();
 		var centerx = w/2;
@@ -13,7 +14,7 @@ function loadGraph(dataSrc, selector){
 			'width':w,
 			'height':h});
 		var ht = new RGraph(canvas, {
-			levelDistance:150.0,
+			levelDistance:225,
 			Node:{color:"#f00000"},
 			Edge:{overridable:true,color:"#008080"},
 			onBeforePlotLine: function(adj){
@@ -51,8 +52,9 @@ function loadGraph(dataSrc, selector){
 						}
 						nnodes++;
 					}
-					ht.levelDistance = 50 + (75*Math.log(nnodes) / logBase);
+					//ht.levelDistance = 550 + (100*Math.log(nnodes) / logBase);
 					center = node.id;
+					infobox.html(node.data.infobox);
 					ht.onClick(node.id,{hideLabels:false});
 				};
 			},
@@ -83,5 +85,6 @@ function loadGraph(dataSrc, selector){
 		ht.loadJSON(data,initial);
 		var center = ht.root;
 		ht.refresh();
+		infobox.html(data[initial].data.infobox);
 	});
 }

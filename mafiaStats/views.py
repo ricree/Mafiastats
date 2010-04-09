@@ -2,14 +2,14 @@
 import logging
 from django.http import HttpResponse, Http404,HttpResponseRedirect
 from django.shortcuts import get_object_or_404#render_to_response, get_object_or_404
-from coffin.shortcuts import render_to_response
+from coffin.shortcuts import render_to_response,render_to_string
 from models import Site, Game, Team, Category,Player,Role,Badge,SiteStats
 from forms import AddGameForm,TeamFormSet,TeamFormSetEdit,AddTeamForm,RoleFormSet,LinkForm,BadgeForm
 from signals import profile_link,profile_unlink
 from tasks import build_badge
 from django.db import transaction
 from django.template import RequestContext
-from django.template.loader import render_to_string
+#from django.template.loader import render_to_string
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required,permission_required,user_passes_test
@@ -209,7 +209,7 @@ def buildTeamGraph(team,playerset,teamset):
 		return
 	teamset.add(team.id)
 	adj = [{'nodeTo':'p'+str(player.id), 'data':{}} for player in team.players.all()]
-	node = {'id':'t'+str(team.id),'name':team.title,'data':{},'adjacencies':adj}
+	node = {'id':'t'+str(team.id),'name':team.title,'data':{'infobox':render_to_string("teamGraphInfo.html",{'team':team})},'adjacencies':adj}
 	yield node
 	for player in team.players.all():
 		for n in buildPlayerGraph(player,playerset,teamset):
@@ -220,10 +220,13 @@ def buildPlayerGraph(player,playerset,teamset):
 	if player.id in playerset:
 		return
 	playerset.add(player.id)
-	adj = [{'nodeTo':'t'+str(team.id), 'data':{}} for team in player.team_set.all()]
-	node={'id':'p'+str(player.id),'name':player.name,'data':{},'adjacencies':adj}
+	teams = player.team_set.all()
+	wonlist = [t for t in teams if t.won]
+	lostlist = [t for t in teams if not t.won]
+	adj = [{'nodeTo':'t'+str(team.id), 'data':{}} for team in teams]
+	node={'id':'p'+str(player.id),'name':player.name,'data':{'infobox':render_to_string("playerGraphInfo.html",{'player':player,'wonlist':wonlist,'lostlist':lostlist})},'adjacencies':adj}
 	yield node
-	for team in player.team_set.all():
+	for team in teams:
 		for n in buildTeamGraph(team,playerset,teamset):
 			yield n
 	

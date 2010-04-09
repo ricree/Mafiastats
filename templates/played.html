@@ -7,13 +7,13 @@
 {%block content%}
 <script type="text/javascript">
 	$(document).ready(function(){
-		loadGraph("{%url mafiastats_player_graph player.id%}", "#infovis");
-		{%for key,width in sortMethods%}
+		loadGraph("{%url mafiastats_player_graph player.id%}", "#infovis","#infobox");
+		{#{%for key,width in sortMethods%}
 			$("#{{key}}Label").ajaxDivSort("{{key}}","#listing");
-		{%endfor%}
+		{%endfor%}#}
 	});
 </script>
-<div class="span-22">
+<div class="span-24">
 	<div class="span-8 infoBox">
 		Games Played: {{player.played}}<br/>
 		Games Won: {{player.wins()}}<br/>
@@ -39,6 +39,7 @@
 		</div>
 	</div>
 </div>
+{#
 <div class="span-20">
 <div class="span-12">
 <div id="sortButtons">
@@ -58,11 +59,17 @@
 {%include "playerGamesListing.html"%}
 </div>
 </div>
-<div class="span-7">
-<div id="infobox" class="span-6" style="min-height:200px;"></div>
-<div id="infovis" class ="span-6" style="min-height:400px;min-width:400px;background-color:black;">
-&nbsp;
-</div>
-</div>
+#}
+<div class="span-24">
+	<div id="infovis" class ="span-15" style="min-height:600px;min-width:600px;background-color:black;"></div>
+	<div>
+	<div class="span-8 ui-corner-top" style="border-color:black;border-width:2px;border-width-bottom:1px;border-style:solid;">
+		<p style="padding:5px">
+		Which teams has <a href="{%url mafiastats_player player.id%}">{{player.name}}</a> been on?
+		Click a name on the graph to focus on it.
+		</p>
+	</div>
+	<div id="infobox" class="span-8 ui-corner-bottom" style="min-height:400px;border-color:black;border-width:2px;border-width-top:1px;border-style:solid;"></div>
+	</div>
 </div>
 {%endblock%}
