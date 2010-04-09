@@ -1,0 +1,6 @@
+<h3><b>{{team.title}}</b></h3>
+<h4>From <a href="{%url mafiastats_game team.game.id%}">{{team.game.title}}</a></h4>
+<b>Members are:</b><br/>
+{% for player in team.players.all()%}
+<a href="{%url mafiastats_player player.id%}">{{player.name}}</a><br/>
+{%endfor%}

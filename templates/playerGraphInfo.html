@@ -1,0 +1,16 @@
+<h3><b><a href="{%url mafiastats_player player.id%}">{{player.name}}</a></b></h3>
+{%if wonlist|length > 0%}
+<div style="font-size:small">
+<b>Won With:</b><br/>
+{%for t in wonlist%}
+{{t.title}} in <br/><a href="{%url mafiastats_game t.game.id%}">{{t.game.title}}</a><br/>
+{%endfor%}
+<br/>
+{%endif%}
+{%if lostlist|length > 0 %}
+<b>Lost With:</b><br/>
+{%for t in lostlist%}
+{{t.title}} in <br/><a href="{%url mafiastats_game t.game.id%}">{{t.game.title}}</a><br/>
+{%endfor%}
+{%endif%}
+</div>
