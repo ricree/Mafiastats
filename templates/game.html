@@ -24,8 +24,15 @@ $(document).ready(function(){
 {%block content%}
 <script type="text/javascript">
 	$(document).ready(function(){
+		var roleOrder = {{roleOrder|safe}};
 		$("#roleAccordian").accordion();
 		$("#tabs").tabs();
+		var url = window.location.hash;
+		if (url != ""){
+			var roleId = parseInt(url.slice(1));
+			$("#tabs").tabs('select','#roles');
+			$("#roleAccordian").accordion('activate',roleOrder[roleId]);
+		}
 	});
 </script>
 <div class="span-23">

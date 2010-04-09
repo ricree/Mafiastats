@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required,permission_required,user_passes_test
 from django.core.paginator import Paginator, InvalidPage,EmptyPage
 from django.core.urlresolvers import reverse
+from django.core.cache import cache
 from itertools import chain
 from django.views.decorators.cache import cache_page
 from collections import defaultdict
@@ -207,11 +208,16 @@ def teamGraph(request,team_id):
 def buildTeamGraph(team,playerset,teamset):
 	if team.id in teamset:
 		return
+	node = cache.get('mafiastats_team_graph_'+str(team.id))
 	teamset.add(team.id)
-	adj = [{'nodeTo':'p'+str(player.id), 'data':{}} for player in team.players.all()]
-	node = {'id':'t'+str(team.id),'name':team.title,'data':{'infobox':render_to_string("teamGraphInfo.html",{'team':team})},'adjacencies':adj}
+	players = team.players.all()
+	if not node:
+		templatePlayers = [(player,player.role_set.filter(game=team.game)) for player in players]
+		adj = [{'nodeTo':'p'+str(player.id), 'data':{}} for player in team.players.all()]
+		node = {'id':'t'+str(team.id),'name':team.title,'data':{'infobox':render_to_string("teamGraphInfo.html",{'team':team,'players':templatePlayers})},'adjacencies':adj}
+		cache.set('mafiastats_team_graph_'+str(team.id),node,60*30)
 	yield node
-	for player in team.players.all():
+	for player in players:
 		for n in buildPlayerGraph(player,playerset,teamset):
 			yield n
 	
@@ -220,11 +226,14 @@ def buildPlayerGraph(player,playerset,teamset):
 	if player.id in playerset:
 		return
 	playerset.add(player.id)
+	node =  cache.get('mafiastats_player_graph_'+str(player.id))
 	teams = player.team_set.all()
-	wonlist = [t for t in teams if t.won]
-	lostlist = [t for t in teams if not t.won]
-	adj = [{'nodeTo':'t'+str(team.id), 'data':{}} for team in teams]
-	node={'id':'p'+str(player.id),'name':player.name,'data':{'infobox':render_to_string("playerGraphInfo.html",{'player':player,'wonlist':wonlist,'lostlist':lostlist})},'adjacencies':adj}
+	if not node:
+		wonlist = [t for t in teams if t.won]
+		lostlist = [t for t in teams if not t.won]
+		adj = [{'nodeTo':'t'+str(team.id), 'data':{}} for team in teams]
+		node={'id':'p'+str(player.id),'name':player.name,'data':{'infobox':render_to_string("playerGraphInfo.html",{'player':player,'wonlist':wonlist,'lostlist':lostlist})},'adjacencies':adj}
+		cache.set('mafiastats_player_graph_'+str(player.id), node,30*60)
 	yield node
 	for team in teams:
 		for n in buildTeamGraph(team,playerset,teamset):
