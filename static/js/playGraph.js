@@ -4,6 +4,7 @@ function loadGraph(dataSrc, selector,infoSelector){
 		var data = dataset.data;
 		var initial  = dataset.initial;
 		var infovis = $(selector);
+		infovis.html('');
 		var infobox = $(infoSelector);
 		var w = infovis.innerWidth();
 		var h = infovis.innerHeight();

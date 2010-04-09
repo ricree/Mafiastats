@@ -7,6 +7,7 @@
 {%block content%}
 <script type="text/javascript">
 	$(document).ready(function(){
+		$("#infovis-label").text("Loading . . .");
 		loadGraph("{%url mafiastats_player_graph player.id%}", "#infovis","#infobox");
 		{#{%for key,width in sortMethods%}
 			$("#{{key}}Label").ajaxDivSort("{{key}}","#listing");
@@ -61,7 +62,7 @@
 </div>
 #}
 <div class="span-24">
-	<div id="infovis" class ="span-15" style="min-height:600px;min-width:600px;background-color:black;"></div>
+	<div id="infovis" class ="span-15" style="min-height:600px;min-width:600px;background-color:black;text-align:center;"><h1 id="infovis-label" style="margin-top:250px;color:#FFF;">Javascript Required</h1></div>
 	<div>
 	<div class="span-8 ui-corner-top" style="border-color:black;border-width:2px;border-width-bottom:1px;border-style:solid;">
 		<p style="padding:5px">
