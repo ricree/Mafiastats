@@ -454,7 +454,7 @@ def add(request, site_id=None):
 					if(rForm.has_changed()):
 						title = rForm.cleaned_data['title']
 						pName = rForm.cleaned_data['player']
-						text = render_bbcode(rForm.cleaned_data['text'])
+						text = rForm.cleaned_data['text']
 						player,created = Player.objects.get_or_create(name=pName,site=site,defaults={'firstGame':game,'lastGame':game})
 						role,created = Role.objects.get_or_create(title=title,game=game,player=player,text=text)
 						role.save()
